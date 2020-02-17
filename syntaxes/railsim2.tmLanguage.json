@@ -6,27 +6,10 @@
 			"include": "#comments"
 		},
 		{
-			"include": "#plugin-header"
+			"include": "#toplevel-blocks"
 		}
 	],
 	"repository": {
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.rs2",
-				"match": "\\b(if|while|for|return)\\b"
-			}]
-		},
-		"strings": {
-			"name": "string.quoted.double.rs2",
-			"begin": "\"",
-			"end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.rs2",
-					"match": "\\\\."
-				}
-			]
-		},
 		"comments": {
 			"patterns": [
 				{
@@ -56,135 +39,109 @@
 				}
 			]
 		},
-		"block": {
+		"toplevel-blocks": {
 			"patterns": [
 				{
-					"begin": "\\{",
-					"end": "\\}",
-					"name": "meta.block.rs2"
+					"begin": "\\b([a-zA-Z0-9]+) *{",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.class.toplevel-block.name"
+						}
+					},
+					"end": "}",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#nested-blocks"
+						},
+						{
+							"include": "#property"
+						}
+					]
+				}
+			]
+		},
+		"nested-blocks": {
+			"patterns": [
+				{
+					"begin": "\\b([A-Z][a-zA-Z0-9]*) *([a-zA-Z0-9]+)? *{",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.function.nested-block.name"
+						},
+						"2": {
+							"name": "entity.name.function.nested-block.argument"
+						}
+					},
+					"end": "}",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#property"
+						},
+						{
+							"include": "#nested-blocks"
+						}
+					]
+				}
+			]
+		},
+		"property": {
+			"patterns": [
+				{
+					"begin": "\\b([A-Z][a-zA-Z0-9]+) *(=) *",
+					"beginCaptures": {
+						"1": {
+							"name": "entity.name.property"
+						},
+						"2": {
+							"name": "keyword.operator.assignment"
+						}
+					},
+					"end": " *;",
+					"patterns": [
+						{
+							"include": "#yes-no"
+						},
+						{
+							"include": "#strings"
+						},
+						{
+							"include": "#numeric"
+						}
+					]
+				}
+			]
+		},
+		"yes-no": {
+			"match": "(yes|no)",
+			"name": "constant.language"
+		},
+		"strings": {
+			"name": "string.quoted.double.rs2",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.rs2",
+					"match": "\\\\."
 				}
 			]
 		},
 		"numeric": {
-			"match": "[0-9]*\\.[0-9]+",
-			"name": "constant.numeric.rs2"
-		},
-		"decimal": {
 			"patterns": [
 				{
-					"match": "[0-9]*\\.[0-9]*",
-					"name": "invalid.illegal.decimal.rs2"
-				},
-				{
-					"include": "#numeric"
-				}
-			]
-		},
-		"float": {
-			"patterns": [
-				{
-					"match": "\\d[^.]+\\d",
-					"name": "invalid.illegal.float.rs2"
-				},
-				{
-					"include": "#numeric"
-				}
-			]
-		},
-		"identifier": {
-			"patterns": [
-				{
-					"match": "\"([0-9].*|.*[^a-zA-Z0-9_].*)\"",
-					"name": "invalid.illegal.identifier.rs2"
-				},
-				{
-					"include": "#strings"
-				}
-			]
-		},
-		"float-value-property": {
-			"begin": " *(=) *",
-			"beginCaptures": {
-				"1": {
-					"name": "keyword.operator.assignment.rs2"
-				}
-			},
-			"end": " *;",
-			"endCaptures": {
-				"0": {
-					"name": "meta.nanka-tekito"
-				}
-			},
-			"patterns": [
-				{
-					"include": "#float"
-				}
-			]	
-		},
-		"identifier-value-property": {
-			"begin": " *(=) *",
-			"beginCaptures": {
-				"1": {
-					"name": "keyword.operator.assignment.rs2"
-				}
-			},
-			"end": " *(?<=;)",
-			"patterns": [
-				{
-					"include": "#identifier"
-				}
-			]
-		},
-		"plugin-header": {
-			"begin": "^ *(PluginHeader) *",
-			"beginCaptures": {
-				"1": {
-					"name": "variable.language.plugin-header.rs2"
-				}
-			},
-			"end": "(?<=\\})",
-			"name": "meta.plugin-header.rs2",
-			"patterns": [
-				{
-					"include": "#plugin-header-block"
-				}
-			]
-		},
-		"plugin-header-block": {
-			"begin": "\\{",
-			"end": "\\}",
-			"name": "meta.plugin-header-block.rs2",
-			"patterns": [
-				{
-					"include": "#comments"
-				},
-				{
-					"begin": "RailSimVersion",
-					"beginCaptures": {
-						"0": {
-							"name": "entity.name.property.rs2"
+					"match": "(-|\\+)?([0-9]*\\.)?[0-9]+",
+					"captures": {
+						"1": {
+							"name": "keyword.operator.signature"
 						}
 					},
-					"end": ";",
-					"patterns": [
-						{
-							"include": "#float-value-property"
-						}
-					]
-				},
-				{
-					"begin": "PluginType",
-					"beginCaptures": {
-						"0": {
-							"name": "entity.name.property.rs2"
-						}
-					},
-					"end": ";",
-					"patterns": [
-						{
-							"include": "#identifier-value-property"
-						}
-					]
+					"name": "constant.numeric"
 				}
 			]
 		}
