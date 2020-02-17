@@ -3,27 +3,188 @@
 	"name": "RailSim2",
 	"patterns": [
 		{
-			"include": "#keywords"
+			"include": "#comments"
 		},
 		{
-			"include": "#strings"
+			"include": "#plugin-header"
 		}
 	],
 	"repository": {
 		"keywords": {
 			"patterns": [{
-				"name": "keyword.control.railsim2",
+				"name": "keyword.control.rs2",
 				"match": "\\b(if|while|for|return)\\b"
 			}]
 		},
 		"strings": {
-			"name": "string.quoted.double.railsim2",
+			"name": "string.quoted.double.rs2",
 			"begin": "\"",
 			"end": "\"",
 			"patterns": [
 				{
-					"name": "constant.character.escape.railsim2",
+					"name": "constant.character.escape.rs2",
 					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"begin": "/\\*",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.begin.rs2"
+						}
+					},
+					"end": "\\*/",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.end.rs2"
+						}
+					},
+					"name": "comment.block.rs2"
+				},
+				{
+					"begin": "//",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.rs2"
+						}
+					},
+					"end": "\\n",
+					"name": "comment.line.double-dash.rs2"
+				}
+			]
+		},
+		"block": {
+			"patterns": [
+				{
+					"begin": "\\{",
+					"end": "\\}",
+					"name": "meta.block.rs2"
+				}
+			]
+		},
+		"numeric": {
+			"match": "[0-9]*\\.[0-9]+",
+			"name": "constant.numeric.rs2"
+		},
+		"decimal": {
+			"patterns": [
+				{
+					"match": "[0-9]*\\.[0-9]*",
+					"name": "invalid.illegal.decimal.rs2"
+				},
+				{
+					"include": "#numeric"
+				}
+			]
+		},
+		"float": {
+			"patterns": [
+				{
+					"match": "\\d[^.]+\\d",
+					"name": "invalid.illegal.float.rs2"
+				},
+				{
+					"include": "#numeric"
+				}
+			]
+		},
+		"identifier": {
+			"patterns": [
+				{
+					"match": "\"([0-9].*|.*[^a-zA-Z0-9_].*)\"",
+					"name": "invalid.illegal.identifier.rs2"
+				},
+				{
+					"include": "#strings"
+				}
+			]
+		},
+		"float-value-property": {
+			"begin": " *(=) *",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.operator.assignment.rs2"
+				}
+			},
+			"end": " *;",
+			"endCaptures": {
+				"0": {
+					"name": "meta.nanka-tekito"
+				}
+			},
+			"patterns": [
+				{
+					"include": "#float"
+				}
+			]	
+		},
+		"identifier-value-property": {
+			"begin": " *(=) *",
+			"beginCaptures": {
+				"1": {
+					"name": "keyword.operator.assignment.rs2"
+				}
+			},
+			"end": " *(?<=;)",
+			"patterns": [
+				{
+					"include": "#identifier"
+				}
+			]
+		},
+		"plugin-header": {
+			"begin": "^ *(PluginHeader) *",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.language.plugin-header.rs2"
+				}
+			},
+			"end": "(?<=\\})",
+			"name": "meta.plugin-header.rs2",
+			"patterns": [
+				{
+					"include": "#plugin-header-block"
+				}
+			]
+		},
+		"plugin-header-block": {
+			"begin": "\\{",
+			"end": "\\}",
+			"name": "meta.plugin-header-block.rs2",
+			"patterns": [
+				{
+					"include": "#comments"
+				},
+				{
+					"begin": "RailSimVersion",
+					"beginCaptures": {
+						"0": {
+							"name": "entity.name.property.rs2"
+						}
+					},
+					"end": ";",
+					"patterns": [
+						{
+							"include": "#float-value-property"
+						}
+					]
+				},
+				{
+					"begin": "PluginType",
+					"beginCaptures": {
+						"0": {
+							"name": "entity.name.property.rs2"
+						}
+					},
+					"end": ";",
+					"patterns": [
+						{
+							"include": "#identifier-value-property"
+						}
+					]
 				}
 			]
 		}
