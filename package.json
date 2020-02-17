@@ -1,0 +1,25 @@
+{
+    "name": "vscode-railsim2-grammar",
+    "displayName": "RailSim2 Plugin Grammar",
+    "description": "Syntax highlighting for RailSim2 plugin definition",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.42.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "railsim2",
+            "aliases": ["RailSim2", "railsim2"],
+            "extensions": [".txt"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "railsim2",
+            "scopeName": "source.rs2",
+            "path": "./syntaxes/railsim2.tmLanguage.json"
+        }]
+    }
+}
