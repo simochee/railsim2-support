@@ -12,7 +12,7 @@
     "contributes": {
         "languages": [{
             "id": "railsim2",
-            "aliases": ["RailSim2", "railsim2"],
+            "aliases": ["RailSim2", "railsim2", "rs2"],
             "extensions": [".txt"],
             "configuration": "./language-configuration.json"
         }],

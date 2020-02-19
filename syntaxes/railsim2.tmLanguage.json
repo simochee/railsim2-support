@@ -1,6 +1,20 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "RailSim2",
+  "name": "RailSim2",
+  "fileTypes": [
+    "Rail2.txt",
+    "Tie2.txt",
+    "Girder2.txt",
+    "Pier2.txt",
+    "Line2.txt",
+    "Pole2.txt",
+    "Train2.txt",
+    "Station2.txt",
+    "Struct2.txt",
+    "Surface2.txt",
+    "Env2.txt",
+    "Skin2.txt"
+  ],
 	"patterns": [
     {
       "include": "#sym-switch-applier"
