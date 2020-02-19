@@ -1,0 +1,172 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "RailSim2",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "#toplevel-blocks"
+		}
+	],
+	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"begin": "/\\*",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.begin.rs2"
+						}
+					},
+					"end": "\\*/",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.end.rs2"
+						}
+					},
+					"name": "comment.block.rs2"
+				},
+				{
+					"begin": "//",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.rs2"
+						}
+					},
+					"end": "\\n",
+					"name": "comment.line.double-dash.rs2"
+				}
+			]
+		},
+		"toplevel-blocks": {
+			"patterns": [
+				{
+					"begin": "\\b([a-zA-Z0-9]+) *{",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.class.toplevel-block.name"
+						}
+					},
+					"end": "}",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#nested-blocks"
+						},
+						{
+							"include": "#property"
+						}
+					]
+				}
+			]
+		},
+		"nested-blocks": {
+			"patterns": [
+				{
+					"begin": "\\b([A-Z][a-zA-Z0-9]*) *([a-zA-Z0-9]+)? *{",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.function.nested-block.name"
+						},
+						"2": {
+							"name": "entity.name.function.nested-block.argument"
+						}
+					},
+					"end": "}",
+					"patterns": [
+						{
+							"include": "#comments"
+						},
+						{
+							"include": "#property"
+						},
+						{
+							"include": "#nested-blocks"
+						}
+					]
+				}
+			]
+		},
+		"property": {
+			"patterns": [
+				{
+					"begin": "\\b([A-Z][a-zA-Z0-9]*) *(=) *",
+					"beginCaptures": {
+						"1": {
+							"name": "entity.name.property"
+						},
+						"2": {
+							"name": "keyword.operator.assignment"
+						}
+					},
+					"end": " *;",
+					"patterns": [
+						{
+							"include": "#yes-no"
+						},
+						{
+							"include": "#color"
+						},
+						{
+							"include": "#strings"
+						},
+						{
+							"include": "#numeric"
+						},
+						{
+							"include": "#constants"
+						}
+					]
+				}
+			]
+		},
+		"yes-no": {
+			"match": "(yes|no)",
+			"name": "constant.language"
+		},
+		"strings": {
+			"name": "string.quoted.double.rs2",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.rs2",
+					"match": "\\\\."
+				}
+			]
+		},
+		"numeric": {
+			"patterns": [
+				{
+					"match": "(-|\\+)?([0-9]*\\.)?[0-9]+",
+					"captures": {
+						"1": {
+							"name": "keyword.operator.signature"
+						}
+					},
+					"name": "constant.numeric"
+				}
+			]
+		},
+		"constants": {
+			"patterns": [
+				{
+					"match": "\\b(Alpha|Add|DayAlpha|NightAlpha|Hour|Minute|Second)\\b",
+					"name": "support.constant"
+				}
+			]
+		},
+		"color": {
+			"patterns": [
+				{
+					"match": "\\b#[0-9a-fA-F]{8}\\b",
+					"name": "constant.other.color"
+				}
+			]
+		}
+	},
+	"scopeName": "source.rs2"
+}
