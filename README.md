@@ -1,65 +1,41 @@
-# vscode-railsim2-grammar README
+# vscode-railsim2-grammar
 
-This is the README for your extension "vscode-railsim2-grammar". After writing up a brief description, we recommend including the following sections.
+This extension provide syntax highlight for RailSim2 plugin definition file.
 
-## Features
+この拡張機能は RailSim2 のプラグイン定義ファイル用のシンタックスハイライトを提供します。
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Installation
 
-For example if there is an image subfolder under your extension project workspace:
+1. Visual Studio Codeで拡張機能 `vscode-railsim2-grammar` を検索します
+2. 拡張機能をインストールします
 
-\!\[feature X\]\(images/feature-x.png\)
+Done 👍
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Supported versions
 
-## Requirements
+この拡張機能は RailSim 2.14 で有効なシンタックスに対応しています。
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+それ以外のバージョン、RailSim2 -k-build の独自記法には対応していません。
 
-## Extension Settings
+## Usage
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Visual Studio Code上でシンタックスハイライトを有効化するには、 `言語モードの選択` より `RailSim2` を指定します。
 
-For example:
+なお、ファイル名が次のいずれかの場合、自動的に `RailSim2` のシンタックスハイライトが適用されます。
 
-This extension contributes the following settings:
+* `Rail2.txt`
+* `Tie2.txt`
+* `Girder2.txt`
+* `Pier2.txt`
+* `Line2.txt`
+* `Pole2.txt`
+* `Train2.txt`
+* `Station2.txt`
+* `Struct2.txt`
+* `Surface2.txt`
+* `Env2.txt`
+* `Skin2.txt`
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+## Bugs
 
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+バグや機能追加についてはTwitter [@simo_offcl](https://twitter.com/simo_offcl) までご連絡ください。
