@@ -3,6 +3,15 @@
     "displayName": "RailSim2 Plugin Grammar",
     "description": "Syntax highlighting for RailSim2 plugin definition",
     "version": "0.0.1",
+    "publisher": "simochee",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/lollipop-onl/vscode-railsim-grammer.git"
+    },
+    "bugs": {
+        "url": "https://twitter.com/simo_offcl",
+        "email": "lollipop@simochee.net"
+    },
     "engines": {
         "vscode": "^1.42.0"
     },
