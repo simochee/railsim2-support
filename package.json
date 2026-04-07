@@ -4,6 +4,7 @@
     "description": "Syntax highlighting for RailSim2 plugin definition",
     "version": "0.0.1",
     "publisher": "simochee",
+    "main": "./out/client/extension.js",
     "license": "MIT",
     "icon": "images/icon.png",
     "homepage": "https://github.com/lollipop-onl/vscode-railsim-grammer",
@@ -62,14 +63,23 @@
         ]
     },
     "scripts": {
+        "build": "tsc -p tsconfig.server.json && tsc -p tsconfig.client.json",
         "test": "vitest run",
-        "package": "vsce package",
-        "publish": "vsce publish"
+        "package": "npm run build && vsce package",
+        "publish": "npm run build && vsce publish"
     },
     "devDependencies": {
+        "@types/node": "^25.5.2",
+        "@types/vscode": "^1.110.0",
         "@vscode/vsce": "^3.0.0",
+        "typescript": "^6.0.2",
         "vitest": "^4.1.2",
         "vscode-oniguruma": "^2.0.1",
         "vscode-textmate": "^9.3.2"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^9.0.1",
+        "vscode-languageserver": "^9.0.1",
+        "vscode-languageserver-textdocument": "^1.0.12"
     }
 }
