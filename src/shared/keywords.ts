@@ -46,6 +46,7 @@ export const OBJECT_NAMES = [
   "Model",
   "Moon",
   "NormalCursor",
+  "NumberedFrame",
   "Object3D",
   "ObjectZY",
   "Particle",
