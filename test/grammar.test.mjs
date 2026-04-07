@@ -153,6 +153,7 @@ describe("properties", () => {
     "DisconnectRail",
     "ParentObject",
     "Gravity",
+    "Acceleration",
   ];
 
   for (const prop of properties) {
