@@ -3,5 +3,6 @@
 .git/**
 .gitignore
 node_modules/**
+test/**
 *.vsix
 vsc-extension-quickstart.md

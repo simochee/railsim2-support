@@ -28,36 +28,48 @@
         "virtualWorkspaces": true
     },
     "contributes": {
-        "languages": [{
-            "id": "railsim2",
-            "aliases": ["RailSim2", "railsim2", "rs2"],
-            "filenames": [
-                "Rail2.txt",
-                "Tie2.txt",
-                "Girder2.txt",
-                "Pier2.txt",
-                "Line2.txt",
-                "Pole2.txt",
-                "Train2.txt",
-                "Station2.txt",
-                "Struct2.txt",
-                "Surface2.txt",
-                "Env2.txt",
-                "Skin2.txt"
-            ],
-            "configuration": "./language-configuration.json"
-        }],
-        "grammars": [{
-            "language": "railsim2",
-            "scopeName": "source.rs2",
-            "path": "./syntaxes/railsim2.tmLanguage.json"
-        }]
+        "languages": [
+            {
+                "id": "railsim2",
+                "aliases": [
+                    "RailSim2",
+                    "railsim2",
+                    "rs2"
+                ],
+                "filenames": [
+                    "Rail2.txt",
+                    "Tie2.txt",
+                    "Girder2.txt",
+                    "Pier2.txt",
+                    "Line2.txt",
+                    "Pole2.txt",
+                    "Train2.txt",
+                    "Station2.txt",
+                    "Struct2.txt",
+                    "Surface2.txt",
+                    "Env2.txt",
+                    "Skin2.txt"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "railsim2",
+                "scopeName": "source.rs2",
+                "path": "./syntaxes/railsim2.tmLanguage.json"
+            }
+        ]
     },
     "scripts": {
+        "test": "vitest run",
         "package": "vsce package",
         "publish": "vsce publish"
     },
     "devDependencies": {
-        "@vscode/vsce": "^3.0.0"
+        "@vscode/vsce": "^3.0.0",
+        "vitest": "^4.1.2",
+        "vscode-oniguruma": "^2.0.1",
+        "vscode-textmate": "^9.3.2"
     }
 }

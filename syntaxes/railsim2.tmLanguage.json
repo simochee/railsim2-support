@@ -17,6 +17,12 @@
   ],
 	"patterns": [
     {
+      "include": "#comment-line"
+    },
+    {
+      "include": "#comment-block"
+    },
+    {
       "include": "#sym-switch-applier"
     },
     {
@@ -24,6 +30,15 @@
     }
 	],
 	"repository": {
+    "comment-line": {
+      "name": "comment.line.double-slash.rs2",
+      "match": "//.*$"
+    },
+    "comment-block": {
+      "name": "comment.block.rs2",
+      "begin": "/\\*",
+      "end": "\\*/"
+    },
     "punctuation-semicolon": {
       "name": "punctuation.terminator.statement.rs2",
       "match": ";"
@@ -61,7 +76,7 @@
     },
     "color": {
       "name": "constant.other.color.rs2",
-      "match": "\\b#[0-9A-Fa-f]{8}\\b"
+      "match": "#[0-9A-Fa-f]{8}\\b"
     },
     "yes-no": {
       "match": "\\b(yes|no)\\b",
@@ -97,7 +112,7 @@
       "patterns": [
         {
           "name": "keyword.operator.rs2",
-          "match": "\\(|\\)|\\+|-|!|~|\\*|\\/|%|<<|>>|<|>|<=|>=|==|!=|^|\\|&&|\\|\\|\\?:"
+          "match": "<<|>>|<=|>=|==|!=|&&|\\|\\||\\?:|\\(|\\)|\\+|-|!|~|\\*|\\/|%|<|>|\\^|&|\\|"
         },
         {
           "include": "#literal"
@@ -139,7 +154,7 @@
       ]
     },
     "sym-objects": {
-      "begin": "\\b((Axle|Body|Tilt|Slide|CrankZY|DynamicRotation|Landscape|Lighting|Moon|EnvInfo|Sun|Circle|Hexagon|Texture|GirderInfo|Headlight|Interval|LensFlare|Set|LineInfo|ChangeMaterial|DefineSwitch|Object3D|Joint3D|JointZY|JointZYX|ObjectZY|Particle|Base|Head|Joint|PierInfo|PistonZY|Platform|PluginHeader|PoleInfo|Model|Profile|Material|Face|Vertex|RailInfo|SoundInfo|Background|NormalCursor|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|EditCtrl|Frame|Interface|ListView|Model|PluginTree|PopupMenu|Sound|SoundEffect|StaticMove|StaticRotation|StationInfo|PrimaryAssembly|StructInfo|SurfaceInfo|DefineAnimation|TieInfo|Link|TriangleZY|Whiteout|TrackWind|Windmill|Wireframe|Line|Vertex)|(ApplySwitch|If|Else))\\b",
+      "begin": "\\b((Axle|Body|Tilt|Slide|CrankZY|DynamicRotation|Landscape|Lighting|Moon|EnvInfo|Sun|Circle|Hexagon|Texture|GirderInfo|Headlight|Interval|LensFlare|Set|LineInfo|ChangeMaterial|DefineSwitch|Object3D|Joint3D|JointZY|JointZYX|ObjectZY|Particle|Base|Head|Joint|PierInfo|PistonZY|Platform|PluginHeader|PoleInfo|Model|Profile|Material|Face|Vertex|RailInfo|SoundInfo|Background|NormalCursor|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|EditCtrl|Frame|Interface|ListView|Model|PluginTree|PopupMenu|Sound|SoundEffect|StaticMove|StaticRotation|StationInfo|PrimaryAssembly|StructInfo|SurfaceInfo|DefineAnimation|TieInfo|TrainInfo|FrontCabin|TailCabin|Link|TriangleZY|Whiteout|TrackWind|Windmill|Wireframe|Line|Vertex)|(ApplySwitch|If|Else))\\b",
       "beginCaptures": {
         "2": {
           "name": "storage.type.object-name.rs2"
@@ -170,6 +185,12 @@
           },
           "end": "(?=})",
           "patterns": [
+            {
+              "include": "#comment-line"
+            },
+            {
+              "include": "#comment-block"
+            },
             {
               "include": "#punctuation-semicolon"
             },
@@ -210,7 +231,7 @@
       ]
     },
     "sym-properties": {
-      "begin": "\\b(ChangeAlpha|AlphaZeroTest|AnalogClock|SetAnimation|Frame|NumberedFrame|RotationUVFrame|SlideUVFrame|ShiftTexture|ScaleTexture|RotateTexture|TransformTexture|TiledUVFrame|Diameter|Symmetric|Coord|WheelSound|TiltRatio|MaxAngle|BaseAlt|Direction|TexFileName|ImageSize|Cursor2DSize|Cursor2DHotSpot|Cursor2DAnimNumber|Cursor2DAnimFrame|RotationAxis|RotationSpeed|RotationSpeed|Deceleration|ModelFileName|ModelScale|NightThreshold|ShadowColor|EnvMap|ModelFileName|ModelScale|AxialInclination|RevolutionPeriod|InitialPhase|Latitude|EnvMapTexFileName|ModelScale|AxialInclination|Distance|Radius|InnerColor|OuterColor|Distance|TexFileName|Height|TrackNum|TrackInterval|FlattenCant|AttachObject|SourceCoord|Direction|MaxDistance|IgnoreCant|ModelFileName|ModelScale|Interval|Offset|StartAngle|Twinkle|Inclination|SunAlt|Directional|Ambient|SkyColor|TrolleyAlt|Height|MaxInterval|Offset|MaxDeflection|MaterialID|Diffuse|Ambient|Specular|Emissive|Power|ChangeModel|GroupCommon|Entry|ModelFileName|ModelScale|Turn|CastShadow|AttachCoord|LocalCoord|DirLink|AttachDir|UpLink|AttachUp|AttachX|FixPosition|FixRight|TextureFileName|AttachObject|SourceCoord|MinQty|MaxQty|VelocityRel|AccelerationRel|DecelerationRel|Lifetime|Direction|InitialRadius|FinalRadius|Color|BlendMode|AirResistance|AirResistance|Turbulence|ModelFileName|ModelScale|BaseToPierLocal|HeadToPierLocal|JointToHeadLocal|TrackNum|TrackInterval|Direction|Interval|Offset|BuildMinAlt|TaperX|TaperY|TaperZ|TrackNum|TrackInterval|Stoppable|OpenDoor|RailPlugin|TiePlugin|GirderPlugin|PierPlugin|LinePlugin|PolePlugin|LiftRailSurface|EnableCant|Coord|RailSimVersion|PluginType|PluginName|PluginAuthor|IconTexture|IconRect|Description|TrackNum|TrackInterval|UseTexture|TexFileName|TexVPerMeter|IgnoreCant|Coord|Normal|Diffuse|TexU|Gauge|Height|SurfaceAlt|CantRatio|MaxCant|FlattenCant|WheelSoundFile|JointInterval|NoCastShadow|NoReceiveShadow|NoShadow|Transparent|UseWallpaper|TexFileName|ImageSize|BackgroundColor|DefaultFontColor|EditBaseColor|EditFontColor|ConvertFontColor|ConvertClauseColor|SelectedBaseColor|FrameTexFileName|IconTexFileName|LabelFontColor|InfoFontColor|FloatFontColor|TexFileName|FontName|TitleBarFontColor|ButtonFontColor|StaticFontColor|FocusFrameColor|DefaultBaseColorOdd|DefaultBaseColorEven|DefaultFontColor|SelectedBaseColor|SelectedFontColor|FocusFrameColor|ArrowModelFileName|ArrowModelScale|LinkModelFileName|LinkModelScale|SegmentModelFileName|SegmentModelScale|CompassModelFileName|CompassModelScale|WindDirModelFileName|WindDirModelScale|DefaultBaseColor|DefaultFontColor|SelectedBaseColor|SelectedFontColor|FocusFrameColor|DefaultFontColor|DisabledFontColor|DisabledShadowColor|SelectedBaseColor|SelectedFontColor|MouseDownWaveFileName|MouseUpWaveFileName|ErrorWaveFileName|ScreenShotWaveFileName|VideoStartWaveFileName|VideoStopWaveFileName|WaveFileName|AttachObject|SourceCoord|Volume|Loop|Displacement|RotationAxis|RotationAngle|PreAnimationDelay|AnimationTime|PostAnimationDelay|PreReverseDelay|ReverseTime|PostReverseDelay|SizeX|SizeZ|ChangeTexture|ChangeTexture|ScaleTexture|RotateTexture|TransformTexture|Height|FlattenCant|Height|FlattenCant|LinkCoord|StartAngle|Color|TrackSpeed|FixAxis|Directional|RotationAxis|RotationSpeed|Symmetric|MinInterval|MaxInterval|IgnoreCant|Diffuse)\\b",
+      "begin": "\\b(ChangeAlpha|AlphaZeroTest|AnalogClock|SetAnimation|Frame|NumberedFrame|RotationUVFrame|SlideUVFrame|ShiftTexture|ScaleTexture|RotateTexture|TransformTexture|TiledUVFrame|Diameter|Symmetric|Coord|WheelSound|TiltRatio|MaxAngle|BaseAlt|Direction|TexFileName|ImageSize|Cursor2DSize|Cursor2DHotSpot|Cursor2DAnimNumber|Cursor2DAnimFrame|RotationAxis|RotationSpeed|RotationSpeed|Deceleration|ModelFileName|ModelScale|NightThreshold|ShadowColor|EnvMap|ModelFileName|ModelScale|AxialInclination|RevolutionPeriod|InitialPhase|Latitude|EnvMapTexFileName|ModelScale|AxialInclination|Distance|Radius|InnerColor|OuterColor|Distance|TexFileName|Height|TrackNum|TrackInterval|FlattenCant|AttachObject|SourceCoord|Direction|MaxDistance|IgnoreCant|ModelFileName|ModelScale|Interval|Offset|StartAngle|Twinkle|Inclination|SunAlt|Directional|Ambient|SkyColor|TrolleyAlt|Height|MaxInterval|Offset|MaxDeflection|MaterialID|Diffuse|Ambient|Specular|Emissive|Power|ChangeModel|GroupCommon|Entry|ModelFileName|ModelScale|Turn|CastShadow|AttachCoord|LocalCoord|DirLink|AttachDir|UpLink|AttachUp|AttachX|FixPosition|FixRight|TextureFileName|AttachObject|SourceCoord|MinQty|MaxQty|VelocityRel|AccelerationRel|DecelerationRel|Lifetime|Direction|InitialRadius|FinalRadius|Color|BlendMode|AirResistance|AirResistance|Turbulence|ModelFileName|ModelScale|BaseToPierLocal|HeadToPierLocal|JointToHeadLocal|TrackNum|TrackInterval|Direction|Interval|Offset|BuildMinAlt|TaperX|TaperY|TaperZ|TrackNum|TrackInterval|Stoppable|OpenDoor|RailPlugin|TiePlugin|GirderPlugin|PierPlugin|LinePlugin|PolePlugin|LiftRailSurface|EnableCant|Coord|RailSimVersion|PluginType|PluginName|PluginAuthor|IconTexture|IconRect|Description|TrackNum|TrackInterval|UseTexture|TexFileName|TexVPerMeter|IgnoreCant|Coord|Normal|Diffuse|TexU|Gauge|Height|SurfaceAlt|CantRatio|MaxCant|FlattenCant|WheelSoundFile|JointInterval|NoCastShadow|NoReceiveShadow|NoShadow|Transparent|UseWallpaper|TexFileName|ImageSize|BackgroundColor|DefaultFontColor|EditBaseColor|EditFontColor|ConvertFontColor|ConvertClauseColor|SelectedBaseColor|FrameTexFileName|IconTexFileName|LabelFontColor|InfoFontColor|FloatFontColor|TexFileName|FontName|TitleBarFontColor|ButtonFontColor|StaticFontColor|FocusFrameColor|DefaultBaseColorOdd|DefaultBaseColorEven|DefaultFontColor|SelectedBaseColor|SelectedFontColor|FocusFrameColor|ArrowModelFileName|ArrowModelScale|LinkModelFileName|LinkModelScale|SegmentModelFileName|SegmentModelScale|CompassModelFileName|CompassModelScale|WindDirModelFileName|WindDirModelScale|DefaultBaseColor|DefaultFontColor|SelectedBaseColor|SelectedFontColor|FocusFrameColor|DefaultFontColor|DisabledFontColor|DisabledShadowColor|SelectedBaseColor|SelectedFontColor|MouseDownWaveFileName|MouseUpWaveFileName|ErrorWaveFileName|ScreenShotWaveFileName|VideoStartWaveFileName|VideoStopWaveFileName|WaveFileName|AttachObject|SourceCoord|Volume|Loop|Displacement|RotationAxis|RotationAngle|PreAnimationDelay|AnimationTime|PostAnimationDelay|PreReverseDelay|ReverseTime|PostReverseDelay|SizeX|SizeZ|ChangeTexture|ChangeTexture|ScaleTexture|RotateTexture|TransformTexture|Height|FlattenCant|Height|FlattenCant|LinkCoord|StartAngle|Color|TrackSpeed|FixAxis|Directional|RotationAxis|RotationSpeed|Symmetric|MinInterval|MaxInterval|IgnoreCant|Diffuse|FrontLimit|TailLimit|MaxVelocity|MaxAcceleration|MaxDeceleration|TiltSpeed|DoorClosingTime|ConnectRail|BranchRail|DisconnectRail|ParentObject|Gravity)\\b",
       "beginCaptures": {
         "0": {
           "name": "variable.parameter.property.rs2"
