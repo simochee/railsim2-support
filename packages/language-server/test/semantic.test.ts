@@ -16,7 +16,7 @@ describe("semanticSchema", () => {
   it("PluginHeader の必須プロパティが正しい", () => {
     const ph = semanticSchema["PluginHeader"];
     expect(ph).toBeDefined();
-    expect(ph.properties["RailSimVersion"]).toMatchObject({ type: "expression", required: true });
+    expect(ph.properties["RailSimVersion"]).toMatchObject({ type: "float", required: true });
     expect(ph.properties["PluginType"]).toMatchObject({ type: "enum", required: true });
     expect(ph.properties["PluginName"]).toMatchObject({ type: "string", required: true });
     expect(ph.properties["PluginAuthor"]).toMatchObject({ type: "string", required: true });

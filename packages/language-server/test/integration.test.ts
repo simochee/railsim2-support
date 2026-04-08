@@ -241,7 +241,7 @@ describe("validation pipeline", () => {
   it("should return no diagnostics for valid input", () => {
     const input = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Train;
   PluginName = "Test";
   PluginAuthor = "Author";
@@ -327,7 +327,7 @@ describe("schema validation integration", () => {
   it("should return type mismatch errors with fileName", () => {
     const input = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "Test";
   PluginAuthor = "Author";
@@ -357,7 +357,7 @@ RailInfo {
   it("should return root validation errors with fileName", () => {
     const input = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "Test";
   PluginAuthor = "Author";
@@ -421,7 +421,7 @@ describe("LSP conversion", () => {
 describe("integration: completion", () => {
   it("Rail2.txt フルパイプライン: parse → findContext → getCompletions", () => {
     const src = `PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";

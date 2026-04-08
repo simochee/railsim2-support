@@ -19,7 +19,7 @@ describe("schemaValidator", () => {
   it("有効な入力 → エラーなし", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
@@ -145,7 +145,7 @@ RailInfo {
   it("Rail2.txt に TrainInfo → error", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
@@ -169,7 +169,7 @@ TrainInfo {
   it("必須ルートオブジェクト欠落 → warning", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
@@ -186,7 +186,7 @@ PluginHeader {
   it("multiple=false のルートオブジェクトが重複 → error", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
@@ -194,7 +194,7 @@ PluginHeader {
 RailInfo { Gauge = 1.0; }
 SoundInfo {}
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test2";
   PluginAuthor = "author2";
@@ -318,7 +318,7 @@ RailInfo {
   it("enum 型に不正な値 → error", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = InvalidType;
   PluginName = "test";
   PluginAuthor = "author";
@@ -336,7 +336,7 @@ PluginHeader {
   it("トップレベルの If はルート検証をスキップ", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
@@ -560,7 +560,7 @@ RailInfo {
   it("Train2.txt の基本構造にスキーマエラーが出ない", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Train;
   PluginName = "test";
   PluginAuthor = "author";
@@ -634,7 +634,7 @@ PrimaryAssembly {
   it("Train2.txt のルートに DefineSwitch を許可する", () => {
     const src = `
 PluginHeader {
-  RailSimVersion = "2.00";
+  RailSimVersion = 2.00;
   PluginType = Train;
   PluginName = "test";
   PluginAuthor = "author";
