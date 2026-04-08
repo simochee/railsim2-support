@@ -286,13 +286,17 @@ export function parse(source: string): ParseResult {
 
       // Otherwise treat as error and skip
       addError(`Unexpected identifier '${t.value}' at top level`, rangeOf(t));
+      const before1 = pos;
       synchronize();
+      if (pos === before1) advance();
       return null;
     }
 
     // Unexpected token
     addError(`Unexpected token '${t.value || t.type}' at top level`, rangeOf(t));
+    const before2 = pos;
     synchronize();
+    if (pos === before2) advance();
     return null;
   }
 
@@ -380,14 +384,18 @@ export function parse(source: string): ParseResult {
         } else {
           // Unknown — try to parse as property without '='? Error and sync.
           addError(`Unexpected identifier '${t.value}'`, rangeOf(t));
+          const before = pos;
           synchronize();
+          if (pos === before) advance();
         }
         continue;
       }
 
       // Unexpected token in body
       addError(`Unexpected token '${t.value || t.type}'`, rangeOf(t));
+      const before = pos;
       synchronize();
+      if (pos === before) advance();
     }
 
     // Interleave comment nodes that fall within this body's range
@@ -494,7 +502,10 @@ export function parse(source: string): ParseResult {
         default_ = parseCaseBody();
       } else {
         addError(`Expected 'Case' or 'Default' in ApplySwitch`, rangeOf(peek()));
+        const before = pos;
         synchronize();
+        // Guard: if synchronize() didn't advance, force progress to prevent infinite loop
+        if (pos === before) advance();
       }
     }
 
@@ -560,13 +571,17 @@ export function parse(source: string): ParseResult {
           body.push(parseObject());
         } else {
           addError(`Unexpected identifier '${t.value}'`, rangeOf(t));
+          const before = pos;
           synchronize();
+          if (pos === before) advance();
         }
         continue;
       }
 
       addError(`Unexpected token '${t.value || t.type}'`, rangeOf(t));
+      const before = pos;
       synchronize();
+      if (pos === before) advance();
     }
 
     return body;
