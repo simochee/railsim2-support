@@ -321,7 +321,8 @@ function checkValueType(
       break;
 
     case "identifier":
-      if (value.type !== "identifier") {
+      // RailSim II ではオブジェクト名を文字列でも指定可能 (例: AttachObject = "MainBody")
+      if (value.type !== "identifier" && value.type !== "string") {
         pushTypeMismatch(propName, objectName, "identifier", value, diagnostics);
       }
       break;
