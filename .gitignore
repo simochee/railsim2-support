@@ -3,3 +3,4 @@ out/
 *.vsix
 docs-site/pages/
 docs-site/dist/
+tsconfig.tsbuildinfo

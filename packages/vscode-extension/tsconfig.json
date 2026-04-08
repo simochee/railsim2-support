@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "out"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "out"],
+  "references": [
+    { "path": "../language-server" }
+  ]
+}

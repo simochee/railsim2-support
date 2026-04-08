@@ -1,94 +1,26 @@
 {
-    "name": "vscode-railsim2-grammar",
-    "displayName": "RailSim2 Plugin Grammar",
-    "description": "Syntax highlighting for RailSim2 plugin definition",
-    "version": "0.0.1",
-    "publisher": "simochee",
-    "main": "./out/client/extension.js",
-    "license": "MIT",
-    "icon": "images/icon.png",
-    "homepage": "https://github.com/lollipop-onl/vscode-railsim-grammer",
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/lollipop-onl/vscode-railsim-grammer.git"
-    },
-    "bugs": {
-        "url": "https://github.com/lollipop-onl/vscode-railsim-grammer/issues",
-        "email": "lollipop@simochee.net"
-    },
-    "engines": {
-        "vscode": "^1.75.0"
-    },
-    "categories": [
-        "Programming Languages"
-    ],
-    "activationEvents": [],
-    "capabilities": {
-        "virtualWorkspaces": true
-    },
-    "contributes": {
-        "languages": [
-            {
-                "id": "railsim2",
-                "aliases": [
-                    "RailSim2",
-                    "railsim2",
-                    "rs2"
-                ],
-                "filenames": [
-                    "Rail2.txt",
-                    "Tie2.txt",
-                    "Girder2.txt",
-                    "Pier2.txt",
-                    "Line2.txt",
-                    "Pole2.txt",
-                    "Train2.txt",
-                    "Station2.txt",
-                    "Struct2.txt",
-                    "Surface2.txt",
-                    "Env2.txt",
-                    "Skin2.txt"
-                ],
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "railsim2",
-                "scopeName": "source.rs2",
-                "path": "./syntaxes/railsim2.tmLanguage.json"
-            }
-        ]
-    },
+    "private": true,
     "packageManager": "pnpm@10.33.0",
     "scripts": {
-        "generate:grammar": "tsx scripts/generateGrammar.ts",
-        "generate:hover-data": "tsx scripts/extract-hover-data.ts",
-        "build": "tsc -p tsconfig.server.json && tsc -p tsconfig.client.json",
-        "test": "vitest run",
-        "package": "pnpm build && vsce package",
-        "publish": "pnpm build && vsce publish",
+        "build": "pnpm -r build",
+        "test": "pnpm -r test",
+        "generate:hover-data": "pnpm --filter @lollipop-onl/railsim2-language-server generate:hover-data",
+        "generate:grammar": "pnpm --filter vscode-railsim2-grammar generate:grammar",
         "docs:build": "vite build --config docs-site/vite.config.ts",
         "docs:dev": "vite --config docs-site/vite.config.ts --open",
         "docs:preview": "vite preview --config docs-site/vite.config.ts"
     },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
+    },
     "devDependencies": {
         "@tabler/icons": "^3.41.1",
-        "@types/node": "^25.5.2",
-        "@types/vscode": "^1.110.0",
-        "@vscode/vsce": "^3.0.0",
         "iconv-lite": "^0.7.2",
         "postcss-modules": "^6.0.1",
         "tsx": "^4.21.0",
         "typescript": "^6.0.2",
-        "vite": "^8.0.7",
-        "vitest": "^4.1.2",
-        "vscode-oniguruma": "^2.0.1",
-        "vscode-textmate": "^9.3.2"
-    },
-    "dependencies": {
-        "vscode-languageclient": "^9.0.1",
-        "vscode-languageserver": "^9.0.1",
-        "vscode-languageserver-textdocument": "^1.0.12"
+        "vite": "^8.0.7"
     }
 }

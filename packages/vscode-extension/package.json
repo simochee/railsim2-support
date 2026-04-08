@@ -1,0 +1,70 @@
+{
+  "name": "vscode-railsim2-grammar",
+  "displayName": "RailSim2 Plugin Grammar",
+  "description": "Syntax highlighting and language support for RailSim2 plugin definition",
+  "version": "0.0.1",
+  "publisher": "simochee",
+  "main": "./out/extension.js",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "homepage": "https://github.com/lollipop-onl/vscode-railsim-grammer",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/lollipop-onl/vscode-railsim-grammer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lollipop-onl/vscode-railsim-grammer/issues",
+    "email": "lollipop@simochee.net"
+  },
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "categories": ["Programming Languages"],
+  "activationEvents": [],
+  "capabilities": {
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "railsim2",
+        "aliases": ["RailSim2", "railsim2", "rs2"],
+        "filenames": [
+          "Rail2.txt", "Tie2.txt", "Girder2.txt", "Pier2.txt",
+          "Line2.txt", "Pole2.txt", "Train2.txt", "Station2.txt",
+          "Struct2.txt", "Surface2.txt", "Env2.txt", "Skin2.txt"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "railsim2",
+        "scopeName": "source.rs2",
+        "path": "./syntaxes/railsim2.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "pretest": "pnpm --filter @lollipop-onl/railsim2-language-server build",
+    "test": "vitest run",
+    "pregenerate:grammar": "pnpm --filter @lollipop-onl/railsim2-language-server build",
+    "generate:grammar": "tsx scripts/generateGrammar.ts",
+    "package": "pnpm build && vsce package --no-dependencies",
+    "publish": "pnpm build && vsce publish --no-dependencies"
+  },
+  "dependencies": {
+    "@lollipop-onl/railsim2-language-server": "workspace:*",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "@types/vscode": "^1.110.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.25.0",
+    "vitest": "^4.1.2",
+    "vscode-oniguruma": "^2.0.1",
+    "vscode-textmate": "^9.3.2"
+  }
+}

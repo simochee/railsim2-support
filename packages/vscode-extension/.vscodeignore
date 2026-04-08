@@ -4,5 +4,9 @@
 .gitignore
 node_modules/**
 test/**
+scripts/**
+src/**
 *.vsix
-vsc-extension-quickstart.md
+*.ts
+out/**/*.map
+tsconfig.json
