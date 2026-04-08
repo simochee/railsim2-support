@@ -63,13 +63,13 @@ describe("semanticSchema", () => {
   it("SoundEffect:Train は Sound と同等のプロパティを持つ", () => {
     const se = semanticSchema["SoundEffect:Train"];
     expect(se).toBeDefined();
-    expect(se.properties["WaveFileName"]).toMatchObject({ type: "filename", required: true });
+    expect(se.properties["WaveFileName"]).toMatchObject({ type: "filename", required: false });
     expect(se.properties["SourceCoord"]).toMatchObject({ type: "vector-3d" });
   });
 
   it("Object3D に材質カスタマイザプロパティが定義されている", () => {
     const o3d = semanticSchema["Object3D"];
-    expect(o3d.properties["NoCastShadow"]).toMatchObject({ type: "integer", multiple: true });
+    expect(o3d.properties["NoCastShadow"]).toMatchObject({ type: "expression", multiple: true });
     expect(o3d.properties["ChangeTexture"]).toMatchObject({ type: "expression", arity: 2, multiple: true });
     expect(o3d.children["Joint3D"]).toBeDefined();
     expect(o3d.children["ChangeMaterial"]).toBeDefined();
@@ -80,13 +80,13 @@ describe("semanticSchema", () => {
     const j3d = semanticSchema["Joint3D"];
     expect(j3d.properties["AttachCoord"]).toMatchObject({ type: "vector-3d" });
     expect(j3d.properties["AttachDir"]).toMatchObject({ type: "vector-3d" });
-    expect(j3d.properties["DirLink"]).toMatchObject({ type: "identifier" });
+    expect(j3d.properties["DirLink"]).toMatchObject({ type: "expression" });
     expect(j3d.nameParameter).toBe("identifier");
   });
 
   it("ChangeMaterial に MaterialID/Emissive が定義されている", () => {
     const cm = semanticSchema["ChangeMaterial"];
-    expect(cm.properties["MaterialID"]).toMatchObject({ type: "integer" });
+    expect(cm.properties["MaterialID"]).toMatchObject({ type: "expression" });
     expect(cm.properties["Emissive"]).toMatchObject({ type: "float", arity: 3 });
     expect(cm.properties["Diffuse"]).toMatchObject({ type: "float", arity: 4 });
   });

@@ -18,14 +18,33 @@ import { resolveSchemaKey } from "../../schema/schemaUtils.js";
 export function validateSchema(file: FileNode, fileName?: string): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
 
-  // ── ルート検証 ──
+  // ルート schemaKey マップを構築 (ファイルコンテキスト依存の解決用)
+  const rootSchemaKeyMap = new Map<string, string>();
   if (fileName) {
     validateRoot(file, fileName, diagnostics);
+    const rootEntries = getFileSchema(fileName);
+    if (rootEntries) {
+      for (const entry of rootEntries) {
+        if (entry.schemaKey) {
+          rootSchemaKeyMap.set(entry.name, entry.schemaKey);
+        }
+      }
+    }
   }
 
   // ── ボディ走査 ──
   for (const node of file.body) {
-    visitTopLevel(node, undefined, diagnostics);
+    if (node.type === "object" && rootSchemaKeyMap.has(node.name)) {
+      // ファイルコンテキスト依存の schemaKey で走査
+      const schemaKey = rootSchemaKeyMap.get(node.name)!;
+      const schema = semanticSchema[schemaKey];
+      if (schema) {
+        validateProperties(node, schema, diagnostics);
+        validateChildren(node, schema, schemaKey, diagnostics);
+      }
+    } else {
+      visitTopLevel(node, undefined, diagnostics);
+    }
   }
 
   return diagnostics;
@@ -247,8 +266,8 @@ function validatePropertyType(
   const expectedArity = getExpectedArity(schema);
   const values = prop.values;
 
-  // arity チェック
-  if (values.length !== expectedArity) {
+  // arity チェック (expression 型で arity 未指定の場合はスキップ)
+  if (expectedArity != null && values.length !== expectedArity) {
     diagnostics.push({
       message: `Property '${prop.name}' in '${objectName}' expects ${expectedArity} value(s), got ${values.length}`,
       range: prop.range,
@@ -263,13 +282,15 @@ function validatePropertyType(
   }
 }
 
-function getExpectedArity(schema: PropertySchema): number {
+function getExpectedArity(schema: PropertySchema): number | null {
   if (schema.arity != null) return schema.arity;
   switch (schema.type) {
     case "vector-2d":
       return 2;
     case "vector-3d":
       return 3;
+    case "expression":
+      return null; // expression 型は可変長 — arity チェックをスキップ
     default:
       return 1;
   }

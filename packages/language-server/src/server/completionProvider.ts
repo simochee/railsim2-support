@@ -101,8 +101,28 @@ export function findContext(
     }
   }
 
-  // 3. AST walk: find innermost ObjectNode containing cursor
-  const result = findInnermostObject(file.body, position, [], undefined, codeTokens);
+  // 3. Build root schemaKey map for file-context-dependent resolution
+  const rootSchemaKeyMap = new Map<string, string>();
+  if (fileName) {
+    const rootEntries = getFileSchema(fileName);
+    if (rootEntries) {
+      for (const entry of rootEntries) {
+        if (entry.schemaKey) {
+          rootSchemaKeyMap.set(entry.name, entry.schemaKey);
+        }
+      }
+    }
+  }
+
+  // 4. AST walk: find innermost ObjectNode containing cursor
+  const result = findInnermostObject(
+    file.body,
+    position,
+    [],
+    undefined,
+    codeTokens,
+    rootSchemaKeyMap,
+  );
   if (result) {
     return {
       type: "objectBody",
@@ -128,6 +148,7 @@ function findInnermostObject(
   parentChain: string[],
   parentSchemaKey?: string,
   codeTokens?: Token[],
+  rootSchemaKeyMap?: Map<string, string>,
 ): ObjectSearchResult | null {
   for (const node of nodes) {
     if (!rangeContains(node.range, position)) continue;
@@ -136,7 +157,11 @@ function findInnermostObject(
       // Skip if cursor is in the object header (name, args, or on '{')
       if (isInObjectHeader(node, position, codeTokens)) continue;
 
-      const schemaKey = resolveSchemaKey(node.name, parentSchemaKey);
+      // ルートレベルでファイルコンテキスト依存の schemaKey がある場合はそれを優先
+      const schemaKey =
+        parentSchemaKey == null && rootSchemaKeyMap?.has(node.name)
+          ? rootSchemaKeyMap.get(node.name)!
+          : resolveSchemaKey(node.name, parentSchemaKey);
       const newChain = [...parentChain, schemaKey];
 
       // Search deeper into this object's body

@@ -87,9 +87,9 @@ export const semanticSchema: SemanticSchema = {
       EnableCant: opt("yes-no"),
       CantRatio: opt("float"),
       FlattenCant: opt("yes-no"),
-      ConnectRail: opt("identifier"),
-      DisconnectRail: opt("identifier"),
-      BranchRail: opt("identifier"),
+      ConnectRail: opt("expression"),
+      DisconnectRail: opt("expression"),
+      BranchRail: opt("expression"),
       Height: opt("float"),
       SurfaceAlt: opt("float"),
     },
@@ -117,6 +117,7 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Face: child(false, true),
+      Material: child(false, true),
     },
   },
 
@@ -183,7 +184,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Tie2.txt =====
   TieInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Height: opt("float"),
       FlattenCant: opt("yes-no"),
@@ -197,7 +198,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Girder2.txt =====
   GirderInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Height: opt("float"),
       TrackNum: opt("integer"),
@@ -213,7 +214,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Pier2.txt =====
   PierInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Height: opt("float"),
       BaseAlt: opt("float"),
@@ -236,7 +237,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Line2.txt =====
   LineInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       TrolleyAlt: opt("float"),
       Height: opt("float"),
@@ -253,7 +254,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Pole2.txt =====
   PoleInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       TrackNum: opt("integer"),
       TrackInterval: opt("float"),
@@ -294,6 +295,17 @@ export const semanticSchema: SemanticSchema = {
       ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Turn: opt("yes-no"),
+      ChangeTexture: opt("expression", { arity: 2, multiple: true }),
+      ChangeAlpha: opt("expression", { arity: 2, multiple: true }),
+      ChangeModel: opt("expression", { arity: 2, multiple: true }),
+      NoCastShadow: opt("expression", { multiple: true }),
+      AlphaZeroTest: opt("expression", { multiple: true }),
+      NoReceiveShadow: opt("expression", { multiple: true }),
+      NoShadow: opt("expression", { multiple: true }),
+      Transparent: opt("expression", { multiple: true }),
+      ShiftTexture: opt("expression", { arity: 3, multiple: true }),
+      SetAnimation: opt("expression", { arity: 2, multiple: true }),
+      EnvMap: opt("expression", { multiple: true }),
     },
     children: {
       Headlight: child(false, true),
@@ -303,6 +315,7 @@ export const semanticSchema: SemanticSchema = {
       Object3D: child(false, true),
       JointZY: child(false, true),
       Tilt: child(false, false),
+      ChangeMaterial: child(false, true),
     },
     nameParameter: "identifier",
   },
@@ -313,10 +326,12 @@ export const semanticSchema: SemanticSchema = {
       SourceCoord: opt("vector-3d"),
       Direction: opt("vector-3d"),
       Color: opt("color"),
-      AttachObject: opt("identifier"),
+      AttachObject: opt("expression"),
       MaxDistance: opt("float"),
     },
-    children: {},
+    children: {
+      LensFlare: child(false, true),
+    },
   },
 
   FrontCabin: {
@@ -362,16 +377,19 @@ export const semanticSchema: SemanticSchema = {
       AnalogClock: opt("enum", { enumValues: ["Hour", "Minute", "Second"] }),
       Turn: opt("yes-no"),
       CastShadow: opt("yes-no"),
-      // 材質カスタマイザ — 材質番号のみ
-      NoCastShadow: opt("integer", { multiple: true }),
-      AlphaZeroTest: opt("integer", { multiple: true }),
-      NoReceiveShadow: opt("integer", { multiple: true }),
-      NoShadow: opt("integer", { multiple: true }),
-      Transparent: opt("integer", { multiple: true }),
+      // 材質カスタマイザ — 材質番号リスト (カンマ区切りで複数指定可)
+      NoCastShadow: opt("expression", { multiple: true }),
+      AlphaZeroTest: opt("expression", { multiple: true }),
+      NoReceiveShadow: opt("expression", { multiple: true }),
+      NoShadow: opt("expression", { multiple: true }),
+      Transparent: opt("expression", { multiple: true }),
       // 材質カスタマイザ — 材質番号 + 値 (混合型のため expression)
       ChangeTexture: opt("expression", { arity: 2, multiple: true }),
       ChangeAlpha: opt("expression", { arity: 2, multiple: true }),
       ChangeModel: opt("expression", { arity: 2, multiple: true }),
+      ShiftTexture: opt("expression", { arity: 3, multiple: true }),
+      SetAnimation: opt("expression", { arity: 2, multiple: true }),
+      EnvMap: opt("expression", { multiple: true }),
     },
     children: {
       StaticRotation: child(false, true),
@@ -437,13 +455,13 @@ export const semanticSchema: SemanticSchema = {
 
   Sound: {
     properties: {
-      WaveFileName: req("filename"),
+      WaveFileName: opt("filename"),
       Volume: opt("float"),
       Loop: opt("yes-no"),
       VelocityRel: opt("yes-no"),
       AccelerationRel: opt("yes-no"),
       DecelerationRel: opt("yes-no"),
-      AttachObject: opt("identifier"),
+      AttachObject: opt("expression"),
       SourceCoord: opt("vector-3d"),
     },
     children: {},
@@ -452,7 +470,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Station2.txt =====
   StationInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Height: opt("float"),
     },
@@ -465,7 +483,7 @@ export const semanticSchema: SemanticSchema = {
 
   Platform: {
     properties: {
-      Coord: req("vector-3d"),
+      Coord: req("vector-3d", { multiple: true }),
       Direction: opt("vector-3d"),
       ParentObject: opt("identifier"),
       TrackNum: opt("integer"),
@@ -487,7 +505,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== Struct2.txt =====
   StructInfo: {
     properties: {
-      ModelFileName: req("filename"),
+      ModelFileName: opt("filename"),
       ModelScale: opt("float"),
       Height: opt("float"),
       BuildMinAlt: opt("float"),
@@ -530,6 +548,7 @@ export const semanticSchema: SemanticSchema = {
       NoShadow: opt("yes-no"),
       UseTexture: opt("yes-no"),
       TexVPerMeter: opt("float"),
+      TexFileName: opt("filename"),
     },
     children: {},
   },
@@ -578,7 +597,11 @@ export const semanticSchema: SemanticSchema = {
       ModelScale: opt("float"),
       AxialInclination: opt("float"),
     },
-    children: {},
+    children: {
+      LensFlare: child(false, true),
+      Whiteout: child(false, false),
+      Lighting: child(false, false),
+    },
   },
 
   Moon: {
@@ -620,7 +643,9 @@ export const semanticSchema: SemanticSchema = {
       Directional: opt("color"),
       NightThreshold: opt("float"),
     },
-    children: {},
+    children: {
+      Set: child(false, true, "Set:Lighting"),
+    },
   },
 
   // ===== Skin2.txt 関連 =====
@@ -630,10 +655,11 @@ export const semanticSchema: SemanticSchema = {
         name,
         {
           properties: {
+            ImageSize: opt("vector-2d"),
             Cursor2DSize: opt("vector-2d"),
             Cursor2DHotSpot: opt("vector-2d"),
             Cursor2DAnimNumber: opt("integer"),
-            Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
+            Cursor2DAnimFrame: opt("expression", { multiple: true }),
             TexFileName: opt("filename"),
           },
           children: {},
@@ -705,11 +731,12 @@ export const semanticSchema: SemanticSchema = {
       PreReverseDelay: opt("float"),
       PostReverseDelay: opt("float"),
       Loop: opt("yes-no"),
-      Frame: opt("string", { multiple: true }),
-      NumberedFrame: opt("string", { multiple: true }),
-      RotationUVFrame: opt("string", { multiple: true }),
-      SlideUVFrame: opt("string", { multiple: true }),
-      TiledUVFrame: opt("string", { multiple: true }),
+      Frame: opt("expression", { arity: 2, multiple: true }),
+      NumberedFrame: opt("expression", { multiple: true }),
+      RotationUVFrame: opt("expression", { multiple: true }),
+      SlideUVFrame: opt("expression", { multiple: true }),
+      TiledUVFrame: opt("expression", { multiple: true }),
+      ShiftTexture: opt("expression", { arity: 2, multiple: true }),
     },
     children: {
       Set: child(false, true),
@@ -722,6 +749,16 @@ export const semanticSchema: SemanticSchema = {
   Set: {
     properties: {
       SetAnimation: opt("identifier"),
+    },
+    children: {},
+  },
+
+  "Set:Lighting": {
+    properties: {
+      SunAlt: opt("float"),
+      Directional: opt("color"),
+      Ambient: opt("color"),
+      SkyColor: opt("color"),
     },
     children: {},
   },
@@ -754,23 +791,23 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       TexFileName: opt("filename"),
       TextureFileName: opt("filename"),
-      Color: opt("color"),
+      Color: opt("expression", { arity: 2 }),
       InnerColor: opt("color"),
       OuterColor: opt("color"),
       SourceCoord: opt("vector-3d"),
-      Direction: opt("vector-3d"),
+      Direction: opt("expression"),
       Inclination: opt("float"),
-      InitialRadius: opt("float"),
-      FinalRadius: opt("float"),
-      Lifetime: opt("float"),
-      MinQty: opt("integer"),
-      MaxQty: opt("integer"),
+      InitialRadius: opt("expression", { arity: 2 }),
+      FinalRadius: opt("expression", { arity: 2 }),
+      Lifetime: opt("expression", { arity: 2 }),
+      MinQty: opt("float"),
+      MaxQty: opt("float"),
       MinInterval: opt("float"),
       MaxInterval: opt("float"),
       Gravity: opt("float"),
       Turbulence: opt("float"),
       AirResistance: opt("float"),
-      AttachObject: opt("identifier"),
+      AttachObject: opt("expression"),
       VelocityRel: opt("float"),
       AccelerationRel: opt("float"),
       DecelerationRel: opt("float"),
@@ -781,14 +818,17 @@ export const semanticSchema: SemanticSchema = {
 
   LensFlare: {
     properties: {
-      Coord: req("vector-3d"),
+      Coord: opt("vector-3d"),
       Color: opt("color"),
       Radius: opt("float"),
       Twinkle: opt("float"),
       StartAngle: opt("float"),
       Inclination: opt("float"),
     },
-    children: {},
+    children: {
+      Circle: child(false, true, "Circle:LensFlare"),
+      Hexagon: child(false, true, "Hexagon:LensFlare"),
+    },
   },
 
   // Model / ChangeMaterial / etc.
@@ -803,8 +843,8 @@ export const semanticSchema: SemanticSchema = {
       LinkModelScale: opt("float"),
       SegmentModelFileName: opt("filename"),
       SegmentModelScale: opt("float"),
-      CompassModelFileName: opt("filename"),
-      CompassModelScale: opt("float"),
+      CompassModelFileName: opt("expression"),
+      CompassModelScale: opt("expression"),
       WindDirModelFileName: opt("filename"),
       WindDirModelScale: opt("float"),
     },
@@ -813,12 +853,33 @@ export const semanticSchema: SemanticSchema = {
 
   ChangeMaterial: {
     properties: {
-      MaterialID: opt("integer"),
+      MaterialID: opt("expression"),
       Diffuse: opt("float", { arity: 4 }),
       Ambient: opt("float", { arity: 3 }),
       Specular: opt("float", { arity: 3 }),
       Emissive: opt("float", { arity: 3 }),
       Power: opt("float"),
+    },
+    children: {},
+  },
+
+  // ===== LensFlare 系サブオブジェクト =====
+  "Circle:LensFlare": {
+    properties: {
+      Distance: opt("float"),
+      Radius: opt("float"),
+      InnerColor: opt("color"),
+      OuterColor: opt("color"),
+    },
+    children: {},
+  },
+
+  "Hexagon:LensFlare": {
+    properties: {
+      Distance: opt("float"),
+      Radius: opt("float"),
+      InnerColor: opt("color"),
+      OuterColor: opt("color"),
     },
     children: {},
   },
@@ -844,20 +905,28 @@ export const semanticSchema: SemanticSchema = {
 
   TriangleZY: {
     properties: {
-      Coord: req("vector-3d"),
-      Radius: req("float"),
+      Coord: opt("vector-3d"),
+      Radius: opt("float"),
       Height: opt("float"),
     },
-    children: {},
+    children: {
+      Link: child(false, true),
+    },
   },
 
   ObjectZY: {
     properties: {
-      Coord: req("vector-3d"),
+      Coord: opt("vector-3d"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
+      Turn: opt("yes-no"),
       FixRight: opt("float"),
       FixPosition: opt("float"),
     },
-    children: {},
+    children: {
+      JointZYX: child(false, true),
+    },
+    nameParameter: "identifier",
   },
 
   // ===== Joint 系 =====
@@ -879,9 +948,9 @@ export const semanticSchema: SemanticSchema = {
       AttachCoord: opt("vector-3d"),
       LocalCoord: opt("vector-3d"),
       AttachDir: opt("vector-3d"),
-      DirLink: opt("identifier"),
+      DirLink: opt("expression"),
       AttachUp: opt("vector-3d"),
-      UpLink: opt("identifier"),
+      UpLink: opt("expression"),
       LinkCoord: opt("vector-3d"),
       MaxAngle: opt("float"),
     },
@@ -913,31 +982,40 @@ export const semanticSchema: SemanticSchema = {
   // ===== Crank / Piston =====
   CrankZY: {
     properties: {
-      Coord: req("vector-3d"),
+      Coord: opt("vector-3d"),
       RotationAxis: opt("vector-3d"),
       Radius: opt("float"),
       InitialPhase: opt("float"),
     },
-    children: {},
+    children: {
+      Link: child(false, true),
+      Slide: child(false, true),
+    },
   },
 
   PistonZY: {
     properties: {
-      Coord: req("vector-3d"),
+      Coord: opt("vector-3d"),
       FixAxis: opt("vector-3d"),
       FixPosition: opt("vector-3d"),
       Direction: opt("vector-3d"),
     },
-    children: {},
+    children: {
+      Link: child(false, true),
+    },
   },
 
   // ===== Animation / Motion =====
   Slide: {
     properties: {
-      Direction: opt("vector-3d"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
+      Direction: opt("expression", { arity: 2, multiple: false }),
       Distance: opt("float"),
     },
-    children: {},
+    children: {
+      JointZYX: child(false, true),
+    },
   },
 
   Tilt: {
@@ -976,7 +1054,7 @@ export const semanticSchema: SemanticSchema = {
       DefaultFontColor: opt("color"),
       DisabledFontColor: opt("color"),
       DisabledShadowColor: opt("color"),
-      SelectedBaseColor: opt("color"),
+      SelectedBaseColor: opt("expression"),
       SelectedFontColor: opt("color"),
       MouseDownWaveFileName: opt("filename"),
       MouseUpWaveFileName: opt("filename"),
@@ -989,7 +1067,7 @@ export const semanticSchema: SemanticSchema = {
       DefaultBaseColorOdd: opt("color"),
       DefaultBaseColorEven: opt("color"),
       DefaultFontColor: opt("color"),
-      SelectedBaseColor: opt("color"),
+      SelectedBaseColor: opt("expression"),
       SelectedFontColor: opt("color"),
       FocusFrameColor: opt("color"),
     },
@@ -999,11 +1077,11 @@ export const semanticSchema: SemanticSchema = {
   EditCtrl: {
     properties: {
       DefaultFontColor: opt("color"),
-      EditBaseColor: opt("color"),
+      EditBaseColor: opt("expression"),
       EditFontColor: opt("color"),
       ConvertFontColor: opt("color"),
-      ConvertClauseColor: opt("color"),
-      SelectedBaseColor: opt("color"),
+      ConvertClauseColor: opt("expression"),
+      SelectedBaseColor: opt("expression"),
       ErrorWaveFileName: opt("filename"),
     },
     children: {},
@@ -1013,7 +1091,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       DefaultBaseColor: opt("color"),
       DefaultFontColor: opt("color"),
-      SelectedBaseColor: opt("color"),
+      SelectedBaseColor: opt("expression"),
       SelectedFontColor: opt("color"),
       FocusFrameColor: opt("color"),
     },
@@ -1035,14 +1113,38 @@ export const semanticSchema: SemanticSchema = {
   // Train2.txt 用 SoundEffect (Sound と同等プロパティ)
   "SoundEffect:Train": {
     properties: {
-      WaveFileName: req("filename"),
+      WaveFileName: opt("filename"),
       Volume: opt("float"),
       Loop: opt("yes-no"),
       VelocityRel: opt("yes-no"),
       AccelerationRel: opt("yes-no"),
       DecelerationRel: opt("yes-no"),
-      AttachObject: opt("identifier"),
+      AttachObject: opt("expression"),
       SourceCoord: opt("vector-3d"),
+    },
+    children: {},
+  },
+
+  // ===== Skin2.txt ファイルコンテキスト依存 =====
+  "Frame:Skin": {
+    properties: {
+      FrameTexFileName: opt("filename"),
+      IconTexFileName: opt("expression"),
+      LabelFontColor: opt("color"),
+      InfoFontColor: opt("color"),
+      FloatFontColor: opt("color"),
+    },
+    children: {},
+  },
+
+  "Sound:Skin": {
+    properties: {
+      MouseDownWaveFileName: opt("filename"),
+      MouseUpWaveFileName: opt("filename"),
+      ErrorWaveFileName: opt("filename"),
+      ScreenShotWaveFileName: opt("filename"),
+      VideoStartWaveFileName: opt("filename"),
+      VideoStopWaveFileName: opt("filename"),
     },
     children: {},
   },
@@ -1069,16 +1171,25 @@ export const semanticSchema: SemanticSchema = {
   // ===== Link / PrimaryAssembly =====
   Link: {
     properties: {
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
+      Turn: opt("yes-no"),
       DirLink: opt("vector-3d"),
       UpLink: opt("vector-3d"),
-      LinkCoord: opt("vector-3d"),
+      LinkCoord: opt("expression", { arity: 2, multiple: false }),
     },
-    children: {},
+    children: {
+      JointZYX: child(false, true),
+    },
     nameParameter: "identifier",
   },
 
   PrimaryAssembly: {
-    properties: {},
+    properties: {
+      ConnectRail: opt("expression", { multiple: true }),
+      DisconnectRail: opt("expression", { multiple: true }),
+      BranchRail: opt("expression", { multiple: true }),
+    },
     children: {
       Axle: child(false, true),
       Body: child(false, true),
@@ -1091,6 +1202,9 @@ export const semanticSchema: SemanticSchema = {
       SoundEffect: child(false, true, "SoundEffect:Train"),
       Particle: child(false, true),
       LensFlare: child(false, true),
+      CrankZY: child(false, true),
+      PistonZY: child(false, true),
+      TriangleZY: child(false, true),
       DefineSwitch: child(false, true),
       DefineAnimation: child(false, true),
     },
@@ -1113,46 +1227,66 @@ export const fileSchemas: FileSchema = {
   "Tie2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TieInfo", required: true, multiple: false },
+    { name: "Profile", required: false, multiple: true },
   ],
   "Girder2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "GirderInfo", required: true, multiple: false },
+    { name: "Profile", required: false, multiple: true },
   ],
   "Pier2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PierInfo", required: true, multiple: false },
     { name: "Base", required: false, multiple: false },
     { name: "Head", required: false, multiple: false },
+    { name: "Joint", required: false, multiple: true },
+    { name: "Profile", required: false, multiple: true },
+    { name: "Interval", required: false, multiple: true },
   ],
   "Line2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "LineInfo", required: true, multiple: false },
+    { name: "Wireframe", required: false, multiple: true },
+    { name: "Interval", required: false, multiple: true },
   ],
   "Pole2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
+    { name: "Model", required: false, multiple: true },
   ],
   "Train2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TrainInfo", required: true, multiple: false },
     { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false },
   ],
   "Station2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StationInfo", required: true, multiple: false },
+    { name: "Platform", required: false, multiple: true },
+    { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
+    { name: "PrimaryAssembly", required: false, multiple: false },
   ],
   "Struct2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StructInfo", required: true, multiple: false },
+    { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
+    { name: "PrimaryAssembly", required: false, multiple: false },
   ],
   "Surface2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "SurfaceInfo", required: true, multiple: false },
+    { name: "PrimaryAssembly", required: false, multiple: false },
   ],
   "Env2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "EnvInfo", required: true, multiple: false },
+    { name: "Landscape", required: false, multiple: true },
+    { name: "Sun", required: false, multiple: false },
+    { name: "Moon", required: false, multiple: false },
   ],
   "Skin2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
@@ -1168,6 +1302,9 @@ export const fileSchemas: FileSchema = {
     { name: "EditCtrl", required: false, multiple: false },
     { name: "PluginTree", required: false, multiple: false },
     { name: "SoundEffect", required: false, multiple: false },
+    { name: "Frame", required: false, multiple: false, schemaKey: "Frame:Skin" },
+    { name: "Model", required: false, multiple: false },
+    { name: "Sound", required: false, multiple: false, schemaKey: "Sound:Skin" },
   ],
 };
 

@@ -334,12 +334,12 @@ describe("getCompletions", () => {
   });
 
   it("identifier property → = ${1:name};", () => {
-    const src = "RailInfo {\n  \n}";
+    const src = "Platform {\n  Coord = 0.0, 0.0, 0.0;\n  \n}";
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
-    const cr = items.find((i) => i.label === "ConnectRail");
-    expect(cr).toBeDefined();
-    expect(cr!.insertText).toBe("ConnectRail = ${1:name};");
+    const items = getCompletions(file, tokens, pos(2, 2));
+    const po = items.find((i) => i.label === "ParentObject");
+    expect(po).toBeDefined();
+    expect(po!.insertText).toBe("ParentObject = ${1:name};");
   });
 
   it("nameParameter object → snippet with name placeholder", () => {

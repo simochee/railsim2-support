@@ -38,6 +38,7 @@ export interface RootObjectEntry {
   name: string;
   required: boolean;
   multiple: boolean;
+  schemaKey?: string; // ファイルコンテキスト依存の場合の lookup key
 }
 
 /** ファイル種別ごとのトップレベル構造 */
