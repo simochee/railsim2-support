@@ -181,6 +181,17 @@ describe("findContext", () => {
       expect(ctx.schemaKey).toBe("TrainInfo");
     }
   });
+
+  it("ネストした子オブジェクトの '{' 上 → 親の objectBody", () => {
+    const src = "TrainInfo {\n  Body {\n    \n  }\n}";
+    const { file, tokens } = setup(src);
+    // cursor on Body's '{' (line 1, char 7)
+    const ctx = findContext(file, tokens, pos(1, 7));
+    expect(ctx.type).toBe("objectBody");
+    if (ctx.type === "objectBody") {
+      expect(ctx.schemaKey).toBe("TrainInfo");
+    }
+  });
 });
 
 // =========================================================================
