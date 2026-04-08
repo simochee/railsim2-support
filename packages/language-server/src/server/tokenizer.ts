@@ -26,7 +26,13 @@ export function tokenize(source: string): Token[] {
     return ch;
   }
 
-  function makeToken(type: TokenType, value: string, startLine: number, startChar: number, startOffset: number): Token {
+  function makeToken(
+    type: TokenType,
+    value: string,
+    startLine: number,
+    startChar: number,
+    startOffset: number,
+  ): Token {
     return {
       type,
       value,

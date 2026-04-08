@@ -15,10 +15,7 @@ import { resolveSchemaKey } from "../../schema/schemaUtils.js";
  * AST + スキーマ + ファイル名から意味レベルのエラーを検出する。
  * fileName を省略するとルート検証をスキップする（後方互換）。
  */
-export function validateSchema(
-  file: FileNode,
-  fileName?: string,
-): Diagnostic[] {
+export function validateSchema(file: FileNode, fileName?: string): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
 
   // ── ルート検証 ──
@@ -38,11 +35,7 @@ export function validateSchema(
 // ルート検証
 // ---------------------------------------------------------------------------
 
-function validateRoot(
-  file: FileNode,
-  fileName: string,
-  diagnostics: Diagnostic[],
-): void {
+function validateRoot(file: FileNode, fileName: string, diagnostics: Diagnostic[]): void {
   const rootEntries = getFileSchema(fileName);
   if (!rootEntries) return;
 
@@ -273,9 +266,12 @@ function validatePropertyType(
 function getExpectedArity(schema: PropertySchema): number {
   if (schema.arity != null) return schema.arity;
   switch (schema.type) {
-    case "vector-2d": return 2;
-    case "vector-3d": return 3;
-    default: return 1;
+    case "vector-2d":
+      return 2;
+    case "vector-3d":
+      return 3;
+    default:
+      return 1;
   }
 }
 
@@ -362,7 +358,8 @@ function isIntegerCompatible(value: ExprNode): boolean {
     value.op === "-" &&
     value.operand.type === "number" &&
     Number.isInteger(value.operand.value)
-  ) return true;
+  )
+    return true;
   if (value.type === "binary") return true; // expression 扱い
   return false;
 }

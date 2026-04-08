@@ -60,9 +60,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(msgs(diags)).toContainEqual(
-      expect.stringContaining("Type mismatch"),
-    );
+    expect(msgs(diags)).toContainEqual(expect.stringContaining("Type mismatch"));
   });
 
   it("型不一致: float を string に → error", () => {
@@ -101,7 +99,9 @@ RailInfo {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning"),
+      diags.some(
+        (d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning",
+      ),
     ).toBe(true);
   });
 
@@ -159,7 +159,9 @@ TrainInfo {
 `;
     const diags = validate(src, "Rail2.txt");
     expect(
-      diags.some((d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo")),
+      diags.some(
+        (d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"),
+      ),
     ).toBe(true);
   });
 
@@ -174,7 +176,9 @@ PluginHeader {
 `;
     const diags = validate(src, "Rail2.txt");
     expect(
-      diags.some((d) => d.message.includes("Required root object 'RailInfo'") && d.severity === "warning"),
+      diags.some(
+        (d) => d.message.includes("Required root object 'RailInfo'") && d.severity === "warning",
+      ),
     ).toBe(true);
   });
 
@@ -196,9 +200,9 @@ PluginHeader {
 }
 `;
     const diags = validate(src, "Rail2.txt");
-    expect(
-      diags.some((d) => d.message.includes("Duplicate root object 'PluginHeader'")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("Duplicate root object 'PluginHeader'"))).toBe(
+      true,
+    );
   });
 
   // ================================================================
@@ -320,9 +324,9 @@ PluginHeader {
 }
 `;
     const diags = validate(src);
-    expect(
-      diags.some((d) => d.message.includes("PluginType") && d.message.includes("enum")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("PluginType") && d.message.includes("enum"))).toBe(
+      true,
+    );
   });
 
   // ================================================================
@@ -421,9 +425,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(
-      diags.some((d) => d.message.includes("Duplicate property 'Gauge'")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("Duplicate property 'Gauge'"))).toBe(true);
   });
 
   it("multiple=false の子オブジェクトが重複 → error", () => {
@@ -449,9 +451,7 @@ Body {
 }
 `;
     const diags = validate(src);
-    expect(
-      diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'"))).toBe(true);
   });
 
   // ================================================================
@@ -489,7 +489,9 @@ Body {
 }
 `;
     const diags = validate(src);
-    const dupFrontCabin = diags.filter((d) => d.message.includes("Duplicate child object 'FrontCabin'"));
+    const dupFrontCabin = diags.filter((d) =>
+      d.message.includes("Duplicate child object 'FrontCabin'"),
+    );
     expect(dupFrontCabin).toHaveLength(0);
   });
 
@@ -519,9 +521,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(
-      diags.some((d) => d.message.includes("Duplicate property 'Gauge'")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("Duplicate property 'Gauge'"))).toBe(true);
   });
 
   it("同一 Case 内の子オブジェクト重複は検出する", () => {
@@ -536,9 +536,7 @@ Body {
 }
 `;
     const diags = validate(src);
-    expect(
-      diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'")),
-    ).toBe(true);
+    expect(diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'"))).toBe(true);
   });
 
   it("RailInfo 内の DefineSwitch は有効な子オブジェクト", () => {
@@ -549,7 +547,9 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    const invalidChild = diags.filter((d) => d.message.includes("Invalid child object 'DefineSwitch'"));
+    const invalidChild = diags.filter((d) =>
+      d.message.includes("Invalid child object 'DefineSwitch'"),
+    );
     expect(invalidChild).toHaveLength(0);
   });
 });

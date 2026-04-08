@@ -1,7 +1,15 @@
 import type { Token, TokenType, Range, Position } from "../shared/tokens.js";
 import type {
-  FileNode, TopLevelNode, BodyNode, ObjectNode, PropertyNode,
-  IfNode, ApplySwitchNode, CaseNode, CommentNode, ExprNode,
+  FileNode,
+  TopLevelNode,
+  BodyNode,
+  ObjectNode,
+  PropertyNode,
+  IfNode,
+  ApplySwitchNode,
+  CaseNode,
+  CommentNode,
+  ExprNode,
 } from "../shared/ast.js";
 import type { Diagnostic, ParseResult } from "../shared/diagnostics.js";
 import { tokenize } from "./tokenizer.js";
@@ -16,11 +24,19 @@ const BINARY_PRECEDENCE: Record<string, number> = {
   "|": 10,
   "^": 9,
   "&": 8,
-  "==": 7, "!=": 7,
-  "<": 6, ">": 6, "<=": 6, ">=": 6,
-  "<<": 5, ">>": 5,
-  "+": 4, "-": 4,
-  "*": 3, "/": 3, "%": 3,
+  "==": 7,
+  "!=": 7,
+  "<": 6,
+  ">": 6,
+  "<=": 6,
+  ">=": 6,
+  "<<": 5,
+  ">>": 5,
+  "+": 4,
+  "-": 4,
+  "*": 3,
+  "/": 3,
+  "%": 3,
 };
 
 const BINARY_TOKEN_TO_OP: Partial<Record<TokenType, string>> = {
@@ -29,11 +45,19 @@ const BINARY_TOKEN_TO_OP: Partial<Record<TokenType, string>> = {
   pipe: "|",
   caret: "^",
   ampersand: "&",
-  equalsEquals: "==", bangEquals: "!=",
-  less: "<", greater: ">", lessEquals: "<=", greaterEquals: ">=",
-  lessLess: "<<", greaterGreater: ">>",
-  plus: "+", minus: "-",
-  star: "*", slash: "/", percent: "%",
+  equalsEquals: "==",
+  bangEquals: "!=",
+  less: "<",
+  greater: ">",
+  lessEquals: "<=",
+  greaterEquals: ">=",
+  lessLess: "<<",
+  greaterGreater: ">>",
+  plus: "+",
+  minus: "-",
+  star: "*",
+  slash: "/",
+  percent: "%",
 };
 
 const UNARY_TOKEN_TO_OP: Partial<Record<TokenType, string>> = {
@@ -126,8 +150,13 @@ export function parse(source: string): ParseResult {
   function synchronize(): void {
     while (!check("eof")) {
       const t = peek();
-      if (t.type === "semicolon") { advance(); return; }
-      if (t.type === "rbrace") { return; }
+      if (t.type === "semicolon") {
+        advance();
+        return;
+      }
+      if (t.type === "rbrace") {
+        return;
+      }
       if (t.type === "identifier") {
         const v = t.value;
         if (v === "Case" || v === "Default" || v === "Else") return;
@@ -207,9 +236,7 @@ export function parse(source: string): ParseResult {
       advance();
       // Strip surrounding quotes for value
       const raw = t.value;
-      const inner = raw.startsWith('"') && raw.endsWith('"')
-        ? raw.slice(1, -1)
-        : raw;
+      const inner = raw.startsWith('"') && raw.endsWith('"') ? raw.slice(1, -1) : raw;
       return { type: "string", value: inner, range: rangeOf(t) };
     }
 
@@ -328,7 +355,12 @@ export function parse(source: string): ParseResult {
     const args: ExprNode[] = [];
     while (!check("lbrace") && !check("eof")) {
       const t = peek();
-      if (t.type === "string" || t.type === "number" || t.type === "identifier" || t.type === "color") {
+      if (
+        t.type === "string" ||
+        t.type === "number" ||
+        t.type === "identifier" ||
+        t.type === "color"
+      ) {
         args.push(parsePrimary());
       } else {
         break;
@@ -338,9 +370,7 @@ export function parse(source: string): ParseResult {
     expect("lbrace", "Expected '{'");
     const body = parseBody();
     const closeBrace = expect("rbrace", "Expected '}'");
-    const endPos = closeBrace.length > 0
-      ? endOf(closeBrace)
-      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
+    const endPos = closeBrace.length > 0 ? endOf(closeBrace) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "object",
@@ -415,7 +445,11 @@ export function parse(source: string): ParseResult {
       } catch {
         synchronize();
         return {
-          type: "property", name, values, range: rangeSpan(startPos, endOf(tokens[pos - 1] ?? nameToken)), nameRange,
+          type: "property",
+          name,
+          values,
+          range: rangeSpan(startPos, endOf(tokens[pos - 1] ?? nameToken)),
+          nameRange,
         };
       }
 
@@ -432,7 +466,12 @@ export function parse(source: string): ParseResult {
     }
 
     const semi = expect("semicolon", "Expected ';'");
-    const endPos = semi.length > 0 ? endOf(semi) : (values.length > 0 ? values[values.length - 1].range.end : endOf(tokens[pos - 1] ?? nameToken));
+    const endPos =
+      semi.length > 0
+        ? endOf(semi)
+        : values.length > 0
+          ? values[values.length - 1].range.end
+          : endOf(tokens[pos - 1] ?? nameToken);
 
     return {
       type: "property",
@@ -462,9 +501,7 @@ export function parse(source: string): ParseResult {
       lastBrace = expect("rbrace", "Expected '}'");
     }
 
-    const endPos = lastBrace.length > 0
-      ? endOf(lastBrace)
-      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
+    const endPos = lastBrace.length > 0 ? endOf(lastBrace) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "if",
@@ -503,9 +540,7 @@ export function parse(source: string): ParseResult {
     }
 
     const closeBraceAS = expect("rbrace", "Expected '}'");
-    const endPos = closeBraceAS.length > 0
-      ? endOf(closeBraceAS)
-      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
+    const endPos = closeBraceAS.length > 0 ? endOf(closeBraceAS) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "applySwitch",
@@ -530,7 +565,8 @@ export function parse(source: string): ParseResult {
     expect("colon", "Expected ':'");
 
     const body = parseBody(true);
-    const endPos = body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
+    const endPos =
+      body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
 
     return {
       type: "case",

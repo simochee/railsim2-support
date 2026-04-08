@@ -1,20 +1,30 @@
-import type {
-  SemanticSchema,
-  FileSchema,
-  RootObjectEntry,
-  ObjectSchema,
-  PropertyType,
-} from "./schemaTypes.js";
+import type { SemanticSchema, FileSchema, RootObjectEntry, PropertyType } from "./schemaTypes.js";
 
 // ---------------------------------------------------------------------------
 // Helper — 頻出パターンの短縮記法
 // ---------------------------------------------------------------------------
 
-const req = (type: PropertyType, opts?: Partial<{ multiple: boolean; arity: number; enumValues: string[] }>) =>
-  ({ type, required: true as const, multiple: opts?.multiple ?? false, arity: opts?.arity, enumValues: opts?.enumValues });
+const req = (
+  type: PropertyType,
+  opts?: Partial<{ multiple: boolean; arity: number; enumValues: string[] }>,
+) => ({
+  type,
+  required: true as const,
+  multiple: opts?.multiple ?? false,
+  arity: opts?.arity,
+  enumValues: opts?.enumValues,
+});
 
-const opt = (type: PropertyType, opts?: Partial<{ multiple: boolean; arity: number; enumValues: string[] }>) =>
-  ({ type, required: false as const, multiple: opts?.multiple ?? false, arity: opts?.arity, enumValues: opts?.enumValues });
+const opt = (
+  type: PropertyType,
+  opts?: Partial<{ multiple: boolean; arity: number; enumValues: string[] }>,
+) => ({
+  type,
+  required: false as const,
+  multiple: opts?.multiple ?? false,
+  arity: opts?.arity,
+  enumValues: opts?.enumValues,
+});
 
 const child = (required: boolean, multiple: boolean, schemaKey?: string) =>
   ({ required, multiple, schemaKey }) as const;
@@ -28,7 +38,22 @@ export const semanticSchema: SemanticSchema = {
   PluginHeader: {
     properties: {
       RailSimVersion: req("string"),
-      PluginType: req("enum", { enumValues: ["Rail", "Tie", "Girder", "Pier", "Line", "Pole", "Train", "Station", "Struct", "Surface", "Env", "Skin"] }),
+      PluginType: req("enum", {
+        enumValues: [
+          "Rail",
+          "Tie",
+          "Girder",
+          "Pier",
+          "Line",
+          "Pole",
+          "Train",
+          "Station",
+          "Struct",
+          "Surface",
+          "Env",
+          "Skin",
+        ],
+      }),
       PluginName: req("string"),
       PluginAuthor: req("string"),
       Description: opt("string"),
@@ -503,16 +528,19 @@ export const semanticSchema: SemanticSchema = {
   // ===== Skin2.txt 関連 =====
   ...Object.fromEntries(
     ["NormalCursor", "ResizeCursor1", "ResizeCursor2", "ResizeCursor3", "ResizeCursor4"].map(
-      (name) => [name, {
-        properties: {
-          Cursor2DSize: opt("vector-2d"),
-          Cursor2DHotSpot: opt("vector-2d"),
-          Cursor2DAnimNumber: opt("integer"),
-          Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-          TexFileName: opt("filename"),
+      (name) => [
+        name,
+        {
+          properties: {
+            Cursor2DSize: opt("vector-2d"),
+            Cursor2DHotSpot: opt("vector-2d"),
+            Cursor2DAnimNumber: opt("integer"),
+            Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
+            TexFileName: opt("filename"),
+          },
+          children: {},
         },
-        children: {},
-      }],
+      ],
     ),
   ),
 

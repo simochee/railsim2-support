@@ -1,0 +1,12 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "warn"
+    },
+    "rules": {
+        "typescript/array-type": ["error", { "default": "array", "readonly": "array" }]
+    },
+    "ignorePatterns": ["out/", "dist/", "node_modules/", "vendor/", "docs-site/", "*.generated.ts"]
+}

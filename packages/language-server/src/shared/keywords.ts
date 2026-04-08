@@ -65,20 +65,13 @@ export const OBJECT_NAMES: readonly string[] = deriveObjectNames();
 // Control keywords (keyword.control)
 // ---------------------------------------------------------------------------
 
-export const CONTROL_KEYWORDS = [
-  "ApplySwitch",
-  "Else",
-  "If",
-] as const satisfies readonly string[];
+export const CONTROL_KEYWORDS = ["ApplySwitch", "Else", "If"] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
 // Case keywords (keyword.control.switch)
 // ---------------------------------------------------------------------------
 
-export const CASE_KEYWORDS = [
-  "Case",
-  "Default",
-] as const satisfies readonly string[];
+export const CASE_KEYWORDS = ["Case", "Default"] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
 // Property names (variable.parameter.property)
@@ -106,13 +99,7 @@ export const CONSTANT_SET: ReadonlySet<string> = new Set(CONSTANTS);
 // Classifier
 // ---------------------------------------------------------------------------
 
-export type IdentifierKind =
-  | "object"
-  | "control"
-  | "case"
-  | "property"
-  | "constant"
-  | "unknown";
+export type IdentifierKind = "object" | "control" | "case" | "property" | "constant" | "unknown";
 
 export function classifyIdentifier(name: string): IdentifierKind {
   if (OBJECT_NAME_SET.has(name)) return "object";

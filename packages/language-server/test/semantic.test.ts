@@ -41,9 +41,18 @@ describe("semanticSchema", () => {
 
 describe("fileSchemas", () => {
   const expectedFiles = [
-    "Rail2.txt", "Tie2.txt", "Girder2.txt", "Pier2.txt",
-    "Line2.txt", "Pole2.txt", "Train2.txt", "Station2.txt",
-    "Struct2.txt", "Surface2.txt", "Env2.txt", "Skin2.txt",
+    "Rail2.txt",
+    "Tie2.txt",
+    "Girder2.txt",
+    "Pier2.txt",
+    "Line2.txt",
+    "Pole2.txt",
+    "Train2.txt",
+    "Station2.txt",
+    "Struct2.txt",
+    "Surface2.txt",
+    "Env2.txt",
+    "Skin2.txt",
   ];
 
   it("12ファイル分の定義が存在する", () => {
@@ -81,4 +90,3 @@ describe("getFileSchema", () => {
     expect(getFileSchema("Unknown.txt")).toBeUndefined();
   });
 });
-

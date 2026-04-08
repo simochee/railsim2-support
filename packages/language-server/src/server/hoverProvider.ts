@@ -1,15 +1,12 @@
 import type { Hover, Position } from "vscode-languageserver/node";
 import { MarkupKind } from "vscode-languageserver/node";
-import type { FileNode, ObjectNode, PropertyNode, BodyNode, TopLevelNode } from "../shared/ast.js";
+import type { FileNode, BodyNode, TopLevelNode } from "../shared/ast.js";
 import { getObjectDoc, getPropertyDoc } from "./hoverData.generated.js";
 
 /**
  * Find the AST node at the given cursor position and return hover info.
  */
-export function getHover(
-  file: FileNode,
-  position: Position
-): Hover | null {
+export function getHover(file: FileNode, position: Position): Hover | null {
   // Walk the AST to find what's at the cursor
   const result = findNodeAt(file.body, position);
   if (!result) return null;
@@ -34,9 +31,7 @@ export function getHover(
       : undefined;
 
     // Also try to get the object doc for a help link
-    const objDoc = result.parentObject
-      ? getObjectDoc(result.parentObject)
-      : undefined;
+    const objDoc = result.parentObject ? getObjectDoc(result.parentObject) : undefined;
 
     const lines = [`**${result.name}**`];
     if (propDoc?.description) lines.push("", propDoc.description);
@@ -67,7 +62,7 @@ function containsPosition(range: { start: Position; end: Position }, pos: Positi
 function findNodeAt(
   nodes: (TopLevelNode | BodyNode)[],
   pos: Position,
-  parentObjectName: string | null = null
+  parentObjectName: string | null = null,
 ): HoverTarget | null {
   for (const node of nodes) {
     if (!containsPosition(node.range, pos)) continue;

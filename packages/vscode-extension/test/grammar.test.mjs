@@ -11,9 +11,7 @@ const GRAMMAR_PATH = join(ROOT, "syntaxes/railsim2.tmLanguage.json");
 let grammar;
 
 beforeAll(async () => {
-  const wasmBin = readFileSync(
-    join(ROOT, "node_modules/vscode-oniguruma/release/onig.wasm")
-  );
+  const wasmBin = readFileSync(join(ROOT, "node_modules/vscode-oniguruma/release/onig.wasm"));
   await loadWASM(wasmBin.buffer);
 
   const registry = new Registry({
@@ -49,7 +47,7 @@ function expectScope(tokens, text, scopeFragment) {
   const hasScope = token.scopes.some((s) => s.includes(scopeFragment));
   expect(
     hasScope,
-    `Token "${text}" should have scope containing "${scopeFragment}", got: ${token.scopes.join(", ")}`
+    `Token "${text}" should have scope containing "${scopeFragment}", got: ${token.scopes.join(", ")}`,
   ).toBe(true);
 }
 
@@ -285,7 +283,7 @@ describe("operators", () => {
       const hasScope = opToken.scopes.some((s) => s.includes("keyword.operator"));
       expect(
         hasScope,
-        `Operator "${op}" should have keyword.operator scope, got: ${opToken.scopes.join(", ")}`
+        `Operator "${op}" should have keyword.operator scope, got: ${opToken.scopes.join(", ")}`,
       ).toBe(true);
     });
   }

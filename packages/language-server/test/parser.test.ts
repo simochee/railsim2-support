@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { parse } from "../src/server/parser.js";
-import type {
-  ObjectNode, PropertyNode, IfNode, ApplySwitchNode, ExprNode,
-} from "../src/shared/ast.js";
+import type { ObjectNode, PropertyNode, IfNode, ApplySwitchNode } from "../src/shared/ast.js";
 
 describe("parser", () => {
   // Basics
@@ -24,7 +22,7 @@ describe("parser", () => {
     expect(obj.body).toHaveLength(0);
   });
 
-  it("should parse object with string argument: Object3D \"main\" { }", () => {
+  it('should parse object with string argument: Object3D "main" { }', () => {
     const { file, diagnostics } = parse('Object3D "main" { }');
     expect(diagnostics).toHaveLength(0);
     const obj = file.body[0] as ObjectNode;
@@ -66,9 +64,9 @@ describe("parser", () => {
     const { file, diagnostics } = parse("// top comment\nBody { // inner\n}");
     expect(diagnostics).toHaveLength(0);
     // Comments are stored as CommentNode in the file body
-    const comments = file.body.filter(n => n.type === "comment");
+    const comments = file.body.filter((n) => n.type === "comment");
     expect(comments.length).toBe(2);
-    const objects = file.body.filter(n => n.type === "object");
+    const objects = file.body.filter((n) => n.type === "object");
     expect(objects.length).toBe(1);
   });
 
@@ -96,7 +94,9 @@ describe("parser", () => {
 
   // ApplySwitch — verify exact AST shape
   it("should parse ApplySwitch with Case/Default", () => {
-    const { file, diagnostics } = parse('ApplySwitch "_FRONT" { Case 0: Coord = 0; Case 1: Coord = 1; Default: Coord = 2; }');
+    const { file, diagnostics } = parse(
+      'ApplySwitch "_FRONT" { Case 0: Coord = 0; Case 1: Coord = 1; Default: Coord = 2; }',
+    );
     expect(diagnostics).toHaveLength(0);
     const node = file.body[0] as ApplySwitchNode;
     expect(node.type).toBe("applySwitch");
@@ -191,9 +191,9 @@ describe("parser", () => {
     expect(diagnostics.length).toBeGreaterThan(0);
     // Should still parse the second property
     const obj = file.body[0] as ObjectNode;
-    const props = obj.body.filter(n => n.type === "property") as PropertyNode[];
+    const props = obj.body.filter((n) => n.type === "property") as PropertyNode[];
     // At least Height should be parsed
-    const heightProp = props.find(p => p.name === "Height");
+    const heightProp = props.find((p) => p.name === "Height");
     expect(heightProp).toBeDefined();
     if (heightProp) {
       expect(heightProp.values).toHaveLength(1);
@@ -248,7 +248,7 @@ ApplySwitch "_FRONT" {
     expect(diagnostics).toHaveLength(0);
 
     // Filter out comments
-    const nonComments = file.body.filter(n => n.type !== "comment");
+    const nonComments = file.body.filter((n) => n.type !== "comment");
     expect(nonComments).toHaveLength(3); // PluginHeader, Body, ApplySwitch
 
     const header = nonComments[0] as ObjectNode;

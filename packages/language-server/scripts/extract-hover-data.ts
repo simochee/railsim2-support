@@ -17,14 +17,10 @@ import iconv from "iconv-lite";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const HELP_SRC = resolve(
-  __dirname,
-  "../vendor/railsim2/Distribution/jp/RailSim2/Help"
-);
+const HELP_SRC = resolve(__dirname, "../vendor/railsim2/Distribution/jp/RailSim2/Help");
 const OUTPUT = resolve(__dirname, "../src/server/hoverData.generated.ts");
 
-const DOCS_BASE_URL =
-  "https://lollipop-onl.github.io/vscode-railsim-grammer/help";
+const DOCS_BASE_URL = "https://lollipop-onl.github.io/vscode-railsim-grammer/help";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -48,10 +44,7 @@ function stripHtml(html: string): string {
 
 /** Extract text content after a <h2> matching the given title, up to the next <h2> or </div> */
 function extractSection(html: string, title: string): string | null {
-  const regex = new RegExp(
-    `<h2[^>]*>${title}</h2>\\s*<p[^>]*>([\\s\\S]*?)</p>`,
-    "i"
-  );
+  const regex = new RegExp(`<h2[^>]*>${title}</h2>\\s*<p[^>]*>([\\s\\S]*?)</p>`, "i");
   const m = html.match(regex);
   return m ? stripHtml(m[1]) : null;
 }
@@ -223,7 +216,7 @@ function main() {
 
   // 2. Process symbol pages (pi_sym_*.html) — extract descriptions and merge properties
   const symFiles = readdirSync(HELP_SRC).filter(
-    (f) => f.startsWith("pi_sym_") && f.endsWith(".html")
+    (f) => f.startsWith("pi_sym_") && f.endsWith(".html"),
   );
 
   for (const filename of symFiles) {
@@ -232,10 +225,6 @@ function main() {
     const overview = extractSection(html, "概要");
     const props = extractPropertyDocs(html);
     const helpUrl = `${DOCS_BASE_URL}/${filename}`;
-
-    // Extract the symbol name from <h1>
-    const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
-    const symbolName = h1Match ? stripHtml(h1Match[1]) : filename;
 
     // Store as symbol doc
     symbolDocs[filename.replace(".html", "")] = {
@@ -297,16 +286,13 @@ export const objectDocs: Record<string, ObjectDoc> = ${JSON.stringify(
           description: doc.description,
           helpUrl: doc.helpUrl,
           properties: Object.fromEntries(
-            Object.entries(doc.properties).map(([prop, desc]) => [
-              prop,
-              { description: desc },
-            ])
+            Object.entries(doc.properties).map(([prop, desc]) => [prop, { description: desc }]),
           ),
         },
-      ])
+      ]),
     ),
     null,
-    2
+    2,
   )};
 
 /** Lookup property documentation in context of an object */
@@ -329,11 +315,9 @@ export function getObjectDoc(objectName: string): ObjectDoc | undefined {
   const objCount = Object.keys(objectDocs).length;
   const propCount = Object.values(objectDocs).reduce(
     (sum, o) => sum + Object.keys(o.properties).length,
-    0
+    0,
   );
-  console.log(
-    `Generated hover data: ${objCount} objects, ${propCount} properties → ${OUTPUT}`
-  );
+  console.log(`Generated hover data: ${objCount} objects, ${propCount} properties → ${OUTPUT}`);
 }
 
 main();

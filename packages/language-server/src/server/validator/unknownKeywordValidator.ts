@@ -1,4 +1,12 @@
-import type { FileNode, ObjectNode, PropertyNode, BodyNode, IfNode, ApplySwitchNode, CaseNode } from "../../shared/ast.js";
+import type {
+  FileNode,
+  ObjectNode,
+  PropertyNode,
+  BodyNode,
+  IfNode,
+  ApplySwitchNode,
+  CaseNode,
+} from "../../shared/ast.js";
 import type { Diagnostic } from "../../shared/diagnostics.js";
 import { OBJECT_NAME_SET, CONTROL_KEYWORD_SET, PROPERTY_NAME_SET } from "../../shared/keywords.js";
 

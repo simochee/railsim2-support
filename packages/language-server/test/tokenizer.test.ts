@@ -8,7 +8,7 @@ function types(tokens: Token[]): TokenType[] {
 }
 
 /** Helper: extract types and values */
-function typesAndValues(tokens: Token[]): Array<[TokenType, string]> {
+function typesAndValues(tokens: Token[]): [TokenType, string][] {
   return tokens.map((t) => [t.type, t.value]);
 }
 
@@ -141,8 +141,14 @@ describe("tokenizer", () => {
     it("tokenizes braces, parens, semicolon, comma, equals, colon", () => {
       const tokens = tokenize("{ } ( ) ; , = :");
       expect(types(tokens)).toEqual([
-        "lbrace", "rbrace", "lparen", "rparen",
-        "semicolon", "comma", "equals", "colon",
+        "lbrace",
+        "rbrace",
+        "lparen",
+        "rparen",
+        "semicolon",
+        "comma",
+        "equals",
+        "colon",
         "eof",
       ]);
     });
@@ -189,9 +195,7 @@ describe("tokenizer", () => {
   describe("single-char operators", () => {
     it("tokenizes arithmetic operators", () => {
       const tokens = tokenize("+ - * / %");
-      expect(types(tokens)).toEqual([
-        "plus", "minus", "star", "slash", "percent", "eof",
-      ]);
+      expect(types(tokens)).toEqual(["plus", "minus", "star", "slash", "percent", "eof"]);
     });
 
     it("tokenizes comparison operators", () => {
@@ -201,9 +205,7 @@ describe("tokenizer", () => {
 
     it("tokenizes bitwise operators", () => {
       const tokens = tokenize("& ^ | ! ~");
-      expect(types(tokens)).toEqual([
-        "ampersand", "caret", "pipe", "bang", "tilde", "eof",
-      ]);
+      expect(types(tokens)).toEqual(["ampersand", "caret", "pipe", "bang", "tilde", "eof"]);
     });
   });
 
@@ -251,9 +253,9 @@ describe("tokenizer", () => {
 
     it("tracks length correctly", () => {
       const tokens = tokenize("hello 123 3.14");
-      expect(tokens[0].length).toBe(5);  // "hello"
-      expect(tokens[1].length).toBe(3);  // "123"
-      expect(tokens[2].length).toBe(4);  // "3.14"
+      expect(tokens[0].length).toBe(5); // "hello"
+      expect(tokens[1].length).toBe(3); // "123"
+      expect(tokens[2].length).toBe(4); // "3.14"
     });
   });
 

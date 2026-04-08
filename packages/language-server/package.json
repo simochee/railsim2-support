@@ -3,11 +3,6 @@
   "version": "0.1.0",
   "description": "Language Server for RailSim II plugin definition files",
   "license": "MIT",
-  "exports": {
-    "./node": "./out/server/server.js",
-    "./keywords": "./out/shared/keywords.js",
-    "./schema": "./out/schema/semantic.js"
-  },
   "bin": {
     "railsim2-language-server": "./bin/railsim2-language-server.cjs"
   },
@@ -15,6 +10,11 @@
     "out",
     "bin"
   ],
+  "exports": {
+    "./node": "./out/server/server.js",
+    "./keywords": "./out/shared/keywords.js",
+    "./schema": "./out/schema/semantic.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",

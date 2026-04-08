@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  findContext,
-  getCompletions,
-} from "../src/server/completionProvider.js";
+import { findContext, getCompletions } from "../src/server/completionProvider.js";
 import { parse } from "../src/server/parser.js";
 import { tokenize } from "../src/server/tokenizer.js";
 import type { Position } from "../src/shared/tokens.js";
@@ -115,8 +112,7 @@ describe("findContext", () => {
   });
 
   it("inside If block within object → objectBody of enclosing object", () => {
-    const src =
-      'RailInfo {\n  If (1) {\n    \n  }\n}';
+    const src = "RailInfo {\n  If (1) {\n    \n  }\n}";
     const { file, tokens } = setup(src);
     // Inside the If block body — should still resolve to RailInfo objectBody
     // because If doesn't change the context
@@ -155,7 +151,7 @@ describe("findContext", () => {
   });
 
   it("nameParameter 引数の上 → root (ヘッダ領域)", () => {
-    const src = 'DefineSwitch foo {\n  \n}';
+    const src = "DefineSwitch foo {\n  \n}";
     const { file, tokens } = setup(src);
     // cursor on "foo" (line 0, char 14)
     const ctx = findContext(file, tokens, pos(0, 14));
@@ -270,7 +266,7 @@ describe("getCompletions", () => {
 
   it("Body inside TrainInfo with existing FrontCabin → FrontCabin excluded", () => {
     const src =
-      "TrainInfo {\n  Body {\n    ModelFileName = \"test.x\";\n    FrontCabin {\n    }\n    \n  }\n}";
+      'TrainInfo {\n  Body {\n    ModelFileName = "test.x";\n    FrontCabin {\n    }\n    \n  }\n}';
     const { file, tokens } = setup(src);
     // Inside Body, after existing FrontCabin
     const items = getCompletions(file, tokens, pos(5, 4), "Train2.txt");
@@ -291,7 +287,7 @@ describe("getCompletions", () => {
     expect(gauge!.insertTextFormat).toBe(InsertTextFormat.Snippet);
   });
 
-  it("filename property → = \"${1}\";", () => {
+  it('filename property → = "${1}";', () => {
     const src = "RailInfo {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
@@ -310,7 +306,8 @@ describe("getCompletions", () => {
   });
 
   it("vector-3d property → 3 placeholders", () => {
-    const src = "TrainInfo {\n  Body {\n    ModelFileName = \"t.x\";\n    Headlight {\n      \n    }\n  }\n}";
+    const src =
+      'TrainInfo {\n  Body {\n    ModelFileName = "t.x";\n    Headlight {\n      \n    }\n  }\n}';
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(4, 6), "Train2.txt");
     const coord = items.find((i) => i.label === "Coord");

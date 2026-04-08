@@ -85,12 +85,9 @@ describe("CASE_KEYWORDS", () => {
 // ---------------------------------------------------------------------------
 
 describe("PROPERTY_NAMES", () => {
-  it.each(["Coord", "ModelFileName", "Acceleration", "Gravity"])(
-    "contains %s",
-    (name) => {
-      expect(PROPERTY_NAMES).toContain(name);
-    },
-  );
+  it.each(["Coord", "ModelFileName", "Acceleration", "Gravity"])("contains %s", (name) => {
+    expect(PROPERTY_NAMES).toContain(name);
+  });
 
   it("is alphabetically sorted", () => {
     expect(isSorted(PROPERTY_NAMES)).toBe(true);

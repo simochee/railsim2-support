@@ -7,7 +7,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "out"],
-  "references": [
-    { "path": "../language-server" }
-  ]
+  "references": [{ "path": "../language-server" }]
 }

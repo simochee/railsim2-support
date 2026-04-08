@@ -4,32 +4,43 @@ export type FileNode = { type: "file"; body: TopLevelNode[]; range: Range };
 export type TopLevelNode = ObjectNode | IfNode | ApplySwitchNode | CommentNode;
 
 export type ObjectNode = {
-  type: "object"; name: string; args: ExprNode[];
+  type: "object";
+  name: string;
+  args: ExprNode[];
   body: BodyNode[];
-  range: Range; nameRange: Range;
+  range: Range;
+  nameRange: Range;
 };
 
 export type BodyNode = ObjectNode | PropertyNode | IfNode | ApplySwitchNode | CommentNode;
 
 export type PropertyNode = {
-  type: "property"; name: string; values: ExprNode[];
-  range: Range; nameRange: Range;
+  type: "property";
+  name: string;
+  values: ExprNode[];
+  range: Range;
+  nameRange: Range;
 };
 
 export type IfNode = {
-  type: "if"; condition: ExprNode;
-  then: BodyNode[]; else_?: BodyNode[];
+  type: "if";
+  condition: ExprNode;
+  then: BodyNode[];
+  else_?: BodyNode[];
   range: Range;
 };
 
 export type ApplySwitchNode = {
-  type: "applySwitch"; switchName: ExprNode;
-  cases: CaseNode[]; default_?: BodyNode[];
+  type: "applySwitch";
+  switchName: ExprNode;
+  cases: CaseNode[];
+  default_?: BodyNode[];
   range: Range;
 };
 
 export type CaseNode = {
-  type: "case"; values: ExprNode[];
+  type: "case";
+  values: ExprNode[];
   body: BodyNode[];
   range: Range;
 };

@@ -31,7 +31,7 @@ describe("unknown keyword validator", () => {
   });
 
   it("should not warn for control keywords (If, ApplySwitch)", () => {
-    const { file } = parse('Body { If 1 { Coord = 0; } }');
+    const { file } = parse("Body { If 1 { Coord = 0; } }");
     const diags = validateUnknownKeywords(file);
     expect(diags).toHaveLength(0);
   });
@@ -46,12 +46,12 @@ describe("unknown keyword validator", () => {
   it("should validate inside If/Else bodies", () => {
     const { file } = parse("Body { If 1 { BadProp = 0; } }");
     const diags = validateUnknownKeywords(file);
-    expect(diags.some(d => d.message.includes("BadProp"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("BadProp"))).toBe(true);
   });
 
   it("should validate inside ApplySwitch Case bodies", () => {
     const { file } = parse('ApplySwitch "_X" { Case 0: BadProp = 1; }');
     const diags = validateUnknownKeywords(file);
-    expect(diags.some(d => d.message.includes("BadProp"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("BadProp"))).toBe(true);
   });
 });

@@ -84,10 +84,14 @@ export function toLspRange(range: Range) {
 
 export function toLspSeverity(severity: string): LspSeverity {
   switch (severity) {
-    case "error": return LspSeverity.Error;
-    case "warning": return LspSeverity.Warning;
-    case "info": return LspSeverity.Information;
-    default: return LspSeverity.Error;
+    case "error":
+      return LspSeverity.Error;
+    case "warning":
+      return LspSeverity.Warning;
+    case "info":
+      return LspSeverity.Information;
+    default:
+      return LspSeverity.Error;
   }
 }
 

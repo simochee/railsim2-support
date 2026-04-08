@@ -1,9 +1,6 @@
 import { semanticSchema } from "./semantic.js";
 
-export function resolveSchemaKey(
-  nodeName: string,
-  parentSchemaKey: string | undefined,
-): string {
+export function resolveSchemaKey(nodeName: string, parentSchemaKey: string | undefined): string {
   if (parentSchemaKey) {
     const parentSchema = semanticSchema[parentSchemaKey];
     if (parentSchema) {

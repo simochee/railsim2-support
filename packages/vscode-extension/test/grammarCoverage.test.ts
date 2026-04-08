@@ -83,10 +83,7 @@ describe("Grammar coverage — properties", () => {
   it("every schema property should be present in Grammar", () => {
     for (const obj of Object.values(semanticSchema)) {
       for (const prop of Object.keys(obj.properties)) {
-        expect(
-          grammarPropertyNames,
-          `Missing schema property: ${prop}`,
-        ).toContain(prop);
+        expect(grammarPropertyNames, `Missing schema property: ${prop}`).toContain(prop);
       }
     }
   });
@@ -99,8 +96,18 @@ describe("Grammar coverage — constants", () => {
 
   it("should include all PluginType enum values", () => {
     const pluginTypes = [
-      "Rail", "Tie", "Girder", "Pier", "Line", "Pole",
-      "Train", "Station", "Struct", "Surface", "Env", "Skin",
+      "Rail",
+      "Tie",
+      "Girder",
+      "Pier",
+      "Line",
+      "Pole",
+      "Train",
+      "Station",
+      "Struct",
+      "Surface",
+      "Env",
+      "Skin",
     ];
     for (const pt of pluginTypes) {
       expect(grammarConstants).toContain(pt);

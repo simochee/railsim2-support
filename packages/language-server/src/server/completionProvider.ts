@@ -1,20 +1,7 @@
-import {
-  CompletionItem,
-  CompletionItemKind,
-  InsertTextFormat,
-} from "vscode-languageserver/node";
+import { CompletionItem, CompletionItemKind, InsertTextFormat } from "vscode-languageserver/node";
 import type { Token, Position } from "../shared/tokens.js";
-import type {
-  FileNode,
-  ObjectNode,
-  BodyNode,
-  TopLevelNode,
-} from "../shared/ast.js";
-import type {
-  PropertySchema,
-  ChildSchema,
-  ObjectSchema,
-} from "../schema/schemaTypes.js";
+import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast.js";
+import type { PropertySchema } from "../schema/schemaTypes.js";
 import { semanticSchema, getFileSchema } from "../schema/semantic.js";
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
 
@@ -78,11 +65,7 @@ export function findContext(
 ): CompletionContext {
   // 1. Suppression: inside comment or string token
   for (const tok of tokens) {
-    if (
-      tok.type === "lineComment" ||
-      tok.type === "blockComment" ||
-      tok.type === "string"
-    ) {
+    if (tok.type === "lineComment" || tok.type === "blockComment" || tok.type === "string") {
       const start = tokenStartPos(tok);
       const end = tokenEndPos(tok);
       // cursor at or after start, before end
@@ -96,9 +79,7 @@ export function findContext(
 
   // 2. Property value check: after = and before ;/{/}
   // Filter to code tokens only (no comments)
-  const codeTokens = tokens.filter(
-    (t) => t.type !== "lineComment" && t.type !== "blockComment",
-  );
+  const codeTokens = tokens.filter((t) => t.type !== "lineComment" && t.type !== "blockComment");
 
   let lastEqualsPos: Position | null = null;
   let lastDelimPos: Position | null = null;
@@ -109,11 +90,7 @@ export function findContext(
     if (tok.type === "equals") {
       lastEqualsPos = start;
     }
-    if (
-      tok.type === "semicolon" ||
-      tok.type === "lbrace" ||
-      tok.type === "rbrace"
-    ) {
+    if (tok.type === "semicolon" || tok.type === "lbrace" || tok.type === "rbrace") {
       lastDelimPos = start;
     }
   }
@@ -163,13 +140,7 @@ function findInnermostObject(
       const newChain = [...parentChain, schemaKey];
 
       // Search deeper into this object's body
-      const deeper = findInnermostObject(
-        node.body,
-        position,
-        newChain,
-        schemaKey,
-        codeTokens,
-      );
+      const deeper = findInnermostObject(node.body, position, newChain, schemaKey, codeTokens);
       if (deeper) return deeper;
 
       // This object is the innermost
@@ -178,12 +149,20 @@ function findInnermostObject(
 
     if (node.type === "if") {
       const inThen = findInnermostObject(
-        node.then, position, parentChain, parentSchemaKey, codeTokens,
+        node.then,
+        position,
+        parentChain,
+        parentSchemaKey,
+        codeTokens,
       );
       if (inThen) return inThen;
       if (node.else_) {
         const inElse = findInnermostObject(
-          node.else_, position, parentChain, parentSchemaKey, codeTokens,
+          node.else_,
+          position,
+          parentChain,
+          parentSchemaKey,
+          codeTokens,
         );
         if (inElse) return inElse;
       }
@@ -193,14 +172,22 @@ function findInnermostObject(
       for (const c of node.cases) {
         if (rangeContains(c.range, position)) {
           const inCase = findInnermostObject(
-            c.body, position, parentChain, parentSchemaKey, codeTokens,
+            c.body,
+            position,
+            parentChain,
+            parentSchemaKey,
+            codeTokens,
           );
           if (inCase) return inCase;
         }
       }
       if (node.default_) {
         const inDefault = findInnermostObject(
-          node.default_, position, parentChain, parentSchemaKey, codeTokens,
+          node.default_,
+          position,
+          parentChain,
+          parentSchemaKey,
+          codeTokens,
         );
         if (inDefault) return inDefault;
       }
@@ -210,23 +197,19 @@ function findInnermostObject(
 }
 
 /** Check if position is in the object header area (name, args, or on '{') */
-function isInObjectHeader(
-  node: ObjectNode,
-  position: Position,
-  codeTokens?: Token[],
-): boolean {
+function isInObjectHeader(node: ObjectNode, position: Position, codeTokens?: Token[]): boolean {
   // Fast check: cursor on or before name/args end
-  const argsEnd = node.args.length > 0
-    ? node.args[node.args.length - 1].range.end
-    : node.nameRange.end;
+  const argsEnd =
+    node.args.length > 0 ? node.args[node.args.length - 1].range.end : node.nameRange.end;
   if (posLE(position, argsEnd)) return true;
 
   // Check if cursor is on or before the opening '{' using token list
   if (codeTokens) {
     const lbrace = codeTokens.find(
-      (t) => t.type === "lbrace"
-        && posLE(argsEnd, tokenStartPos(t))
-        && rangeContains(node.range, tokenStartPos(t)),
+      (t) =>
+        t.type === "lbrace" &&
+        posLE(argsEnd, tokenStartPos(t)) &&
+        rangeContains(node.range, tokenStartPos(t)),
     );
     if (lbrace && posLE(position, tokenStartPos(lbrace))) return true;
   }
@@ -234,10 +217,7 @@ function isInObjectHeader(
   return false;
 }
 
-function rangeContains(
-  range: { start: Position; end: Position },
-  pos: Position,
-): boolean {
+function rangeContains(range: { start: Position; end: Position }, pos: Position): boolean {
   return posLE(range.start, pos) && posLE(pos, range.end);
 }
 
@@ -266,10 +246,7 @@ export function getCompletions(
 // Root completions
 // ---------------------------------------------------------------------------
 
-function buildRootCompletions(
-  file: FileNode,
-  fileName?: string,
-): CompletionItem[] {
+function buildRootCompletions(file: FileNode, fileName?: string): CompletionItem[] {
   if (!fileName) return [];
   const rootEntries = getFileSchema(fileName);
   if (!rootEntries) return [];
@@ -320,10 +297,7 @@ function buildObjectBodyCompletions(
     if (node.type === "property") {
       existingProps.set(node.name, (existingProps.get(node.name) ?? 0) + 1);
     } else if (node.type === "object") {
-      existingChildren.set(
-        node.name,
-        (existingChildren.get(node.name) ?? 0) + 1,
-      );
+      existingChildren.set(node.name, (existingChildren.get(node.name) ?? 0) + 1);
     }
   }
 
@@ -343,8 +317,7 @@ function buildObjectBodyCompletions(
 
   // Children
   for (const [name, childSchema] of Object.entries(schema.children)) {
-    if (!childSchema.multiple && (existingChildren.get(name) ?? 0) > 0)
-      continue;
+    if (!childSchema.multiple && (existingChildren.get(name) ?? 0) > 0) continue;
 
     const childObjSchema = semanticSchema[childSchema.schemaKey ?? name];
     const snippet = childObjSchema?.nameParameter
@@ -380,10 +353,7 @@ function buildPropertySnippet(name: string, schema: PropertySchema): string {
 
   // General arity > 1
   if (arity > 1) {
-    const placeholders = Array.from(
-      { length: arity },
-      (_, i) => `\${${i + 1}:0}`,
-    ).join(", ");
+    const placeholders = Array.from({ length: arity }, (_, i) => `\${${i + 1}:0}`).join(", ");
     return `${name} = ${placeholders};`;
   }
 

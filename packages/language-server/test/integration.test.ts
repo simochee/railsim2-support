@@ -17,7 +17,33 @@ vi.mock("vscode-languageserver/node", () => ({
   },
   TextDocumentSyncKind: { Full: 1 },
   DiagnosticSeverity: { Error: 1, Warning: 2, Information: 3, Hint: 4 },
-  CompletionItemKind: { Text: 1, Method: 2, Function: 3, Constructor: 4, Field: 5, Variable: 6, Class: 7, Interface: 8, Module: 9, Property: 10, Unit: 11, Value: 12, Enum: 13, Keyword: 14, Snippet: 15, Color: 16, File: 17, Reference: 18, Folder: 19, EnumMember: 20, Constant: 21, Struct: 22, Event: 23, Operator: 24, TypeParameter: 25 },
+  CompletionItemKind: {
+    Text: 1,
+    Method: 2,
+    Function: 3,
+    Constructor: 4,
+    Field: 5,
+    Variable: 6,
+    Class: 7,
+    Interface: 8,
+    Module: 9,
+    Property: 10,
+    Unit: 11,
+    Value: 12,
+    Enum: 13,
+    Keyword: 14,
+    Snippet: 15,
+    Color: 16,
+    File: 17,
+    Reference: 18,
+    Folder: 19,
+    EnumMember: 20,
+    Constant: 21,
+    Struct: 22,
+    Event: 23,
+    Operator: 24,
+    TypeParameter: 25,
+  },
   InsertTextFormat: { PlainText: 1, Snippet: 2 },
 }));
 
@@ -311,7 +337,9 @@ RailInfo {
 }
 SoundInfo {}`;
     const diagnostics = validateTextDocument(input, "Rail2.txt");
-    expect(diagnostics.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge"))).toBe(true);
+    expect(
+      diagnostics.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
+    ).toBe(true);
   });
 
   it("should return required property warnings", () => {
@@ -319,7 +347,11 @@ SoundInfo {}`;
 RailInfo {
 }`;
     const diagnostics = validateTextDocument(input);
-    expect(diagnostics.some((d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning")).toBe(true);
+    expect(
+      diagnostics.some(
+        (d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning",
+      ),
+    ).toBe(true);
   });
 
   it("should return root validation errors with fileName", () => {
@@ -334,7 +366,11 @@ RailInfo { Gauge = 1.0; }
 SoundInfo {}
 TrainInfo { Gauge = 1.0; }`;
     const diagnostics = validateTextDocument(input, "Rail2.txt");
-    expect(diagnostics.some((d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"))).toBe(true);
+    expect(
+      diagnostics.some(
+        (d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"),
+      ),
+    ).toBe(true);
   });
 
   it("should skip root validation without fileName (backward compat)", () => {

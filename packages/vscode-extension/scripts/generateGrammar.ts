@@ -40,8 +40,7 @@ function generateGrammar(): object {
   const constantRegex = buildAlternation(constantsWithoutYesNo);
 
   return {
-    $schema:
-      "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    $schema: "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
     name: "RailSim2",
     fileTypes: [
       "Rail2.txt",
@@ -94,8 +93,8 @@ function generateGrammar(): object {
       },
       string: {
         name: "string.quoted.double.rs2",
-        begin: "\"",
-        end: "\"",
+        begin: '"',
+        end: '"',
         patterns: [
           {
             name: "constant.character.escape.rs2",
@@ -133,8 +132,7 @@ function generateGrammar(): object {
         patterns: [
           {
             name: "keyword.operator.rs2",
-            match:
-              "<<|>>|<=|>=|==|!=|&&|\\|\\||\\?:|\\(|\\)|\\+|-|!|~|\\*|\\/|%|<|>|\\^|&|\\|",
+            match: "<<|>>|<=|>=|==|!=|&&|\\|\\||\\?:|\\(|\\)|\\+|-|!|~|\\*|\\/|%|<|>|\\^|&|\\|",
           },
           { include: "#literal" },
         ],
