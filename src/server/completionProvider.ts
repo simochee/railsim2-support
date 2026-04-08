@@ -85,8 +85,8 @@ export function findContext(
     ) {
       const start = tokenStartPos(tok);
       const end = tokenEndPos(tok);
-      // cursor strictly inside (after start, before end)
-      if (posLT(start, position) && posLT(position, end)) {
+      // cursor at or after start, before end
+      if (posLE(start, position) && posLT(position, end)) {
         return { type: "none" };
       }
       // For block comments, also suppress at the start position itself
@@ -277,6 +277,7 @@ function buildRootCompletions(
     items.push({
       label: entry.name,
       kind: CompletionItemKind.Class,
+      detail: entry.required ? "(required)" : undefined,
       insertText: snippet,
       insertTextFormat: InsertTextFormat.Snippet,
     });
@@ -317,6 +318,7 @@ function buildObjectBodyCompletions(
     items.push({
       label: name,
       kind: CompletionItemKind.Property,
+      detail: `${propSchema.type}${propSchema.required ? " (required)" : ""}`,
       insertText: buildPropertySnippet(name, propSchema),
       insertTextFormat: InsertTextFormat.Snippet,
     });
@@ -335,6 +337,7 @@ function buildObjectBodyCompletions(
     items.push({
       label: name,
       kind: CompletionItemKind.Class,
+      detail: childSchema.required ? "(required)" : undefined,
       insertText: snippet,
       insertTextFormat: InsertTextFormat.Snippet,
     });

@@ -131,6 +131,14 @@ describe("findContext", () => {
     }
   });
 
+  it("コメント開始位置 → none", () => {
+    const src = "RailInfo {\n  // comment\n}";
+    const { file, tokens } = setup(src);
+    // cursor at the start of // (character 2)
+    const result = findContext(file, tokens, pos(1, 2));
+    expect(result.type).toBe("none");
+  });
+
   it("outside any object → root", () => {
     const src = "RailInfo {\n}\n";
     const { file, tokens } = setup(src);
@@ -354,5 +362,29 @@ describe("getCompletions", () => {
     const ir = items.find((i) => i.label === "IconRect");
     expect(ir).toBeDefined();
     expect(ir!.insertText).toBe("IconRect = ${1:0}, ${2:0}, ${3:0}, ${4:0};");
+  });
+
+  it("プロパティの detail に型情報が含まれる", () => {
+    const src = "RailInfo {\n  \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
+    const gauge = items.find((i) => i.label === "Gauge");
+    expect(gauge?.detail).toBe("float (required)");
+  });
+
+  it("required 子オブジェクトの detail に (required) が含まれる", () => {
+    const src = "TrainInfo {\n  Gauge = 1.0;\n  \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(2, 2), "Train2.txt");
+    const body = items.find((i) => i.label === "Body");
+    expect(body?.detail).toBe("(required)");
+  });
+
+  it("optional プロパティの detail に (required) が含まれない", () => {
+    const src = "RailInfo {\n  \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
+    const trackNum = items.find((i) => i.label === "TrackNum");
+    expect(trackNum?.detail).toBe("integer");
   });
 });
