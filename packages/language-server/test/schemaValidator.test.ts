@@ -98,6 +98,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
+    // RailInfo.Gauge は required
     expect(
       diags.some(
         (d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning",
@@ -551,5 +552,144 @@ RailInfo {
       d.message.includes("Invalid child object 'DefineSwitch'"),
     );
     expect(invalidChild).toHaveLength(0);
+  });
+
+  // ================================================================
+  // Train2.txt 統合テスト
+  // ================================================================
+  it("Train2.txt の基本構造にスキーマエラーが出ない", () => {
+    const src = `
+PluginHeader {
+  RailSimVersion = "2.00";
+  PluginType = Train;
+  PluginName = "test";
+  PluginAuthor = "author";
+}
+TrainInfo {
+  FrontLimit = 10.65;
+  TailLimit = -10.65;
+  MaxVelocity = 100.0;
+  MaxAcceleration = 2.1;
+  MaxDeceleration = 3.3;
+  DoorClosingTime = 4.0;
+}
+DefineSwitch "switch1" {
+  Entry = "a";
+  Entry = "b";
+}
+PrimaryAssembly {
+  Axle "Wheel1" {
+    ModelFileName = "wheel.x";
+    ModelScale = 1.0;
+    Diameter = 0.8;
+    Symmetric = 8;
+    Coord = (8.25, 0.43);
+  }
+  Body "Bogie1" {
+    ModelFileName = "bogie.x";
+    ModelScale = 1.0;
+    JointZY "Wheel1" {
+      AttachCoord = (0.0, 0.0);
+      LocalCoord = (0.9, 0.0);
+    }
+  }
+  Object3D "MainBody" {
+    ModelFileName = "body.x";
+    ModelScale = 1.0;
+    NoCastShadow = 24;
+    AlphaZeroTest = 24;
+    Joint3D "Bogie1" {
+      AttachCoord = (0.0, 0.57, 0.0);
+      AttachDir = (0.0, 0.0, 1.0);
+    }
+    ChangeMaterial {
+      MaterialID = 0;
+      Emissive = 1.0, 1.0, 1.0;
+    }
+    StaticMove {
+      Displacement = (0.0, 0.0, 0.6);
+      PreAnimationDelay = 0.5;
+      AnimationTime = 2.5;
+    }
+    StaticMove {
+      Displacement = (0.0, 0.0, 0.05);
+      PreAnimationDelay = 3.0;
+      AnimationTime = 0.5;
+    }
+  }
+  FrontCabin {
+    Joint3D "MainBody" {
+      AttachCoord = (-0.9, 2.5, 10.0);
+      DirLink = MainBody;
+      AttachDir = (0.0, 0.0, 1.0);
+    }
+  }
+}
+`;
+    const diags = validate(src, "Train2.txt");
+    const errors = diags.filter((d) => d.severity === "error");
+    expect(errors).toEqual([]);
+  });
+
+  it("Train2.txt のルートに DefineSwitch を許可する", () => {
+    const src = `
+PluginHeader {
+  RailSimVersion = "2.00";
+  PluginType = Train;
+  PluginName = "test";
+  PluginAuthor = "author";
+}
+TrainInfo {}
+DefineSwitch "sw1" { Entry = "a"; }
+DefineSwitch "sw2" { Entry = "b"; }
+`;
+    const diags = validate(src, "Train2.txt");
+    const rootErrors = diags.filter((d) => d.message.includes("not allowed as root object"));
+    expect(rootErrors).toHaveLength(0);
+  });
+
+  it("TrainInfo に Gauge がなくても warning が出ない", () => {
+    const src = `
+TrainInfo {
+  FrontLimit = 10.0;
+}
+`;
+    const diags = validate(src);
+    const gaugeWarnings = diags.filter((d) => d.message.includes("Required property 'Gauge'"));
+    expect(gaugeWarnings).toHaveLength(0);
+  });
+
+  it("Body 内の JointZY は有効な子オブジェクト", () => {
+    const src = `
+Body "Bogie1" {
+  ModelFileName = "bogie.x";
+  JointZY "Wheel1" {
+    AttachCoord = (0.0, 0.0);
+    LocalCoord = (0.9, 0.0);
+  }
+}
+`;
+    const diags = validate(src);
+    const invalidChild = diags.filter((d) => d.message.includes("Invalid child object 'JointZY'"));
+    expect(invalidChild).toHaveLength(0);
+  });
+
+  it("Object3D 内の複数 StaticMove は許可される", () => {
+    const src = `
+Object3D "Door" {
+  ModelFileName = "door.x";
+  StaticMove {
+    Displacement = (0.0, 0.0, 0.6);
+    AnimationTime = 2.5;
+  }
+  StaticMove {
+    Displacement = (0.0, 0.0, 0.05);
+    AnimationTime = 0.5;
+  }
+}
+`;
+    const diags = validate(src);
+    const dupErrors = diags.filter((d) => d.message.includes("Duplicate child object 'StaticMove'"));
+    expect(dupErrors).toHaveLength(0);
   });
 });

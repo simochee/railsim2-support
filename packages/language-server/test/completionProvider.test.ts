@@ -417,11 +417,11 @@ describe("getCompletions", () => {
   });
 
   it("required 子オブジェクトの detail に (required) が含まれる", () => {
-    const src = "TrainInfo {\n  Gauge = 1.0;\n  \n}";
+    const src = "Face {\n  \n}";
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(2, 2), "Train2.txt");
-    const body = items.find((i) => i.label === "Body");
-    expect(body?.detail).toBe("(required)");
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const vertex = items.find((i) => i.label === "Vertex");
+    expect(vertex?.detail).toBe("(required)");
   });
 
   it("optional プロパティの detail に (required) が含まれない", () => {

@@ -21,7 +21,7 @@ function deriveObjectNames(): string[] {
 }
 
 /** スキーマ未定義だが RailSim2 で使われるレガシープロパティ */
-const LEGACY_PROPERTIES = ["EnvMap", "Turn"];
+const LEGACY_PROPERTIES: string[] = [];
 
 function derivePropertyNames(): string[] {
   const names = new Set<string>();
