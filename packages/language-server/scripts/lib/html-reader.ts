@@ -58,7 +58,7 @@ export function extractBnfBlocks($: CheerioAPI): BnfBlock[] {
 
     // Check for file-level grammar: look for fileName in <h2> of parent contbox
     let fileName: string | undefined;
-    const contbox = preNonterm.closest("div.contbox");
+    const contbox = preNonterm.closest("div.contbox.cb_src");
     const h2 = contbox.find("h2").first();
     const h2Text = h2.text();
     const fileMatch = h2Text.match(/定義ファイル\s*\(([^)]+)\)\s*文法/);

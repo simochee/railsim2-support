@@ -114,10 +114,10 @@ describe("extractOverview", () => {
     expect(overview).toContain("ピストン構造を定義します");
   });
 
-  it("returns null when no overview section exists", () => {
+  it("returns null when no overview section exists", async () => {
     // Use a cheerio instance with no overview
-    const cheerio = require("cheerio");
-    const $ = cheerio.load("<html><body><h2>Other</h2><p>text</p></body></html>");
+    const { load } = await import("cheerio");
+    const $ = load("<html><body><h2>Other</h2><p>text</p></body></html>");
     const overview = extractOverview($);
 
     expect(overview).toBeNull();
