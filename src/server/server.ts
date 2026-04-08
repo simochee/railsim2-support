@@ -24,7 +24,6 @@ connection.onInitialize(() => ({
     textDocumentSync: TextDocumentSyncKind.Full,
     completionProvider: {
       resolveProvider: false,
-      triggerCharacters: ["\n"],
     },
   },
 }));
