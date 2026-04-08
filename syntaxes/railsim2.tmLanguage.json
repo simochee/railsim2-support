@@ -1,5 +1,5 @@
 {
-	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "RailSim2",
   "fileTypes": [
     "Rail2.txt",
@@ -15,7 +15,7 @@
     "Env2.txt",
     "Skin2.txt"
   ],
-	"patterns": [
+  "patterns": [
     {
       "include": "#comment-line"
     },
@@ -25,8 +25,8 @@
     {
       "include": "#sym-objects"
     }
-	],
-	"repository": {
+  ],
+  "repository": {
     "comment-line": {
       "name": "comment.line.double-slash.rs2",
       "match": "//.*$"
@@ -60,16 +60,16 @@
       "name": "string.quoted.double.rs2",
       "begin": "\"",
       "end": "\"",
-			"patterns": [
-				{
-					"name": "constant.character.escape.rs2",
-					"match": "\\\\."
-				}
-			]
+      "patterns": [
+        {
+          "name": "constant.character.escape.rs2",
+          "match": "\\\\."
+        }
+      ]
     },
     "constant": {
       "name": "support.constant.rs2",
-      "match": "\\b(DayAlpha|NightAlpha|Hour|Minute|Second|Alpha|Add|Up|Down|Rail|Tie|Girder|Pier|Line|Pole|Train|Station|Struct|Surface|Env|Skin)\\b"
+      "match": "\\b(Add|Alpha|DayAlpha|Down|Env|Girder|Hour|Line|Minute|NightAlpha|Pier|Pole|Rail|Second|Skin|Station|Struct|Surface|Tie|Train|Up)\\b"
     },
     "color": {
       "name": "constant.other.color.rs2",
@@ -151,7 +151,7 @@
       ]
     },
     "sym-objects": {
-      "begin": "\\b((Axle|Body|Tilt|Slide|CrankZY|DynamicRotation|Landscape|Lighting|Moon|EnvInfo|Sun|Circle|Hexagon|Texture|GirderInfo|Headlight|Interval|LensFlare|Set|LineInfo|ChangeMaterial|DefineSwitch|Object3D|Joint3D|JointZY|JointZYX|ObjectZY|Particle|Base|Head|Joint|PierInfo|PistonZY|Platform|PluginHeader|PoleInfo|Model|Profile|Material|Face|Vertex|RailInfo|SoundInfo|Background|NormalCursor|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|EditCtrl|Frame|Interface|ListView|Model|PluginTree|PopupMenu|Sound|SoundEffect|StaticMove|StaticRotation|StationInfo|PrimaryAssembly|StructInfo|SurfaceInfo|DefineAnimation|TieInfo|TrainInfo|FrontCabin|TailCabin|Link|TriangleZY|Whiteout|TrackWind|Windmill|Wireframe|Line|Vertex)|(ApplySwitch|If|Else))\\b",
+      "begin": "\\b((Axle|Background|Base|Body|ChangeMaterial|Circle|CrankZY|DefineAnimation|DefineSwitch|DynamicRotation|EditCtrl|EnvInfo|Face|Frame|FrontCabin|GirderInfo|Head|Headlight|Hexagon|Interface|Interval|Joint|Joint3D|JointZY|JointZYX|Landscape|LensFlare|Lighting|Line|LineInfo|Link|ListView|Material|Model|Moon|NormalCursor|NumberedFrame|Object3D|ObjectZY|Particle|PierInfo|PistonZY|Platform|PluginHeader|PluginTree|PoleInfo|PopupMenu|PrimaryAssembly|Profile|RailInfo|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|Set|Slide|Sound|SoundEffect|SoundInfo|StaticMove|StaticRotation|StationInfo|StructInfo|Sun|SurfaceInfo|TailCabin|Texture|TieInfo|Tilt|TrackWind|TrainInfo|TriangleZY|Vertex|Whiteout|Windmill|Wireframe)|(ApplySwitch|If|Else))\\b",
       "beginCaptures": {
         "2": {
           "name": "storage.type.object-name.rs2"
@@ -228,7 +228,7 @@
       ]
     },
     "sym-properties": {
-      "begin": "\\b(Acceleration|AccelerationRel|AirResistance|AlphaZeroTest|Ambient|AnalogClock|AnimationTime|ArrowModelFileName|ArrowModelScale|AttachCoord|AttachDir|AttachObject|AttachUp|AttachX|AxialInclination|BackgroundColor|BaseAlt|BaseToPierLocal|BlendMode|BranchRail|BuildMinAlt|ButtonFontColor|CantRatio|CastShadow|ChangeAlpha|ChangeModel|ChangeTexture|Color|CompassModelFileName|CompassModelScale|ConnectRail|ConvertClauseColor|ConvertFontColor|Coord|Cursor2DAnimFrame|Cursor2DAnimNumber|Cursor2DHotSpot|Cursor2DSize|Deceleration|DecelerationRel|DefaultBaseColor|DefaultBaseColorEven|DefaultBaseColorOdd|DefaultFontColor|Description|Diameter|Diffuse|Direction|Directional|DirLink|DisabledFontColor|DisabledShadowColor|DisconnectRail|Displacement|Distance|DoorClosingTime|EditBaseColor|EditFontColor|Emissive|EnableCant|Entry|EnvMap|EnvMapTexFileName|ErrorWaveFileName|FinalRadius|FixAxis|FixPosition|FixRight|FlattenCant|FloatFontColor|FocusFrameColor|FontName|Frame|FrameTexFileName|FrontLimit|Gauge|GirderPlugin|Gravity|GroupCommon|HeadToPierLocal|Height|IconRect|IconTexFileName|IconTexture|IgnoreCant|ImageSize|Inclination|InfoFontColor|InitialPhase|InitialRadius|InnerColor|Interval|JointInterval|JointToHeadLocal|LabelFontColor|Latitude|Lifetime|LiftRailSurface|LinePlugin|LinkCoord|LinkModelFileName|LinkModelScale|LocalCoord|Loop|MaterialID|MaxAcceleration|MaxAngle|MaxCant|MaxDeceleration|MaxDeflection|MaxDistance|MaxInterval|MaxQty|MaxVelocity|MinInterval|MinQty|ModelFileName|ModelScale|MouseDownWaveFileName|MouseUpWaveFileName|NightThreshold|NoCastShadow|NoReceiveShadow|Normal|NoShadow|NumberedFrame|Offset|OpenDoor|OuterColor|ParentObject|PierPlugin|PluginAuthor|PluginName|PluginType|PolePlugin|PostAnimationDelay|PostReverseDelay|Power|PreAnimationDelay|PreReverseDelay|Radius|RailPlugin|RailSimVersion|ReverseTime|RevolutionPeriod|RotateTexture|RotationAngle|RotationAxis|RotationSpeed|RotationUVFrame|ScaleTexture|ScreenShotWaveFileName|SegmentModelFileName|SegmentModelScale|SelectedBaseColor|SelectedFontColor|SetAnimation|ShadowColor|ShiftTexture|SizeX|SizeZ|SkyColor|SlideUVFrame|SourceCoord|Specular|StartAngle|StaticFontColor|Stoppable|SunAlt|SurfaceAlt|Symmetric|TailLimit|TaperX|TaperY|TaperZ|TexFileName|TextureFileName|TexU|TexVPerMeter|TiePlugin|TiledUVFrame|TiltRatio|TiltSpeed|TitleBarFontColor|TrackInterval|TrackNum|TrackSpeed|TransformTexture|Transparent|TrolleyAlt|Turbulence|Turn|Twinkle|UpLink|UseTexture|UseWallpaper|VelocityRel|VideoStartWaveFileName|VideoStopWaveFileName|Volume|WaveFileName|WheelSound|WheelSoundFile|WindDirModelFileName|WindDirModelScale)\\b",
+      "begin": "\\b(Acceleration|AccelerationRel|AirResistance|AlphaZeroTest|Ambient|AnalogClock|AnimationTime|ArrowModelFileName|ArrowModelScale|AttachCoord|AttachDir|AttachObject|AttachUp|AttachX|AxialInclination|BackgroundColor|BaseAlt|BaseToPierLocal|BlendMode|BranchRail|BuildMinAlt|ButtonFontColor|CantRatio|CastShadow|ChangeAlpha|ChangeModel|ChangeTexture|Color|CompassModelFileName|CompassModelScale|ConnectRail|ConvertClauseColor|ConvertFontColor|Coord|Cursor2DAnimFrame|Cursor2DAnimNumber|Cursor2DHotSpot|Cursor2DSize|Deceleration|DecelerationRel|DefaultBaseColor|DefaultBaseColorEven|DefaultBaseColorOdd|DefaultFontColor|Description|Diameter|Diffuse|DirLink|Direction|Directional|DisabledFontColor|DisabledShadowColor|DisconnectRail|Displacement|Distance|DoorClosingTime|EditBaseColor|EditFontColor|Emissive|EnableCant|Entry|EnvMap|EnvMapTexFileName|ErrorWaveFileName|FinalRadius|FixAxis|FixPosition|FixRight|FlattenCant|FloatFontColor|FocusFrameColor|FontName|Frame|FrameTexFileName|FrontLimit|Gauge|GirderPlugin|Gravity|GroupCommon|HeadToPierLocal|Height|IconRect|IconTexFileName|IconTexture|IgnoreCant|ImageSize|Inclination|InfoFontColor|InitialPhase|InitialRadius|InnerColor|Interval|JointInterval|JointToHeadLocal|LabelFontColor|Latitude|Lifetime|LiftRailSurface|LinePlugin|LinkCoord|LinkModelFileName|LinkModelScale|LocalCoord|Loop|MaterialID|MaxAcceleration|MaxAngle|MaxCant|MaxDeceleration|MaxDeflection|MaxDistance|MaxInterval|MaxQty|MaxVelocity|MinInterval|MinQty|ModelFileName|ModelScale|MouseDownWaveFileName|MouseUpWaveFileName|NightThreshold|NoCastShadow|NoReceiveShadow|NoShadow|Normal|NumberedFrame|Offset|OpenDoor|OuterColor|ParentObject|PierPlugin|PluginAuthor|PluginName|PluginType|PolePlugin|PostAnimationDelay|PostReverseDelay|Power|PreAnimationDelay|PreReverseDelay|Radius|RailPlugin|RailSimVersion|ReverseTime|RevolutionPeriod|RotateTexture|RotationAngle|RotationAxis|RotationSpeed|RotationUVFrame|ScaleTexture|ScreenShotWaveFileName|SegmentModelFileName|SegmentModelScale|SelectedBaseColor|SelectedFontColor|SetAnimation|ShadowColor|ShiftTexture|SizeX|SizeZ|SkyColor|SlideUVFrame|SourceCoord|Specular|StartAngle|StaticFontColor|Stoppable|SunAlt|SurfaceAlt|Symmetric|TailLimit|TaperX|TaperY|TaperZ|TexFileName|TexU|TexVPerMeter|TextureFileName|TiePlugin|TiledUVFrame|TiltRatio|TiltSpeed|TitleBarFontColor|TrackInterval|TrackNum|TrackSpeed|TransformTexture|Transparent|TrolleyAlt|Turbulence|Turn|Twinkle|UpLink|UseTexture|UseWallpaper|VelocityRel|VideoStartWaveFileName|VideoStopWaveFileName|Volume|WaveFileName|WheelSound|WheelSoundFile|WindDirModelFileName|WindDirModelScale)\\b",
       "beginCaptures": {
         "0": {
           "name": "variable.parameter.property.rs2"
@@ -241,6 +241,6 @@
         }
       ]
     }
-	},
-	"scopeName": "source.rs2"
+  },
+  "scopeName": "source.rs2"
 }

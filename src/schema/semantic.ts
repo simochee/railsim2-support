@@ -55,6 +55,8 @@ export const semanticSchema: SemanticSchema = {
       TiePlugin: opt("filename"),
       GirderPlugin: opt("filename"),
       PierPlugin: opt("filename"),
+      LinePlugin: opt("filename"),
+      PolePlugin: opt("filename"),
       TrackInterval: opt("float"),
       MaxCant: opt("float"),
       EnableCant: opt("yes-no"),
@@ -132,6 +134,10 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Interval: req("float"),
       Height: opt("float"),
+      IgnoreCant: opt("yes-no"),
+      Offset: opt("float"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
     },
     children: {},
   },
@@ -169,6 +175,10 @@ export const semanticSchema: SemanticSchema = {
       BaseAlt: opt("float"),
       BaseToPierLocal: opt("vector-3d"),
       HeadToPierLocal: opt("vector-3d"),
+      Offset: opt("float"),
+      TaperX: opt("float"),
+      TaperY: opt("float"),
+      TaperZ: opt("float"),
     },
     children: {
       DefineSwitch: child(false, true),
@@ -181,6 +191,11 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       ModelFileName: req("filename"),
       ModelScale: opt("float"),
+      TrolleyAlt: opt("float"),
+      Height: opt("float"),
+      MaxInterval: opt("float"),
+      Offset: opt("float"),
+      MaxDeflection: opt("float"),
     },
     children: {
       DefineSwitch: child(false, true),
@@ -243,6 +258,7 @@ export const semanticSchema: SemanticSchema = {
       Coord: req("vector-3d"),
       Direction: opt("vector-3d"),
       Color: opt("color"),
+      AttachObject: opt("identifier"),
     },
     children: {},
   },
@@ -267,6 +283,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Coord: req("vector-3d"),
       Diameter: opt("float"),
+      Symmetric: opt("integer"),
     },
     children: {},
   },
@@ -278,6 +295,7 @@ export const semanticSchema: SemanticSchema = {
       AttachCoord: opt("vector-3d"),
       AttachDir: opt("vector-3d"),
       AttachUp: opt("vector-3d"),
+      AnalogClock: opt("enum", { enumValues: ["Hour", "Minute", "Second"] }),
     },
     children: {
       StaticRotation: child(false, false),
@@ -307,6 +325,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Direction: opt("vector-3d"),
       Distance: opt("float"),
+      Displacement: opt("vector-3d"),
     },
     children: {},
   },
@@ -319,6 +338,7 @@ export const semanticSchema: SemanticSchema = {
       VelocityRel: opt("yes-no"),
       AccelerationRel: opt("yes-no"),
       DecelerationRel: opt("yes-no"),
+      AttachObject: opt("identifier"),
     },
     children: {},
   },
@@ -341,6 +361,8 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Coord: req("vector-3d"),
       Direction: opt("vector-3d"),
+      ParentObject: opt("identifier"),
+      LinePlugin: opt("filename"),
     },
     children: {},
   },
@@ -389,6 +411,8 @@ export const semanticSchema: SemanticSchema = {
       NoCastShadow: opt("yes-no"),
       NoReceiveShadow: opt("yes-no"),
       NoShadow: opt("yes-no"),
+      UseTexture: opt("yes-no"),
+      TexVPerMeter: opt("float"),
     },
     children: {},
   },
@@ -412,6 +436,7 @@ export const semanticSchema: SemanticSchema = {
       Gravity: opt("float"),
       Latitude: opt("float"),
       AxialInclination: opt("float"),
+      EnvMapTexFileName: opt("filename"),
     },
     children: {
       Sun: child(false, false),
@@ -431,6 +456,9 @@ export const semanticSchema: SemanticSchema = {
       Directional: opt("color"),
       Ambient: opt("color"),
       NightThreshold: opt("float"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
+      AxialInclination: opt("float"),
     },
     children: {},
   },
@@ -438,6 +466,11 @@ export const semanticSchema: SemanticSchema = {
   Moon: {
     properties: {
       Color: opt("color"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
+      AxialInclination: opt("float"),
+      RevolutionPeriod: opt("float"),
+      InitialPhase: opt("float"),
     },
     children: {},
   },
@@ -454,6 +487,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Color: opt("color"),
       MaxDistance: opt("float"),
+      StartAngle: opt("float"),
     },
     children: {},
   },
@@ -564,7 +598,10 @@ export const semanticSchema: SemanticSchema = {
   // ===== 共有 子オブジェクト =====
 
   DefineSwitch: {
-    properties: {},
+    properties: {
+      Entry: opt("string", { multiple: true }),
+      GroupCommon: opt("string"),
+    },
     children: {},
     nameParameter: "identifier",
   },
@@ -578,6 +615,11 @@ export const semanticSchema: SemanticSchema = {
       PreReverseDelay: opt("float"),
       PostReverseDelay: opt("float"),
       Loop: opt("yes-no"),
+      Frame: opt("string", { multiple: true }),
+      NumberedFrame: opt("string", { multiple: true }),
+      RotationUVFrame: opt("string", { multiple: true }),
+      SlideUVFrame: opt("string", { multiple: true }),
+      TiledUVFrame: opt("string", { multiple: true }),
     },
     children: {
       Set: child(false, true),
@@ -619,6 +661,7 @@ export const semanticSchema: SemanticSchema = {
   Particle: {
     properties: {
       TexFileName: opt("filename"),
+      TextureFileName: opt("filename"),
       Color: opt("color"),
       InnerColor: opt("color"),
       OuterColor: opt("color"),
@@ -634,6 +677,8 @@ export const semanticSchema: SemanticSchema = {
       MaxInterval: opt("float"),
       Gravity: opt("float"),
       Turbulence: opt("float"),
+      AirResistance: opt("float"),
+      AttachObject: opt("identifier"),
     },
     children: {},
   },
@@ -644,6 +689,7 @@ export const semanticSchema: SemanticSchema = {
       Color: opt("color"),
       Radius: opt("float"),
       Twinkle: opt("float"),
+      StartAngle: opt("float"),
     },
     children: {},
   },
@@ -653,6 +699,10 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       ModelFileName: req("filename"),
       ModelScale: opt("float"),
+      CompassModelFileName: opt("filename"),
+      CompassModelScale: opt("float"),
+      WindDirModelFileName: opt("filename"),
+      WindDirModelScale: opt("float"),
     },
     children: {},
   },
@@ -698,6 +748,7 @@ export const semanticSchema: SemanticSchema = {
   ObjectZY: {
     properties: {
       Coord: req("vector-3d"),
+      FixRight: opt("float"),
     },
     children: {},
   },
@@ -709,6 +760,9 @@ export const semanticSchema: SemanticSchema = {
       LocalCoord: opt("vector-3d"),
       MaxAngle: opt("float"),
       MaxDeflection: opt("float"),
+      JointToHeadLocal: opt("vector-3d"),
+      ModelFileName: opt("filename"),
+      ModelScale: opt("float"),
     },
     children: {},
   },
@@ -734,6 +788,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       LinkCoord: opt("vector-3d"),
       LocalCoord: opt("vector-3d"),
+      AttachX: opt("float"),
     },
     children: {},
   },
@@ -780,6 +835,7 @@ export const semanticSchema: SemanticSchema = {
       RotationAxis: opt("vector-3d"),
       RotationSpeed: opt("float"),
       RevolutionPeriod: opt("float"),
+      Symmetric: opt("integer"),
     },
     children: {},
   },

@@ -63,6 +63,7 @@
         ]
     },
     "scripts": {
+        "generate:grammar": "npx tsx scripts/generateGrammar.ts",
         "build": "tsc -p tsconfig.server.json && tsc -p tsconfig.client.json",
         "test": "vitest run",
         "package": "npm run build && vsce package",
@@ -72,6 +73,7 @@
         "@types/node": "^25.5.2",
         "@types/vscode": "^1.110.0",
         "@vscode/vsce": "^3.0.0",
+        "tsx": "^4.21.0",
         "typescript": "^6.0.2",
         "vitest": "^4.1.2",
         "vscode-oniguruma": "^2.0.1",
