@@ -37,7 +37,7 @@ export const semanticSchema: SemanticSchema = {
   // ===== 共通 =====
   PluginHeader: {
     properties: {
-      RailSimVersion: req("string"),
+      RailSimVersion: req("expression"),
       PluginType: req("enum", {
         enumValues: [
           "Rail",

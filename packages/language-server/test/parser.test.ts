@@ -160,6 +160,33 @@ describe("parser", () => {
     }
   });
 
+  it("should parse parenthesized value lists (tuple syntax)", () => {
+    const { file, diagnostics } = parse("Axle { Coord = (0.9, 0.0); }");
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values).toHaveLength(2);
+    expect(prop.values[0].type).toBe("number");
+    expect(prop.values[1].type).toBe("number");
+  });
+
+  it("should parse parenthesized 3D vector", () => {
+    const { file, diagnostics } = parse("Joint3D { AttachCoord = (0.0, 0.57, 0.0); }");
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values).toHaveLength(3);
+  });
+
+  it("should parse negative values in parenthesized list", () => {
+    const { file, diagnostics } = parse("Axle { Coord = (-8.25, 0.43); }");
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values).toHaveLength(2);
+    expect(prop.values[0].type).toBe("unary");
+  });
+
   it("should parse boolean values yes/no", () => {
     const { file, diagnostics } = parse("Body { Flag = yes; }");
     expect(diagnostics).toHaveLength(0);

@@ -426,6 +426,36 @@ export function parse(source: string): ParseResult {
     return body;
   }
 
+  /**
+   * '(' がタプル構文 (値リストの囲み) かどうかを先読みで判定する。
+   * タプル: (0.9, 0.0) — '(' 値 ',' ... ')' ';'
+   * 演算式: (1+2)*3  — '(' 式 ')' 演算子 ...
+   * 判定: ')' の後が ';' または '}' ならタプル、演算子ならカッコ式。
+   */
+  function isTupleParenStart(): boolean {
+    // pos は '(' を指している
+    let depth = 1;
+    let i = pos + 1;
+    let hasComma = false;
+    while (i < tokens.length && depth > 0) {
+      const tt = tokens[i].type;
+      if (tt === "lparen") depth++;
+      else if (tt === "rparen") {
+        depth--;
+        if (depth === 0) break;
+      } else if (tt === "comma" && depth === 1) {
+        hasComma = true;
+      }
+      i++;
+    }
+    if (depth !== 0) return false;
+    // ')' の後のトークンを確認
+    const afterParen = i + 1 < tokens.length ? tokens[i + 1].type : "eof";
+    // カンマがあればタプル確定。なくても ')' の後が ';' や '}' ならタプル（単一値のカッコ囲み）
+    if (hasComma) return true;
+    return afterParen === "semicolon" || afterParen === "rbrace" || afterParen === "eof";
+  }
+
   function parseProperty(): PropertyNode {
     const nameToken = advance(); // identifier
     const startPos = posOf(nameToken);
@@ -436,7 +466,14 @@ export function parse(source: string): ParseResult {
 
     const values: ExprNode[] = [];
 
-    // Parse comma-separated expressions until ';'
+    // RailSim II では値リストをカッコで囲む記法がある: Coord = (0.9, 0.0);
+    // カッコはオプショナルなグルーピングとして透過的に扱う。
+    // ただし (1+2)*3 のような演算式のカッコとは区別する必要がある。
+    // 先読み: '(' の後が 値, ',' のパターンならタプル構文と判断する。
+    const parenWrapped = check("lparen") && isTupleParenStart();
+    if (parenWrapped) advance(); // '(' を消費
+
+    // Parse comma-separated expressions until ';' (or ')' if paren-wrapped)
     if (check("semicolon") || check("rbrace") || check("eof")) {
       addError(`Expected expression after '='`, rangeOf(peek()));
     } else {
@@ -456,6 +493,7 @@ export function parse(source: string): ParseResult {
       while (check("comma")) {
         advance(); // ','
         if (check("semicolon") || check("rbrace") || check("eof")) break;
+        if (parenWrapped && check("rparen")) break;
         try {
           values.push(parseExpr());
         } catch {
@@ -463,6 +501,10 @@ export function parse(source: string): ParseResult {
           break;
         }
       }
+    }
+
+    if (parenWrapped) {
+      expect("rparen", "Expected ')'");
     }
 
     const semi = expect("semicolon", "Expected ';'");
