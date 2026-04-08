@@ -1,0 +1,3 @@
+[submodule "vendor/railsim2"]
+	path = vendor/railsim2
+	url = https://github.com/aizentranza/railsim2.git

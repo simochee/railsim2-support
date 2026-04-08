@@ -10,6 +10,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import * as path from "node:path";
 import { parse } from "./parser.js";
 import { getCompletions } from "./completionProvider.js";
+import { getHover } from "./hoverProvider.js";
 import { tokenize } from "./tokenizer.js";
 import { validateUnknownKeywords } from "./validator/unknownKeywordValidator.js";
 import { validateSchema } from "./validator/schemaValidator.js";
@@ -63,6 +64,7 @@ connection.onInitialize(() => ({
     completionProvider: {
       resolveProvider: false,
     },
+    hoverProvider: true,
   },
 }));
 
@@ -111,6 +113,16 @@ connection.onCompletion((params) => {
 
 documents.onDidClose((event) => {
   parseCache.delete(event.document.uri);
+});
+
+connection.onHover((params) => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return null;
+
+  const text = doc.getText();
+  const { file } = parse(text);
+
+  return getHover(file, params.position);
 });
 
 documents.listen(connection);

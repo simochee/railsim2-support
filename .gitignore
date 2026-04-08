@@ -1,3 +1,5 @@
 node_modules/
 out/
 *.vsix
+docs-site/pages/
+docs-site/dist/

@@ -1,0 +1,22 @@
+Third-Party Licenses
+====================
+
+RailSim II Help Documentation
+-----------------------------
+Files: vendor/railsim2/**, docs-site generated output, src/server/hoverData.generated.ts
+
+Copyright (C) 2003-2012 インターネット停留所 (Intaanetto Teiryuujo)
+Source: https://github.com/aizentranza/railsim2
+License: GNU Lesser General Public License v2.1 (LGPL-2.1)
+
+The full license text is available at:
+  vendor/railsim2/Distribution/jp/RailSim2/COPYING.txt
+  https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+Modifications made:
+  - Converted character encoding from Shift_JIS to UTF-8
+  - Updated HTML doctype and charset meta tags for modern browsers
+  - Injected a banner indicating this is an unofficial mirror
+  - Fixed malformed HTML entities for HTML5 compliance
+  - Extracted property and object descriptions into structured data
+    for use in the VS Code extension's Language Server Protocol hover provider

@@ -5,6 +5,7 @@ vi.mock("vscode-languageserver/node", () => ({
   createConnection: () => ({
     onInitialize: vi.fn(),
     onCompletion: vi.fn(),
+    onHover: vi.fn(),
     sendDiagnostics: vi.fn(),
     listen: vi.fn(),
   }),
