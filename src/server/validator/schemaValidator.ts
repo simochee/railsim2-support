@@ -9,6 +9,7 @@ import type {
 import type { Diagnostic } from "../../shared/diagnostics.js";
 import type { ObjectSchema, PropertySchema } from "../../schema/schemaTypes.js";
 import { semanticSchema, getFileSchema } from "../../schema/semantic.js";
+import { resolveSchemaKey } from "../../schema/schemaUtils.js";
 
 /**
  * AST + スキーマ + ファイル名から意味レベルのエラーを検出する。
@@ -134,22 +135,6 @@ function visitObject(
 
   validateProperties(node, schema, diagnostics);
   validateChildren(node, schema, schemaKey, diagnostics);
-}
-
-function resolveSchemaKey(
-  nodeName: string,
-  parentSchemaKey: string | undefined,
-): string {
-  if (parentSchemaKey) {
-    const parentSchema = semanticSchema[parentSchemaKey];
-    if (parentSchema) {
-      const childDef = parentSchema.children[nodeName];
-      if (childDef?.schemaKey) {
-        return childDef.schemaKey;
-      }
-    }
-  }
-  return nodeName;
 }
 
 // ---------------------------------------------------------------------------
