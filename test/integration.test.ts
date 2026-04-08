@@ -4,6 +4,7 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("vscode-languageserver/node", () => ({
   createConnection: () => ({
     onInitialize: vi.fn(),
+    onCompletion: vi.fn(),
     sendDiagnostics: vi.fn(),
     listen: vi.fn(),
   }),
@@ -14,6 +15,8 @@ vi.mock("vscode-languageserver/node", () => ({
   },
   TextDocumentSyncKind: { Full: 1 },
   DiagnosticSeverity: { Error: 1, Warning: 2, Information: 3, Hint: 4 },
+  CompletionItemKind: { Text: 1, Method: 2, Function: 3, Constructor: 4, Field: 5, Variable: 6, Class: 7, Interface: 8, Module: 9, Property: 10, Unit: 11, Value: 12, Enum: 13, Keyword: 14, Snippet: 15, Color: 16, File: 17, Reference: 18, Folder: 19, EnumMember: 20, Constant: 21, Struct: 22, Event: 23, Operator: 24, TypeParameter: 25 },
+  InsertTextFormat: { PlainText: 1, Snippet: 2 },
 }));
 
 vi.mock("vscode-languageserver-textdocument", () => ({
@@ -21,6 +24,8 @@ vi.mock("vscode-languageserver-textdocument", () => ({
 }));
 
 import { parse } from "../src/server/parser.js";
+import { getCompletions } from "../src/server/completionProvider.js";
+import { tokenize } from "../src/server/tokenizer.js";
 import { validateTextDocument, toLspRange, toLspSeverity } from "../src/server/server.js";
 
 // ---------------------------------------------------------------------------
@@ -368,5 +373,35 @@ describe("LSP conversion", () => {
 
   it("should default to error for unknown severity", () => {
     expect(toLspSeverity("bogus")).toBe(1); // DiagnosticSeverity.Error
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Suite 5: Completion integration
+// ---------------------------------------------------------------------------
+
+describe("integration: completion", () => {
+  it("Rail2.txt フルパイプライン: parse → findContext → getCompletions", () => {
+    const src = `PluginHeader {
+  RailSimVersion = "2.00";
+  PluginType = Rail;
+  PluginName = "test";
+  PluginAuthor = "author";
+}
+RailInfo {
+  Gauge = 1.067;
+
+}`;
+    const { file } = parse(src);
+    const tokens = tokenize(src);
+    const items = getCompletions(file, tokens, { line: 8, character: 2 }, "Rail2.txt");
+    const itemLabels = items.map((i) => i.label);
+    // Gauge は既出なので除外
+    expect(itemLabels).not.toContain("Gauge");
+    // 他のプロパティは表示
+    expect(itemLabels).toContain("TrackNum");
+    expect(itemLabels).toContain("ModelFileName");
+    // 子オブジェクト
+    expect(itemLabels).toContain("DefineSwitch");
   });
 });

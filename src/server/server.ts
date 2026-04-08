@@ -9,6 +9,8 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import * as path from "node:path";
 import { parse } from "./parser.js";
+import { getCompletions } from "./completionProvider.js";
+import { tokenize } from "./tokenizer.js";
 import { validateUnknownKeywords } from "./validator/unknownKeywordValidator.js";
 import { validateSchema } from "./validator/schemaValidator.js";
 import type { Diagnostic } from "../shared/diagnostics.js";
@@ -20,6 +22,9 @@ const documents = new TextDocuments(TextDocument);
 connection.onInitialize(() => ({
   capabilities: {
     textDocumentSync: TextDocumentSyncKind.Full,
+    completionProvider: {
+      resolveProvider: false,
+    },
   },
 }));
 
@@ -57,6 +62,18 @@ documents.onDidChangeContent((change) => {
     message: d.message,
   }));
   connection.sendDiagnostics({ uri: change.document.uri, diagnostics: lspDiags });
+});
+
+connection.onCompletion((params) => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return [];
+
+  const text = doc.getText();
+  const fileName = path.basename(new URL(params.textDocument.uri).pathname);
+  const { file } = parse(text);
+  const tokens = tokenize(text);
+
+  return getCompletions(file, tokens, params.position, fileName);
 });
 
 documents.listen(connection);

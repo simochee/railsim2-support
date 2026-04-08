@@ -362,7 +362,7 @@ function buildPropertySnippet(name: string, schema: PropertySchema): string {
   }
 
   // General arity > 1
-  if (arity > 1 && schema.type !== "vector-2d" && schema.type !== "vector-3d") {
+  if (arity > 1) {
     const placeholders = Array.from(
       { length: arity },
       (_, i) => `\${${i + 1}:0}`,
