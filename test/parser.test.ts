@@ -330,6 +330,16 @@ ApplySwitch "_FRONT" {
     expect(defProp.name).toBe("Coord");
   });
 
+  it("should not infinite-loop on object inside ApplySwitch without Case", () => {
+    const { diagnostics } = parse('ApplySwitch "_SW" { Profile { Coord = 1; } }');
+    expect(diagnostics.length).toBeGreaterThan(0);
+  }, 2000);
+
+  it("should not infinite-loop on property inside ApplySwitch without Case", () => {
+    const { diagnostics } = parse('ApplySwitch "_SW" { Coord = 1; }');
+    expect(diagnostics.length).toBeGreaterThan(0);
+  }, 2000);
+
   it("should recover at object-start sync point after error", () => {
     // Error in first object, second object should still parse
     const { file, diagnostics } = parse("Foo { = } Bar { Coord = 1; }");

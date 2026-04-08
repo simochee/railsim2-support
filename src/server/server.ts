@@ -7,8 +7,10 @@ import {
   DiagnosticSeverity as LspSeverity,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import * as path from "node:path";
 import { parse } from "./parser.js";
 import { validateUnknownKeywords } from "./validator/unknownKeywordValidator.js";
+import { validateSchema } from "./validator/schemaValidator.js";
 import type { Diagnostic } from "../shared/diagnostics.js";
 import type { Range } from "../shared/tokens.js";
 
@@ -37,15 +39,17 @@ export function toLspSeverity(severity: string): LspSeverity {
   }
 }
 
-export function validateTextDocument(text: string): Diagnostic[] {
+export function validateTextDocument(text: string, fileName?: string): Diagnostic[] {
   const { file, diagnostics: parseDiags } = parse(text);
   const keywordDiags = validateUnknownKeywords(file);
-  return [...parseDiags, ...keywordDiags];
+  const schemaDiags = validateSchema(file, fileName);
+  return [...parseDiags, ...keywordDiags, ...schemaDiags];
 }
 
 documents.onDidChangeContent((change) => {
   const text = change.document.getText();
-  const diags = validateTextDocument(text);
+  const fileName = path.basename(new URL(change.document.uri).pathname);
+  const diags = validateTextDocument(text, fileName);
   const lspDiags: LspDiagnostic[] = diags.map((d) => ({
     range: toLspRange(d.range),
     severity: toLspSeverity(d.severity),

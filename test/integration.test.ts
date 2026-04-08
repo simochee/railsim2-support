@@ -208,14 +208,16 @@ describe("validation pipeline", () => {
   it("should return no diagnostics for valid input", () => {
     const input = `
 PluginHeader {
-  RailSimVersion = 2;
+  RailSimVersion = "2.00";
   PluginType = Train;
   PluginName = "Test";
   PluginAuthor = "Author";
 }
-Body {
-  ModelFileName = "body.x";
-  Coord = 0.0, 0.0, 0.0;
+TrainInfo {
+  Gauge = 1.067;
+  Body {
+    ModelFileName = "body.x";
+  }
 }`;
     const diagnostics = validateTextDocument(input);
     expect(diagnostics).toHaveLength(0);
@@ -285,7 +287,61 @@ FakeObject {
 });
 
 // ---------------------------------------------------------------------------
-// Suite 3: LSP conversion functions
+// Suite 3: Schema validation integration
+// ---------------------------------------------------------------------------
+
+describe("schema validation integration", () => {
+  it("should return type mismatch errors with fileName", () => {
+    const input = `
+PluginHeader {
+  RailSimVersion = "2.00";
+  PluginType = Rail;
+  PluginName = "Test";
+  PluginAuthor = "Author";
+}
+RailInfo {
+  Gauge = "not a number";
+}
+SoundInfo {}`;
+    const diagnostics = validateTextDocument(input, "Rail2.txt");
+    expect(diagnostics.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge"))).toBe(true);
+  });
+
+  it("should return required property warnings", () => {
+    const input = `
+RailInfo {
+}`;
+    const diagnostics = validateTextDocument(input);
+    expect(diagnostics.some((d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning")).toBe(true);
+  });
+
+  it("should return root validation errors with fileName", () => {
+    const input = `
+PluginHeader {
+  RailSimVersion = "2.00";
+  PluginType = Rail;
+  PluginName = "Test";
+  PluginAuthor = "Author";
+}
+RailInfo { Gauge = 1.0; }
+SoundInfo {}
+TrainInfo { Gauge = 1.0; }`;
+    const diagnostics = validateTextDocument(input, "Rail2.txt");
+    expect(diagnostics.some((d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"))).toBe(true);
+  });
+
+  it("should skip root validation without fileName (backward compat)", () => {
+    const input = `
+RailInfo { Gauge = 1.0; }
+TrainInfo { Gauge = 1.0; }`;
+    const diagnostics = validateTextDocument(input);
+    const rootErrors = diagnostics.filter((d) => d.message.includes("root object"));
+    expect(rootErrors).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Suite 4: LSP conversion functions
 // ---------------------------------------------------------------------------
 
 describe("LSP conversion", () => {
