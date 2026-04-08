@@ -145,6 +145,22 @@ describe("findContext", () => {
     const ctx = findContext(file, tokens, pos(2, 0), "Rail2.txt");
     expect(ctx.type).toBe("root");
   });
+
+  it("オブジェクト名の上 → root (ヘッダ領域は body ではない)", () => {
+    const src = "RailInfo {\n  \n}";
+    const { file, tokens } = setup(src);
+    // cursor on "RailInfo" name (line 0, char 4)
+    const ctx = findContext(file, tokens, pos(0, 4), "Rail2.txt");
+    expect(ctx.type).toBe("root");
+  });
+
+  it("nameParameter 引数の上 → root (ヘッダ領域)", () => {
+    const src = 'DefineSwitch foo {\n  \n}';
+    const { file, tokens } = setup(src);
+    // cursor on "foo" (line 0, char 14)
+    const ctx = findContext(file, tokens, pos(0, 14));
+    expect(ctx.type).not.toBe("objectBody");
+  });
 });
 
 // =========================================================================

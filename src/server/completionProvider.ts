@@ -155,6 +155,13 @@ function findInnermostObject(
     if (!rangeContains(node.range, position)) continue;
 
     if (node.type === "object") {
+      // Skip if cursor is in the object header (name, args, before '{')
+      // Header area: from node.range.start up to just after nameRange + args
+      const headerEnd = node.args.length > 0
+        ? node.args[node.args.length - 1].range.end
+        : node.nameRange.end;
+      if (posLE(position, headerEnd)) continue;
+
       const schemaKey = resolveSchemaKey(node.name, parentSchemaKey);
       const newChain = [...parentChain, schemaKey];
 
