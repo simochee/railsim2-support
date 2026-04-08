@@ -161,6 +161,26 @@ describe("findContext", () => {
     const ctx = findContext(file, tokens, pos(0, 14));
     expect(ctx.type).not.toBe("objectBody");
   });
+
+  it("'{' の上 → root (ヘッダ領域)", () => {
+    const src = "RailInfo {\n  \n}";
+    const { file, tokens } = setup(src);
+    // cursor on '{' (line 0, char 9)
+    const ctx = findContext(file, tokens, pos(0, 9), "Rail2.txt");
+    expect(ctx.type).toBe("root");
+  });
+
+  it("ネストした子オブジェクトのヘッダ → 親の objectBody", () => {
+    const src = "TrainInfo {\n  Body {\n    \n  }\n}";
+    const { file, tokens } = setup(src);
+    // cursor on "Body" name (line 1, char 3)
+    const ctx = findContext(file, tokens, pos(1, 3));
+    // Should be TrainInfo's objectBody, not Body's
+    expect(ctx.type).toBe("objectBody");
+    if (ctx.type === "objectBody") {
+      expect(ctx.schemaKey).toBe("TrainInfo");
+    }
+  });
 });
 
 // =========================================================================

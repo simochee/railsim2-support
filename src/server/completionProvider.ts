@@ -125,7 +125,7 @@ export function findContext(
   }
 
   // 3. AST walk: find innermost ObjectNode containing cursor
-  const result = findInnermostObject(file.body, position, []);
+  const result = findInnermostObject(file.body, position, [], undefined, codeTokens);
   if (result) {
     return {
       type: "objectBody",
@@ -150,17 +150,14 @@ function findInnermostObject(
   position: Position,
   parentChain: string[],
   parentSchemaKey?: string,
+  codeTokens?: Token[],
 ): ObjectSearchResult | null {
   for (const node of nodes) {
     if (!rangeContains(node.range, position)) continue;
 
     if (node.type === "object") {
-      // Skip if cursor is in the object header (name, args, before '{')
-      // Header area: from node.range.start up to just after nameRange + args
-      const headerEnd = node.args.length > 0
-        ? node.args[node.args.length - 1].range.end
-        : node.nameRange.end;
-      if (posLE(position, headerEnd)) continue;
+      // Skip if cursor is in the object header (name, args, or on '{')
+      if (isInObjectHeader(node, position, codeTokens)) continue;
 
       const schemaKey = resolveSchemaKey(node.name, parentSchemaKey);
       const newChain = [...parentChain, schemaKey];
@@ -171,6 +168,7 @@ function findInnermostObject(
         position,
         newChain,
         schemaKey,
+        codeTokens,
       );
       if (deeper) return deeper;
 
@@ -179,20 +177,13 @@ function findInnermostObject(
     }
 
     if (node.type === "if") {
-      // Search inside if branches but keep current parent context
       const inThen = findInnermostObject(
-        node.then,
-        position,
-        parentChain,
-        parentSchemaKey,
+        node.then, position, parentChain, parentSchemaKey, codeTokens,
       );
       if (inThen) return inThen;
       if (node.else_) {
         const inElse = findInnermostObject(
-          node.else_,
-          position,
-          parentChain,
-          parentSchemaKey,
+          node.else_, position, parentChain, parentSchemaKey, codeTokens,
         );
         if (inElse) return inElse;
       }
@@ -202,26 +193,45 @@ function findInnermostObject(
       for (const c of node.cases) {
         if (rangeContains(c.range, position)) {
           const inCase = findInnermostObject(
-            c.body,
-            position,
-            parentChain,
-            parentSchemaKey,
+            c.body, position, parentChain, parentSchemaKey, codeTokens,
           );
           if (inCase) return inCase;
         }
       }
       if (node.default_) {
         const inDefault = findInnermostObject(
-          node.default_,
-          position,
-          parentChain,
-          parentSchemaKey,
+          node.default_, position, parentChain, parentSchemaKey, codeTokens,
         );
         if (inDefault) return inDefault;
       }
     }
   }
   return null;
+}
+
+/** Check if position is in the object header area (name, args, or on '{') */
+function isInObjectHeader(
+  node: ObjectNode,
+  position: Position,
+  codeTokens?: Token[],
+): boolean {
+  // Fast check: cursor on or before name/args end
+  const argsEnd = node.args.length > 0
+    ? node.args[node.args.length - 1].range.end
+    : node.nameRange.end;
+  if (posLE(position, argsEnd)) return true;
+
+  // Check if cursor is on or before the opening '{' using token list
+  if (codeTokens) {
+    const lbrace = codeTokens.find(
+      (t) => t.type === "lbrace"
+        && posLE(argsEnd, tokenStartPos(t))
+        && rangeContains(node.range, tokenStartPos(t)),
+    );
+    if (lbrace && posLE(position, tokenStartPos(lbrace))) return true;
+  }
+
+  return false;
 }
 
 function rangeContains(
