@@ -350,4 +350,42 @@ ApplySwitch "_FRONT" {
     const bar = objects.find((o) => o.name === "Bar");
     expect(bar).toBeDefined();
   });
+
+  // --- Unclosed structure range.end extends to EOF ---
+
+  it("should extend unclosed object range.end to EOF position", () => {
+    const src = "RailInfo {\n  Gauge = 1.0;\n";
+    const { file, diagnostics } = parse(src);
+    expect(diagnostics.length).toBeGreaterThan(0);
+    const obj = file.body[0] as ObjectNode;
+    expect(obj.type).toBe("object");
+    expect(obj.name).toBe("RailInfo");
+    // range.end should be at EOF, not at the last real token
+    // EOF is at line 2, character 0 (after the trailing newline)
+    expect(obj.range.end.line).toBeGreaterThanOrEqual(2);
+  });
+
+  it("should extend unclosed If range.end to EOF position", () => {
+    const src = "Foo {\n  If 1 {\n    Gauge = 1.0;\n";
+    const { file, diagnostics } = parse(src);
+    expect(diagnostics.length).toBeGreaterThan(0);
+    const obj = file.body[0] as ObjectNode;
+    expect(obj.type).toBe("object");
+    const ifNode = obj.body.find((n) => n.type === "if") as IfNode;
+    expect(ifNode).toBeDefined();
+    // The If's range.end should extend to EOF
+    expect(ifNode.range.end.line).toBeGreaterThanOrEqual(2);
+  });
+
+  it("should extend unclosed ApplySwitch range.end to EOF position", () => {
+    const src = "Foo {\n  ApplySwitch x {\n    Case 1:\n      Gauge = 1.0;\n";
+    const { file, diagnostics } = parse(src);
+    expect(diagnostics.length).toBeGreaterThan(0);
+    const obj = file.body[0] as ObjectNode;
+    expect(obj.type).toBe("object");
+    const asNode = obj.body.find((n) => n.type === "applySwitch") as ApplySwitchNode;
+    expect(asNode).toBeDefined();
+    // The ApplySwitch's range.end should extend to EOF
+    expect(asNode.range.end.line).toBeGreaterThanOrEqual(3);
+  });
 });

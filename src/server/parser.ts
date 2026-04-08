@@ -338,7 +338,9 @@ export function parse(source: string): ParseResult {
     expect("lbrace", "Expected '{'");
     const body = parseBody();
     const closeBrace = expect("rbrace", "Expected '}'");
-    const endPos = endOf(closeBrace.length > 0 ? closeBrace : (tokens[pos - 1] ?? nameToken));
+    const endPos = closeBrace.length > 0
+      ? endOf(closeBrace)
+      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "object",
@@ -460,7 +462,7 @@ export function parse(source: string): ParseResult {
 
     expect("lbrace", "Expected '{'");
     const thenBody = parseBody();
-    expect("rbrace", "Expected '}'");
+    let lastBrace = expect("rbrace", "Expected '}'");
 
     let elseBody: BodyNode[] | undefined;
 
@@ -468,10 +470,12 @@ export function parse(source: string): ParseResult {
       advance(); // "Else"
       expect("lbrace", "Expected '{'");
       elseBody = parseBody();
-      expect("rbrace", "Expected '}'");
+      lastBrace = expect("rbrace", "Expected '}'");
     }
 
-    const endPos = endOf(tokens[pos - 1] ?? ifToken);
+    const endPos = lastBrace.length > 0
+      ? endOf(lastBrace)
+      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "if",
@@ -509,8 +513,10 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    expect("rbrace", "Expected '}'");
-    const endPos = endOf(tokens[pos - 1] ?? asToken);
+    const closeBraceAS = expect("rbrace", "Expected '}'");
+    const endPos = closeBraceAS.length > 0
+      ? endOf(closeBraceAS)
+      : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
       type: "applySwitch",
