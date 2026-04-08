@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { semanticSchema, fileSchemas, getFileSchema } from "../src/schema/semantic.js";
-import { OBJECT_NAME_SET, PROPERTY_NAME_SET } from "../src/shared/keywords.js";
 
 describe("semanticSchema", () => {
   it("全ルートオブジェクトが定義されている", () => {
@@ -83,26 +82,3 @@ describe("getFileSchema", () => {
   });
 });
 
-describe("keywords.ts との整合性", () => {
-  it("semantic schema のオブジェクト名が keywords.ts に含まれる（内部 lookup key を除く）", () => {
-    for (const key of Object.keys(semanticSchema)) {
-      // schemaKey（コロン含む）は内部 lookup 用なのでスキップ
-      if (key.includes(":")) continue;
-      expect(
-        OBJECT_NAME_SET.has(key),
-        `Object "${key}" in semanticSchema should exist in OBJECT_NAMES`,
-      ).toBe(true);
-    }
-  });
-
-  it("semantic schema のプロパティ名が keywords.ts に含まれる", () => {
-    for (const [objName, schema] of Object.entries(semanticSchema)) {
-      for (const propName of Object.keys(schema.properties)) {
-        expect(
-          PROPERTY_NAME_SET.has(propName),
-          `Property "${propName}" in ${objName} should exist in PROPERTY_NAMES`,
-        ).toBe(true);
-      }
-    }
-  });
-});

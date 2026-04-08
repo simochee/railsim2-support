@@ -11,6 +11,7 @@ vi.mock("vscode-languageserver/node", () => ({
   ProposedFeatures: { all: [] },
   TextDocuments: class {
     onDidChangeContent = vi.fn();
+    onDidClose = vi.fn();
     listen = vi.fn();
   },
   TextDocumentSyncKind: { Full: 1 },

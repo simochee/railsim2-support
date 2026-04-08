@@ -151,7 +151,7 @@
       ]
     },
     "sym-objects": {
-      "begin": "\\b((Axle|Background|Base|Body|ChangeMaterial|Circle|CrankZY|DefineAnimation|DefineSwitch|DynamicRotation|EditCtrl|EnvInfo|Face|Frame|FrontCabin|GirderInfo|Head|Headlight|Hexagon|Interface|Interval|Joint|Joint3D|JointZY|JointZYX|Landscape|LensFlare|Lighting|Line|LineInfo|Link|ListView|Material|Model|Moon|NormalCursor|NumberedFrame|Object3D|ObjectZY|Particle|PierInfo|PistonZY|Platform|PluginHeader|PluginTree|PoleInfo|PopupMenu|PrimaryAssembly|Profile|RailInfo|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|Set|Slide|Sound|SoundEffect|SoundInfo|StaticMove|StaticRotation|StationInfo|StructInfo|Sun|SurfaceInfo|TailCabin|Texture|TieInfo|Tilt|TrackWind|TrainInfo|TriangleZY|Vertex|Whiteout|Windmill|Wireframe)|(ApplySwitch|If|Else))\\b",
+      "begin": "\\b((Axle|Background|Base|Body|ChangeMaterial|Circle|CrankZY|DefineAnimation|DefineSwitch|DynamicRotation|EditCtrl|EnvInfo|Face|Frame|FrontCabin|GirderInfo|Head|Headlight|Hexagon|Interface|Interval|Joint|Joint3D|JointZY|JointZYX|Landscape|LensFlare|Lighting|Line|LineInfo|Link|ListView|Material|Model|Moon|NormalCursor|NumberedFrame|Object3D|ObjectZY|Particle|PierInfo|PistonZY|Platform|PluginHeader|PluginTree|PoleInfo|PopupMenu|PrimaryAssembly|Profile|RailInfo|ResizeCursor1|ResizeCursor2|ResizeCursor3|ResizeCursor4|Set|Slide|Sound|SoundEffect|SoundInfo|StaticMove|StaticRotation|StationInfo|StructInfo|Sun|SurfaceInfo|TailCabin|Texture|TieInfo|Tilt|TrackWind|TrainInfo|TriangleZY|Vertex|Whiteout|Windmill|Wireframe)|(ApplySwitch|Else|If))\\b",
       "beginCaptures": {
         "2": {
           "name": "storage.type.object-name.rs2"

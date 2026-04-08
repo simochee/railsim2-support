@@ -501,60 +501,20 @@ export const semanticSchema: SemanticSchema = {
   },
 
   // ===== Skin2.txt 関連 =====
-  NormalCursor: {
-    properties: {
-      Cursor2DSize: opt("vector-2d"),
-      Cursor2DHotSpot: opt("vector-2d"),
-      Cursor2DAnimNumber: opt("integer"),
-      Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-      TexFileName: opt("filename"),
-    },
-    children: {},
-  },
-
-  ResizeCursor1: {
-    properties: {
-      Cursor2DSize: opt("vector-2d"),
-      Cursor2DHotSpot: opt("vector-2d"),
-      Cursor2DAnimNumber: opt("integer"),
-      Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-      TexFileName: opt("filename"),
-    },
-    children: {},
-  },
-
-  ResizeCursor2: {
-    properties: {
-      Cursor2DSize: opt("vector-2d"),
-      Cursor2DHotSpot: opt("vector-2d"),
-      Cursor2DAnimNumber: opt("integer"),
-      Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-      TexFileName: opt("filename"),
-    },
-    children: {},
-  },
-
-  ResizeCursor3: {
-    properties: {
-      Cursor2DSize: opt("vector-2d"),
-      Cursor2DHotSpot: opt("vector-2d"),
-      Cursor2DAnimNumber: opt("integer"),
-      Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-      TexFileName: opt("filename"),
-    },
-    children: {},
-  },
-
-  ResizeCursor4: {
-    properties: {
-      Cursor2DSize: opt("vector-2d"),
-      Cursor2DHotSpot: opt("vector-2d"),
-      Cursor2DAnimNumber: opt("integer"),
-      Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
-      TexFileName: opt("filename"),
-    },
-    children: {},
-  },
+  ...Object.fromEntries(
+    ["NormalCursor", "ResizeCursor1", "ResizeCursor2", "ResizeCursor3", "ResizeCursor4"].map(
+      (name) => [name, {
+        properties: {
+          Cursor2DSize: opt("vector-2d"),
+          Cursor2DHotSpot: opt("vector-2d"),
+          Cursor2DAnimNumber: opt("integer"),
+          Cursor2DAnimFrame: opt("integer", { arity: 4, multiple: true }),
+          TexFileName: opt("filename"),
+        },
+        children: {},
+      }],
+    ),
+  ),
 
   Interface: {
     properties: {

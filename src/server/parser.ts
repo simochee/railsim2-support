@@ -352,7 +352,7 @@ export function parse(source: string): ParseResult {
     };
   }
 
-  function parseBody(): BodyNode[] {
+  function parseBody(stopAtCaseDefault = false): BodyNode[] {
     const body: BodyNode[] = [];
 
     while (!check("rbrace") && !check("eof")) {
@@ -368,23 +368,17 @@ export function parse(source: string): ParseResult {
           continue;
         }
         if (t.value === "Case" || t.value === "Default") {
-          // These should be handled by the ApplySwitch parser
           break;
         }
-        if (t.value === "Else") {
-          // This should be handled by the If parser
+        if (!stopAtCaseDefault && t.value === "Else") {
           break;
         }
 
-        // Decide: object or property?
-        // identifier followed by '=' → property
-        // identifier followed by '{' or identifier followed by string/number/etc then '{' → object
         if (pos + 1 < tokens.length && tokens[pos + 1].type === "equals") {
           body.push(parseProperty());
         } else if (isObjectStart()) {
           body.push(parseObject());
         } else {
-          // Unknown — try to parse as property without '='? Error and sync.
           addError(`Unexpected identifier '${t.value}'`, rangeOf(t));
           const before = pos;
           synchronize();
@@ -393,16 +387,11 @@ export function parse(source: string): ParseResult {
         continue;
       }
 
-      // Unexpected token in body
       addError(`Unexpected token '${t.value || t.type}'`, rangeOf(t));
       const before = pos;
       synchronize();
       if (pos === before) advance();
     }
-
-    // Interleave comment nodes that fall within this body's range
-    // (This is handled at the file level; body-level comments are not needed here
-    //  since we strip them during tokenization. But we can add them.)
 
     return body;
   }
@@ -503,7 +492,7 @@ export function parse(source: string): ParseResult {
       } else if (checkValue("identifier", "Default")) {
         advance(); // "Default"
         expect("colon", "Expected ':'");
-        default_ = parseCaseBody();
+        default_ = parseBody(true);
       } else {
         addError(`Expected 'Case' or 'Default' in ApplySwitch`, rangeOf(peek()));
         const before = pos;
@@ -540,7 +529,7 @@ export function parse(source: string): ParseResult {
 
     expect("colon", "Expected ':'");
 
-    const body = parseCaseBody();
+    const body = parseBody(true);
     const endPos = body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
 
     return {
@@ -549,48 +538,6 @@ export function parse(source: string): ParseResult {
       body,
       range: rangeSpan(startPos, endPos),
     };
-  }
-
-  function parseCaseBody(): BodyNode[] {
-    // Parse body nodes until we hit Case, Default, or }
-    const body: BodyNode[] = [];
-
-    while (!check("rbrace") && !check("eof")) {
-      const t = peek();
-      if (t.type === "identifier" && (t.value === "Case" || t.value === "Default")) {
-        break;
-      }
-
-      if (t.type === "identifier") {
-        if (t.value === "If") {
-          body.push(parseIf());
-          continue;
-        }
-        if (t.value === "ApplySwitch") {
-          body.push(parseApplySwitch());
-          continue;
-        }
-
-        if (pos + 1 < tokens.length && tokens[pos + 1].type === "equals") {
-          body.push(parseProperty());
-        } else if (isObjectStart()) {
-          body.push(parseObject());
-        } else {
-          addError(`Unexpected identifier '${t.value}'`, rangeOf(t));
-          const before = pos;
-          synchronize();
-          if (pos === before) advance();
-        }
-        continue;
-      }
-
-      addError(`Unexpected token '${t.value || t.type}'`, rangeOf(t));
-      const before = pos;
-      synchronize();
-      if (pos === before) advance();
-    }
-
-    return body;
   }
 
   // -----------------------------------------------------------------------

@@ -11,6 +11,12 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { semanticSchema } from "../src/schema/semantic.js";
+import {
+  OBJECT_NAMES,
+  CONTROL_KEYWORDS,
+  PROPERTY_NAMES,
+  CONSTANTS,
+} from "../src/shared/keywords.js";
 
 const ROOT = resolve(import.meta.dirname!, "..");
 const GRAMMAR_PATH = join(ROOT, "syntaxes/railsim2.tmLanguage.json");
@@ -18,55 +24,12 @@ const GRAMMAR_PATH = join(ROOT, "syntaxes/railsim2.tmLanguage.json");
 const grammar = JSON.parse(readFileSync(GRAMMAR_PATH, "utf-8"));
 
 // ---------------------------------------------------------------------------
-// Grammar 固定語彙（生成スクリプトと同じ定義）
+// keywords.ts から期待値を取得（yes/no は Grammar の constant ルールに含まれない）
 // ---------------------------------------------------------------------------
 
-const CONTROL_KEYWORDS = ["ApplySwitch", "If", "Else"];
-const LEGACY_PROPERTIES = ["EnvMap", "Turn"];
-const LEGACY_CONSTANTS = ["DayAlpha", "NightAlpha"];
-
-// ---------------------------------------------------------------------------
-// semanticSchema から期待値を導出
-// ---------------------------------------------------------------------------
-
-function expectedObjectNames(): string[] {
-  const names = new Set<string>();
-  for (const key of Object.keys(semanticSchema)) {
-    const name = key.includes(":") ? key.split(":")[0] : key;
-    names.add(name);
-  }
-  return [...names].sort();
-}
-
-function expectedPropertyNames(): string[] {
-  const names = new Set<string>();
-  for (const obj of Object.values(semanticSchema)) {
-    for (const prop of Object.keys(obj.properties)) {
-      names.add(prop);
-    }
-  }
-  for (const legacy of LEGACY_PROPERTIES) {
-    names.add(legacy);
-  }
-  return [...names].sort();
-}
-
-function expectedEnumValues(): string[] {
-  const values = new Set<string>();
-  for (const obj of Object.values(semanticSchema)) {
-    for (const prop of Object.values(obj.properties)) {
-      if (prop.type === "enum" && prop.enumValues) {
-        for (const v of prop.enumValues) {
-          values.add(v);
-        }
-      }
-    }
-  }
-  for (const legacy of LEGACY_CONSTANTS) {
-    values.add(legacy);
-  }
-  return [...values].sort();
-}
+const expectedObjects = [...OBJECT_NAMES];
+const expectedProperties = [...PROPERTY_NAMES];
+const expectedConstants = CONSTANTS.filter((c) => c !== "yes" && c !== "no");
 
 // ---------------------------------------------------------------------------
 // Grammar から実際の語彙を抽出
@@ -97,14 +60,12 @@ const grammarConstants = extractRegexWords(repo["constant"].match);
 // ---------------------------------------------------------------------------
 
 describe("Grammar coverage — object names", () => {
-  const expected = expectedObjectNames();
-
   it("should contain exactly the schema-derived object names", () => {
-    expect(grammarObjectNames).toEqual(expected);
+    expect(grammarObjectNames).toEqual(expectedObjects);
   });
 
   it("should contain exactly the control keywords", () => {
-    expect(grammarControlKeywords).toEqual(CONTROL_KEYWORDS);
+    expect(grammarControlKeywords).toEqual([...CONTROL_KEYWORDS]);
   });
 
   it("should not contain colon-variant keys", () => {
@@ -115,10 +76,8 @@ describe("Grammar coverage — object names", () => {
 });
 
 describe("Grammar coverage — properties", () => {
-  const expected = expectedPropertyNames();
-
   it("should contain exactly the schema-derived + legacy property names", () => {
-    expect(grammarPropertyNames).toEqual(expected);
+    expect(grammarPropertyNames).toEqual(expectedProperties);
   });
 
   it("every schema property should be present in Grammar", () => {
@@ -134,10 +93,8 @@ describe("Grammar coverage — properties", () => {
 });
 
 describe("Grammar coverage — constants", () => {
-  const expected = expectedEnumValues();
-
   it("should contain exactly the schema-derived + legacy constants", () => {
-    expect(grammarConstants).toEqual(expected);
+    expect(grammarConstants).toEqual([...expectedConstants]);
   });
 
   it("should include all PluginType enum values", () => {

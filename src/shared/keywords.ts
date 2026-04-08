@@ -1,95 +1,68 @@
 /**
- * RailSim2 keyword definitions — Single Source of Truth.
+ * RailSim2 keyword definitions — derived from semanticSchema (Single Source of Truth).
  *
- * Extracted from syntaxes/railsim2.tmLanguage.json.
- * The parser does NOT depend on this; only the validator uses it.
+ * Object names, property names, and constants are extracted from the semantic schema.
+ * Control/case keywords are structural and defined here directly.
  */
 
-// ---------------------------------------------------------------------------
-// Object names (storage.type) — from sym-objects capture group 2
-// ---------------------------------------------------------------------------
-
-export const OBJECT_NAMES = [
-  "Axle",
-  "Background",
-  "Base",
-  "Body",
-  "ChangeMaterial",
-  "Circle",
-  "CrankZY",
-  "DefineAnimation",
-  "DefineSwitch",
-  "DynamicRotation",
-  "EditCtrl",
-  "EnvInfo",
-  "Face",
-  "Frame",
-  "FrontCabin",
-  "GirderInfo",
-  "Head",
-  "Headlight",
-  "Hexagon",
-  "Interface",
-  "Interval",
-  "Joint",
-  "Joint3D",
-  "JointZY",
-  "JointZYX",
-  "Landscape",
-  "LensFlare",
-  "Lighting",
-  "Line",
-  "LineInfo",
-  "Link",
-  "ListView",
-  "Material",
-  "Model",
-  "Moon",
-  "NormalCursor",
-  "NumberedFrame",
-  "Object3D",
-  "ObjectZY",
-  "Particle",
-  "PierInfo",
-  "PistonZY",
-  "Platform",
-  "PluginHeader",
-  "PluginTree",
-  "PoleInfo",
-  "PopupMenu",
-  "PrimaryAssembly",
-  "Profile",
-  "RailInfo",
-  "ResizeCursor1",
-  "ResizeCursor2",
-  "ResizeCursor3",
-  "ResizeCursor4",
-  "Set",
-  "Slide",
-  "Sound",
-  "SoundEffect",
-  "SoundInfo",
-  "StaticMove",
-  "StaticRotation",
-  "StationInfo",
-  "StructInfo",
-  "Sun",
-  "SurfaceInfo",
-  "TailCabin",
-  "Texture",
-  "TieInfo",
-  "Tilt",
-  "TrackWind",
-  "TrainInfo",
-  "TriangleZY",
-  "Vertex",
-  "Whiteout",
-  "Windmill",
-  "Wireframe",
-] as const satisfies readonly string[];
+import { semanticSchema } from "../schema/semantic.js";
 
 // ---------------------------------------------------------------------------
-// Control keywords (keyword.control) — from sym-objects capture group 3
+// semantic schema からの自動導出
+// ---------------------------------------------------------------------------
+
+function deriveObjectNames(): string[] {
+  const names = new Set<string>();
+  for (const key of Object.keys(semanticSchema)) {
+    const name = key.includes(":") ? key.split(":")[0] : key;
+    names.add(name);
+  }
+  return [...names].sort();
+}
+
+/** スキーマ未定義だが RailSim2 で使われるレガシープロパティ */
+const LEGACY_PROPERTIES = ["EnvMap", "Turn"];
+
+function derivePropertyNames(): string[] {
+  const names = new Set<string>();
+  for (const obj of Object.values(semanticSchema)) {
+    for (const prop of Object.keys(obj.properties)) {
+      names.add(prop);
+    }
+  }
+  for (const p of LEGACY_PROPERTIES) names.add(p);
+  return [...names].sort();
+}
+
+/** スキーマ未定義だが RailSim2 で使われるレガシー定数 */
+const LEGACY_CONSTANTS = ["DayAlpha", "NightAlpha"];
+
+function deriveEnumValues(): string[] {
+  const values = new Set<string>();
+  for (const obj of Object.values(semanticSchema)) {
+    for (const prop of Object.values(obj.properties)) {
+      if (prop.type === "enum" && prop.enumValues) {
+        for (const v of prop.enumValues) {
+          values.add(v);
+        }
+      }
+    }
+  }
+  // yes/no は言語リテラルとして追加
+  values.add("yes");
+  values.add("no");
+  for (const c of LEGACY_CONSTANTS) values.add(c);
+  return [...values].sort();
+}
+
+// ---------------------------------------------------------------------------
+// Object names (storage.type)
+// ---------------------------------------------------------------------------
+
+export const OBJECT_NAMES: readonly string[] = deriveObjectNames();
+
+// ---------------------------------------------------------------------------
+// Control keywords (keyword.control)
 // ---------------------------------------------------------------------------
 
 export const CONTROL_KEYWORDS = [
@@ -99,7 +72,7 @@ export const CONTROL_KEYWORDS = [
 ] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
-// Case keywords (keyword.control.switch) — from sym-case-clause
+// Case keywords (keyword.control.switch)
 // ---------------------------------------------------------------------------
 
 export const CASE_KEYWORDS = [
@@ -108,246 +81,16 @@ export const CASE_KEYWORDS = [
 ] as const satisfies readonly string[];
 
 // ---------------------------------------------------------------------------
-// Property names (variable.parameter.property) — from sym-properties
+// Property names (variable.parameter.property)
 // ---------------------------------------------------------------------------
 
-export const PROPERTY_NAMES = [
-  "Acceleration",
-  "AccelerationRel",
-  "AirResistance",
-  "AlphaZeroTest",
-  "Ambient",
-  "AnalogClock",
-  "AnimationTime",
-  "ArrowModelFileName",
-  "ArrowModelScale",
-  "AttachCoord",
-  "AttachDir",
-  "AttachObject",
-  "AttachUp",
-  "AttachX",
-  "AxialInclination",
-  "BackgroundColor",
-  "BaseAlt",
-  "BaseToPierLocal",
-  "BlendMode",
-  "BranchRail",
-  "BuildMinAlt",
-  "ButtonFontColor",
-  "CantRatio",
-  "CastShadow",
-  "ChangeAlpha",
-  "ChangeModel",
-  "ChangeTexture",
-  "Color",
-  "CompassModelFileName",
-  "CompassModelScale",
-  "ConnectRail",
-  "ConvertClauseColor",
-  "ConvertFontColor",
-  "Coord",
-  "Cursor2DAnimFrame",
-  "Cursor2DAnimNumber",
-  "Cursor2DHotSpot",
-  "Cursor2DSize",
-  "Deceleration",
-  "DecelerationRel",
-  "DefaultBaseColor",
-  "DefaultBaseColorEven",
-  "DefaultBaseColorOdd",
-  "DefaultFontColor",
-  "Description",
-  "Diameter",
-  "Diffuse",
-  "DirLink",
-  "Direction",
-  "Directional",
-  "DisabledFontColor",
-  "DisabledShadowColor",
-  "DisconnectRail",
-  "Displacement",
-  "Distance",
-  "DoorClosingTime",
-  "EditBaseColor",
-  "EditFontColor",
-  "Emissive",
-  "EnableCant",
-  "Entry",
-  "EnvMap",
-  "EnvMapTexFileName",
-  "ErrorWaveFileName",
-  "FinalRadius",
-  "FixAxis",
-  "FixPosition",
-  "FixRight",
-  "FlattenCant",
-  "FloatFontColor",
-  "FocusFrameColor",
-  "FontName",
-  "Frame",
-  "FrameTexFileName",
-  "FrontLimit",
-  "Gauge",
-  "GirderPlugin",
-  "Gravity",
-  "GroupCommon",
-  "HeadToPierLocal",
-  "Height",
-  "IconRect",
-  "IconTexFileName",
-  "IconTexture",
-  "IgnoreCant",
-  "ImageSize",
-  "Inclination",
-  "InfoFontColor",
-  "InitialPhase",
-  "InitialRadius",
-  "InnerColor",
-  "Interval",
-  "JointInterval",
-  "JointToHeadLocal",
-  "LabelFontColor",
-  "Latitude",
-  "Lifetime",
-  "LiftRailSurface",
-  "LinePlugin",
-  "LinkCoord",
-  "LinkModelFileName",
-  "LinkModelScale",
-  "LocalCoord",
-  "Loop",
-  "MaterialID",
-  "MaxAcceleration",
-  "MaxAngle",
-  "MaxCant",
-  "MaxDeceleration",
-  "MaxDeflection",
-  "MaxDistance",
-  "MaxInterval",
-  "MaxQty",
-  "MaxVelocity",
-  "MinInterval",
-  "MinQty",
-  "ModelFileName",
-  "ModelScale",
-  "MouseDownWaveFileName",
-  "MouseUpWaveFileName",
-  "NightThreshold",
-  "NoCastShadow",
-  "NoReceiveShadow",
-  "NoShadow",
-  "Normal",
-  "NumberedFrame",
-  "Offset",
-  "OpenDoor",
-  "OuterColor",
-  "ParentObject",
-  "PierPlugin",
-  "PluginAuthor",
-  "PluginName",
-  "PluginType",
-  "PolePlugin",
-  "PostAnimationDelay",
-  "PostReverseDelay",
-  "Power",
-  "PreAnimationDelay",
-  "PreReverseDelay",
-  "Radius",
-  "RailPlugin",
-  "RailSimVersion",
-  "ReverseTime",
-  "RevolutionPeriod",
-  "RotateTexture",
-  "RotationAngle",
-  "RotationAxis",
-  "RotationSpeed",
-  "RotationUVFrame",
-  "ScaleTexture",
-  "ScreenShotWaveFileName",
-  "SegmentModelFileName",
-  "SegmentModelScale",
-  "SelectedBaseColor",
-  "SelectedFontColor",
-  "SetAnimation",
-  "ShadowColor",
-  "ShiftTexture",
-  "SizeX",
-  "SizeZ",
-  "SkyColor",
-  "SlideUVFrame",
-  "SourceCoord",
-  "Specular",
-  "StartAngle",
-  "StaticFontColor",
-  "Stoppable",
-  "SunAlt",
-  "SurfaceAlt",
-  "Symmetric",
-  "TailLimit",
-  "TaperX",
-  "TaperY",
-  "TaperZ",
-  "TexFileName",
-  "TexU",
-  "TexVPerMeter",
-  "TextureFileName",
-  "TiePlugin",
-  "TiledUVFrame",
-  "TiltRatio",
-  "TiltSpeed",
-  "TitleBarFontColor",
-  "TrackInterval",
-  "TrackNum",
-  "TrackSpeed",
-  "TransformTexture",
-  "Transparent",
-  "TrolleyAlt",
-  "Turbulence",
-  "Turn",
-  "Twinkle",
-  "UpLink",
-  "UseTexture",
-  "UseWallpaper",
-  "VelocityRel",
-  "VideoStartWaveFileName",
-  "VideoStopWaveFileName",
-  "Volume",
-  "WaveFileName",
-  "WheelSound",
-  "WheelSoundFile",
-  "WindDirModelFileName",
-  "WindDirModelScale",
-] as const satisfies readonly string[];
+export const PROPERTY_NAMES: readonly string[] = derivePropertyNames();
 
 // ---------------------------------------------------------------------------
-// Constants (support.constant + yes/no) — from constant match + yes-no
+// Constants (support.constant + yes/no)
 // ---------------------------------------------------------------------------
 
-export const CONSTANTS = [
-  "Add",
-  "Alpha",
-  "DayAlpha",
-  "Down",
-  "Env",
-  "Girder",
-  "Hour",
-  "Line",
-  "Minute",
-  "NightAlpha",
-  "Pier",
-  "Pole",
-  "Rail",
-  "Second",
-  "Skin",
-  "Station",
-  "Struct",
-  "Surface",
-  "Tie",
-  "Train",
-  "Up",
-  "no",
-  "yes",
-] as const satisfies readonly string[];
+export const CONSTANTS: readonly string[] = deriveEnumValues();
 
 // ---------------------------------------------------------------------------
 // Set versions for O(1) lookup

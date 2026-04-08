@@ -214,12 +214,22 @@ function checkDuplicateProps(
   objectName: string,
   diagnostics: Diagnostic[],
 ): void {
-  const counts = new Map<string, number>();
+  const seen = new Map<string, PropertyNode>();
   for (const child of body) {
     if (child.type === "property") {
-      counts.set(child.name, (counts.get(child.name) ?? 0) + 1);
+      const propSchema = schema.properties[child.name];
+      if (propSchema && !propSchema.multiple) {
+        if (seen.has(child.name)) {
+          diagnostics.push({
+            message: `Duplicate property '${child.name}' in '${objectName}'`,
+            range: child.nameRange,
+            severity: "error",
+          });
+        } else {
+          seen.set(child.name, child);
+        }
+      }
     } else if (child.type === "if") {
-      // 各枝を独立スコープとして再帰チェック
       checkDuplicateProps(child.then, schema, objectName, diagnostics);
       if (child.else_) checkDuplicateProps(child.else_, schema, objectName, diagnostics);
     } else if (child.type === "applySwitch") {
@@ -227,16 +237,6 @@ function checkDuplicateProps(
         checkDuplicateProps(c.body, schema, objectName, diagnostics);
       }
       if (child.default_) checkDuplicateProps(child.default_, schema, objectName, diagnostics);
-    }
-  }
-  for (const [name, count] of counts) {
-    const propSchema = schema.properties[name];
-    if (propSchema && !propSchema.multiple && count > 1) {
-      diagnostics.push({
-        message: `Duplicate property '${name}' in '${objectName}'`,
-        range: body[0]?.type === "property" ? body[0].nameRange : { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
-        severity: "error",
-      });
     }
   }
 }
@@ -432,10 +432,21 @@ function checkDuplicateChildren(
   objectName: string,
   diagnostics: Diagnostic[],
 ): void {
-  const counts = new Map<string, number>();
+  const seen = new Map<string, ObjectNode>();
   for (const child of body) {
     if (child.type === "object") {
-      counts.set(child.name, (counts.get(child.name) ?? 0) + 1);
+      const childDef = schema.children[child.name];
+      if (childDef && !childDef.multiple) {
+        if (seen.has(child.name)) {
+          diagnostics.push({
+            message: `Duplicate child object '${child.name}' in '${objectName}'`,
+            range: child.nameRange,
+            severity: "error",
+          });
+        } else {
+          seen.set(child.name, child);
+        }
+      }
     } else if (child.type === "if") {
       checkDuplicateChildren(child.then, schema, objectName, diagnostics);
       if (child.else_) checkDuplicateChildren(child.else_, schema, objectName, diagnostics);
@@ -444,16 +455,6 @@ function checkDuplicateChildren(
         checkDuplicateChildren(c.body, schema, objectName, diagnostics);
       }
       if (child.default_) checkDuplicateChildren(child.default_, schema, objectName, diagnostics);
-    }
-  }
-  for (const [name, count] of counts) {
-    const childDef = schema.children[name];
-    if (childDef && !childDef.multiple && count > 1) {
-      diagnostics.push({
-        message: `Duplicate child object '${name}' in '${objectName}'`,
-        range: body[0]?.type === "object" ? body[0].nameRange : { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } },
-        severity: "error",
-      });
     }
   }
 }

@@ -1,88 +1,29 @@
 /**
  * Grammar 自動生成スクリプト
  *
- * semanticSchema を Single Source of Truth として
+ * keywords.ts (semanticSchema 由来) を Single Source of Truth として
  * syntaxes/railsim2.tmLanguage.json を生成する。
- *
- * 二層構造:
- *   1. semanticSchema 由来 — オブジェクト名、プロパティ名、enum 定数
- *   2. Grammar 固定語彙 — 制御キーワード、レガシー互換語、リテラルパターン
  */
 
 import { resolve, join, dirname } from "node:path";
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { semanticSchema } from "../src/schema/semantic.js";
+import {
+  OBJECT_NAMES,
+  CONTROL_KEYWORDS,
+  PROPERTY_NAMES,
+  CONSTANTS,
+} from "../src/shared/keywords.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const OUTPUT_PATH = join(ROOT, "syntaxes/railsim2.tmLanguage.json");
 
 // ---------------------------------------------------------------------------
-// Grammar 固定語彙 — semanticSchema 外の補助語彙
-// ---------------------------------------------------------------------------
-
-/** 制御構文キーワード (keyword.control.object-name.rs2) */
-const CONTROL_KEYWORDS = ["ApplySwitch", "If", "Else"];
-
-/** Case/Default (keyword.control.switch.rs2) */
-const CASE_KEYWORDS = ["Case", "Default"];
-
-/** レガシー互換プロパティ — schema 未定義だが既存 Grammar で使われている */
-const LEGACY_PROPERTIES = [
-  "EnvMap",          // env-mapper 用
-  "Turn",            // model switch 条件
-];
-
-/** レガシー互換定数 — schema の enumValues に含まれない固定定数 */
-const LEGACY_CONSTANTS = [
-  "DayAlpha",        // alpha-changer 用定数
-  "NightAlpha",      // alpha-changer 用定数
-];
-
-// ---------------------------------------------------------------------------
-// semanticSchema からの抽出
-// ---------------------------------------------------------------------------
-
-function extractObjectNames(): string[] {
-  const names = new Set<string>();
-  for (const key of Object.keys(semanticSchema)) {
-    // コロン付きキー（例: Vertex:Profile）はコロン前のみ
-    const name = key.includes(":") ? key.split(":")[0] : key;
-    names.add(name);
-  }
-  return [...names].sort();
-}
-
-function extractPropertyNames(): string[] {
-  const names = new Set<string>();
-  for (const obj of Object.values(semanticSchema)) {
-    for (const prop of Object.keys(obj.properties)) {
-      names.add(prop);
-    }
-  }
-  return [...names].sort();
-}
-
-function extractEnumValues(): string[] {
-  const values = new Set<string>();
-  for (const obj of Object.values(semanticSchema)) {
-    for (const prop of Object.values(obj.properties)) {
-      if (prop.type === "enum" && prop.enumValues) {
-        for (const v of prop.enumValues) {
-          values.add(v);
-        }
-      }
-    }
-  }
-  return [...values].sort();
-}
-
-// ---------------------------------------------------------------------------
 // Regex ヘルパー
 // ---------------------------------------------------------------------------
 
-function buildAlternation(words: string[]): string {
+function buildAlternation(words: readonly string[]): string {
   return words.join("|");
 }
 
@@ -91,17 +32,12 @@ function buildAlternation(words: string[]): string {
 // ---------------------------------------------------------------------------
 
 function generateGrammar(): object {
-  const objectNames = extractObjectNames();
-  const propertyNames = [...new Set([...extractPropertyNames(), ...LEGACY_PROPERTIES])].sort();
-  const enumValues = [...new Set([...extractEnumValues(), ...LEGACY_CONSTANTS])].sort();
-
-  // PluginType enum 値は constant にも含まれる（Rail, Tie, Girder, ...）
-  // これは extractEnumValues() で自動的に含まれる
-
-  const objectNamesRegex = buildAlternation(objectNames);
+  const objectNamesRegex = buildAlternation(OBJECT_NAMES);
   const controlRegex = buildAlternation(CONTROL_KEYWORDS);
-  const propertyNamesRegex = buildAlternation(propertyNames);
-  const constantRegex = buildAlternation(enumValues);
+  const propertyNamesRegex = buildAlternation(PROPERTY_NAMES);
+  // yes/no は別ルールで扱うため、constants からは除外
+  const constantsWithoutYesNo = CONSTANTS.filter((c) => c !== "yes" && c !== "no");
+  const constantRegex = buildAlternation(constantsWithoutYesNo);
 
   return {
     $schema:
@@ -314,6 +250,6 @@ const json = JSON.stringify(grammar, null, 2) + "\n";
 writeFileSync(OUTPUT_PATH, json, "utf-8");
 
 console.log(`✅ Generated ${OUTPUT_PATH}`);
-console.log(`   Objects: ${extractObjectNames().length}`);
-console.log(`   Properties: ${[...new Set([...extractPropertyNames(), ...LEGACY_PROPERTIES])].length}`);
-console.log(`   Constants: ${[...new Set([...extractEnumValues(), ...LEGACY_CONSTANTS])].length}`);
+console.log(`   Objects: ${OBJECT_NAMES.length}`);
+console.log(`   Properties: ${PROPERTY_NAMES.length}`);
+console.log(`   Constants: ${CONSTANTS.length}`);
