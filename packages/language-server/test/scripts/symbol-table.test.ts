@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import path from "node:path";
 import { SymbolTable } from "../../scripts/lib/symbol-table.js";
 
 const HELP_DIR = new URL(

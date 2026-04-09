@@ -6,14 +6,11 @@ import type {
 	ResolvedObject,
 	ResolvedProperty,
 	ResolvedChild,
-	GrammarSymbol,
 } from "./symbol-table.js";
-import type { GrammarRule } from "./bnf-parser.js";
 import {
 	schemaOverrides,
 	additionalSchemas,
 	fileSchemaOverrides,
-	type SchemaOverride,
 } from "../schema-overrides.js";
 
 // ── Type conversion ──────────────────────────────────────────────────

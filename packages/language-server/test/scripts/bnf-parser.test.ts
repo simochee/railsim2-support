@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseBnfBody, type GrammarRule } from "../../scripts/lib/bnf-parser.js";
+import { parseBnfBody } from "../../scripts/lib/bnf-parser.js";
 
 describe("parseBnfBody", () => {
 	it("parses a simple property definition (Gauge = float;)", () => {
