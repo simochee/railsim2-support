@@ -11,16 +11,23 @@
 
 import { readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { readHelpHtml, extractPropertyDocs, extractOverview } from "./html-reader.js";
+import { readHelpHtml, extractPropertyDocs, extractOverview, extractTitle } from "./html-reader.js";
 
 const DOCS_BASE_URL = "https://railsim2.simochee.net";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+interface PropertyDocInternal {
+  description: string;
+  helpUrl: string;
+  helpTitle: string;
+}
+
 interface ObjectDoc {
   description: string;
   helpUrl: string;
-  properties: Record<string, string>;
+  helpTitle: string;
+  properties: Record<string, PropertyDocInternal>;
 }
 
 // ── Mapping: HTML filename → object names defined in that file ───────────────
@@ -41,87 +48,87 @@ const FILE_TO_OBJECTS: Record<string, string[]> = {
   "pi_profile.html": ["Profile"],
 };
 
-// Mapping: pi_sym_*.html → object name in schema
-const SYM_FILE_TO_OBJECT: Record<string, string> = {
-  "pi_sym_plugin_header.html": "PluginHeader",
-  "pi_sym_profile.html": "Profile",
-  "pi_sym_profile_face.html": "Face",
-  "pi_sym_profile_vertex.html": "Vertex",
-  "pi_sym_profile_list.html": "Profile",
-  "pi_sym_wireframe.html": "Wireframe",
-  "pi_sym_wireframe_line.html": "Line",
-  "pi_sym_wireframe_vertex.html": "Vertex:Wireframe",
-  "pi_sym_interval.html": "Interval",
-  "pi_sym_object_3d.html": "Object3D",
-  "pi_sym_object_zy.html": "ObjectZY",
-  "pi_sym_object_joint_3d.html": "Joint3D",
-  "pi_sym_object_joint_zy.html": "JointZY",
-  "pi_sym_object_joint_zyx.html": "JointZYX",
-  "pi_sym_axle_object.html": "Axle",
-  "pi_sym_body_object.html": "Body",
-  "pi_sym_body_tilt_info.html": "Tilt",
-  "pi_sym_crank_zy.html": "CrankZY",
-  "pi_sym_crank_slide_zy.html": "PistonZY",
-  "pi_sym_piston_zy.html": "PistonZY",
-  "pi_sym_triangle_zy.html": "TriangleZY",
-  "pi_sym_triangle_link_zy.html": "Link",
-  "pi_sym_static_rotator.html": "StaticRotation",
-  "pi_sym_static_mover.html": "StaticMove",
-  "pi_sym_dynamic_rotator.html": "DynamicRotation",
-  "pi_sym_windmill.html": "Windmill",
-  "pi_sym_wind_tracker.html": "TrackWind",
-  "pi_sym_whiteout.html": "Whiteout",
-  "pi_sym_platform.html": "Platform",
-  "pi_sym_sound_effector.html": "Sound",
-  "pi_sym_particle_applier.html": "Particle",
-  "pi_sym_lens_flare.html": "LensFlare",
-  "pi_sym_material_changer.html": "ChangeMaterial",
-  "pi_sym_model_changer.html": "Model",
-  "pi_sym_model_switch.html": "DefineSwitch",
-  "pi_sym_model_option.html": "Model",
-  "pi_sym_animation_applier.html": "DefineAnimation",
-  "pi_sym_animation_frame.html": "Frame",
-  "pi_sym_animation_numbered_frame.html": "NumberedFrame",
-  "pi_sym_animation_rotation_uv_frame.html": "DefineAnimation",
-  "pi_sym_animation_slide_uv_frame.html": "DefineAnimation",
-  "pi_sym_animation_tiled_uv_frame.html": "DefineAnimation",
-  "pi_sym_animation_texture_transformer.html": "Texture",
-  "pi_sym_texture_changer.html": "Texture",
-  "pi_sym_texture_transformer.html": "Texture",
-  "pi_sym_alpha_changer.html": "Material",
-  "pi_sym_alpha_tester.html": "Material",
-  "pi_sym_shadow_inhibitor.html": "Material",
-  "pi_sym_headlight_applier.html": "Headlight",
-  "pi_sym_effector.html": "SoundEffect",
-  "pi_sym_effector_switch_applier.html": "SoundEffect",
-  "pi_sym_cursor_info.html": "NormalCursor",
-  "pi_sym_skin_cursor_info.html": "NormalCursor",
-  "pi_sym_skin_background_info.html": "Background",
-  "pi_sym_skin_frame_info.html": "Interface",
-  "pi_sym_skin_interface_info.html": "Interface",
-  "pi_sym_skin_listview_info.html": "ListView",
-  "pi_sym_skin_editctrl_info.html": "EditCtrl",
-  "pi_sym_skin_plugintree_info.html": "PluginTree",
-  "pi_sym_skin_popupmenu_info.html": "PopupMenu",
-  "pi_sym_skin_sound_info.html": "SoundEffect",
-  "pi_sym_skin_model_info.html": "Model",
-  "pi_sym_named_object_info.html": "Object3D",
-  "pi_sym_static_timing_info.html": "DefineAnimation",
-  "pi_sym_customizer.html": "DefineSwitch",
-  "pi_sym_customizer_switch_applier.html": "DefineSwitch",
-  "pi_sym_pier_base_info.html": "Base",
-  "pi_sym_pier_head_info.html": "Head",
-  "pi_sym_pier_joint_info.html": "Joint",
-  "pi_sym_rail_brancher.html": "RailInfo",
-  "pi_sym_rail_connector.html": "RailInfo",
-  "pi_sym_rail_disconnector.html": "RailInfo",
-  "pi_sym_env_lighting.html": "Lighting",
-  "pi_sym_env_landscape_info.html": "Landscape",
-  "pi_sym_env_mapper.html": "EnvInfo",
-  "pi_sym_env_sun_info.html": "Sun",
-  "pi_sym_env_moon_info.html": "Moon",
-  "pi_sym_light_setting.html": "Lighting",
-  "pi_sym_train_free_object.html": "Object3D",
+// Mapping: pi_sym_*.html → object name(s) in schema
+const SYM_FILE_TO_OBJECTS: Record<string, string[]> = {
+  "pi_sym_plugin_header.html": ["PluginHeader"],
+  "pi_sym_profile.html": ["Material"],
+  "pi_sym_profile_face.html": ["Face"],
+  "pi_sym_profile_vertex.html": ["Vertex:Profile"],
+  "pi_sym_profile_list.html": ["Profile", "Wireframe", "Interval"],
+  "pi_sym_wireframe.html": ["Wireframe"],
+  "pi_sym_wireframe_line.html": ["Line"],
+  "pi_sym_wireframe_vertex.html": ["Vertex:Wireframe"],
+  "pi_sym_interval.html": ["Interval"],
+  "pi_sym_object_3d.html": ["Object3D"],
+  "pi_sym_object_zy.html": ["ObjectZY"],
+  "pi_sym_object_joint_3d.html": ["Joint3D"],
+  "pi_sym_object_joint_zy.html": ["JointZY"],
+  "pi_sym_object_joint_zyx.html": ["JointZYX"],
+  "pi_sym_axle_object.html": ["Axle"],
+  "pi_sym_body_object.html": ["Body"],
+  "pi_sym_body_tilt_info.html": ["Tilt"],
+  "pi_sym_crank_zy.html": ["CrankZY"],
+  "pi_sym_crank_slide_zy.html": ["Slide"],
+  "pi_sym_piston_zy.html": ["PistonZY"],
+  "pi_sym_triangle_zy.html": ["TriangleZY"],
+  "pi_sym_triangle_link_zy.html": ["Link"],
+  "pi_sym_static_rotator.html": ["StaticRotation"],
+  "pi_sym_static_mover.html": ["StaticMove"],
+  "pi_sym_dynamic_rotator.html": ["DynamicRotation"],
+  "pi_sym_windmill.html": ["Windmill"],
+  "pi_sym_wind_tracker.html": ["TrackWind"],
+  "pi_sym_whiteout.html": ["Whiteout"],
+  "pi_sym_platform.html": ["Platform"],
+  "pi_sym_sound_effector.html": ["SoundEffect"],
+  "pi_sym_particle_applier.html": ["Particle"],
+  "pi_sym_lens_flare.html": ["LensFlare"],
+  "pi_sym_material_changer.html": ["ChangeMaterial"],
+  "pi_sym_model_changer.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_model_switch.html": ["DefineSwitch"],
+  "pi_sym_model_option.html": ["DefineSwitch", "DefineAnimation"],
+  "pi_sym_animation_applier.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_animation_frame.html": ["DefineAnimation"],
+  "pi_sym_animation_numbered_frame.html": ["DefineAnimation"],
+  "pi_sym_animation_rotation_uv_frame.html": ["DefineAnimation"],
+  "pi_sym_animation_slide_uv_frame.html": ["DefineAnimation"],
+  "pi_sym_animation_tiled_uv_frame.html": ["DefineAnimation"],
+  "pi_sym_animation_texture_transformer.html": ["DefineAnimation"],
+  "pi_sym_texture_changer.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_texture_transformer.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_alpha_changer.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_alpha_tester.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_shadow_inhibitor.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_headlight_applier.html": ["Headlight"],
+  "pi_sym_effector.html": ["Headlight", "Particle", "SoundEffect", "PrimaryAssembly"],
+  "pi_sym_effector_switch_applier.html": ["ApplySwitch"],
+  "pi_sym_cursor_info.html": ["NormalCursor", "ResizeCursor1", "ResizeCursor2", "ResizeCursor3", "ResizeCursor4"],
+  "pi_sym_skin_cursor_info.html": ["NormalCursor", "ResizeCursor1", "ResizeCursor2", "ResizeCursor3", "ResizeCursor4"],
+  "pi_sym_skin_background_info.html": ["Background"],
+  "pi_sym_skin_frame_info.html": ["Frame"],
+  "pi_sym_skin_interface_info.html": ["Interface"],
+  "pi_sym_skin_listview_info.html": ["ListView"],
+  "pi_sym_skin_editctrl_info.html": ["EditCtrl"],
+  "pi_sym_skin_plugintree_info.html": ["PluginTree"],
+  "pi_sym_skin_popupmenu_info.html": ["PopupMenu"],
+  "pi_sym_skin_sound_info.html": ["Sound"],
+  "pi_sym_skin_model_info.html": ["Model"],
+  "pi_sym_named_object_info.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_static_timing_info.html": ["StaticRotation", "StaticMove"],
+  "pi_sym_customizer.html": ["StaticRotation", "StaticMove", "DynamicRotation", "TrackWind", "Windmill", "ChangeMaterial"],
+  "pi_sym_customizer_switch_applier.html": ["ApplySwitch"],
+  "pi_sym_pier_base_info.html": ["Base"],
+  "pi_sym_pier_head_info.html": ["Head"],
+  "pi_sym_pier_joint_info.html": ["Joint"],
+  "pi_sym_rail_brancher.html": ["PrimaryAssembly"],
+  "pi_sym_rail_connector.html": ["PrimaryAssembly"],
+  "pi_sym_rail_disconnector.html": ["PrimaryAssembly"],
+  "pi_sym_env_lighting.html": ["Lighting"],
+  "pi_sym_env_landscape_info.html": ["Landscape"],
+  "pi_sym_env_mapper.html": ["Object3D", "ObjectZY", "Link", "Slide", "Axle", "Body"],
+  "pi_sym_env_sun_info.html": ["Sun"],
+  "pi_sym_env_moon_info.html": ["Moon"],
+  "pi_sym_light_setting.html": ["Set"],
+  "pi_sym_train_free_object.html": ["Object3D", "ObjectZY", "TriangleZY", "CrankZY", "PistonZY"],
 };
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -134,6 +141,7 @@ export function emitHoverData(helpDir: string, outputPath: string): void {
     const filePath = resolve(helpDir, filename);
     const $ = readHelpHtml(filePath);
     const overview = extractOverview($);
+    const title = extractTitle($);
     const props = extractPropertyDocs($);
     const helpUrl = `${DOCS_BASE_URL}/${filename}`;
 
@@ -143,7 +151,13 @@ export function emitHoverData(helpDir: string, outputPath: string): void {
       objectDocs[primaryObject] = {
         description: overview ?? "",
         helpUrl,
-        properties: Object.fromEntries(props),
+        helpTitle: title,
+        properties: Object.fromEntries(
+          Array.from(props, ([name, desc]) => [
+            name,
+            { description: desc, helpUrl, helpTitle: title },
+          ]),
+        ),
       };
 
       // Secondary objects (e.g. SoundInfo in pi_rail.html) get the same helpUrl
@@ -151,6 +165,7 @@ export function emitHoverData(helpDir: string, outputPath: string): void {
         objectDocs[objectNames[i]] = {
           description: "",
           helpUrl,
+          helpTitle: title,
           properties: {},
         };
       }
@@ -158,31 +173,46 @@ export function emitHoverData(helpDir: string, outputPath: string): void {
   }
 
   // 2. Process symbol pages (pi_sym_*.html) — extract descriptions and merge properties
+  //    Sort: single-target files first so object-specific pages set the representative
+  //    helpUrl/helpTitle before shared pages try to create the same object.
   const symFiles = readdirSync(helpDir).filter(
     (f) => f.startsWith("pi_sym_") && f.endsWith(".html"),
   );
+  symFiles.sort((a, b) => {
+    const aTargets = SYM_FILE_TO_OBJECTS[a]?.length ?? 0;
+    const bTargets = SYM_FILE_TO_OBJECTS[b]?.length ?? 0;
+    return aTargets - bTargets;
+  });
 
   for (const filename of symFiles) {
     const filePath = resolve(helpDir, filename);
     const $ = readHelpHtml(filePath);
     const overview = extractOverview($);
+    const title = extractTitle($);
     const props = extractPropertyDocs($);
     const helpUrl = `${DOCS_BASE_URL}/${filename}`;
 
-    // Merge properties into the mapped object
-    const objectName = SYM_FILE_TO_OBJECT[filename];
-    if (objectName && props.size > 0) {
+    // Merge properties into the mapped object(s)
+    const objectNames = SYM_FILE_TO_OBJECTS[filename];
+    if (!objectNames || props.size === 0) continue;
+
+    for (const objectName of objectNames) {
       if (!objectDocs[objectName]) {
         objectDocs[objectName] = {
           description: overview ?? "",
           helpUrl,
+          helpTitle: title,
           properties: {},
         };
       }
       for (const [propName, propDesc] of props) {
         // Don't overwrite if already set from main page
         if (!objectDocs[objectName].properties[propName]) {
-          objectDocs[objectName].properties[propName] = propDesc;
+          objectDocs[objectName].properties[propName] = {
+            description: propDesc,
+            helpUrl,
+            helpTitle: title,
+          };
         }
       }
     }
@@ -202,6 +232,10 @@ export function emitHoverData(helpDir: string, outputPath: string): void {
 export interface PropertyDoc {
   /** Japanese description of the property */
   description: string;
+  /** URL to the help page where this property is documented */
+  helpUrl: string;
+  /** Title of the help page */
+  helpTitle: string;
 }
 
 export interface ObjectDoc {
@@ -209,21 +243,30 @@ export interface ObjectDoc {
   description: string;
   /** URL to the help page on GitHub Pages */
   helpUrl: string;
+  /** Title of the help page */
+  helpTitle: string;
   /** Property documentation keyed by property name */
   properties: Record<string, PropertyDoc>;
 }
 
 /** Documentation for object blocks (RailInfo, TieInfo, etc.) */
 export const objectDocs: Record<string, ObjectDoc> = ${JSON.stringify(
-    // Transform to include PropertyDoc structure
     Object.fromEntries(
       Object.entries(objectDocs).map(([name, doc]) => [
         name,
         {
           description: doc.description,
           helpUrl: doc.helpUrl,
+          helpTitle: doc.helpTitle,
           properties: Object.fromEntries(
-            Object.entries(doc.properties).map(([prop, desc]) => [prop, { description: desc }]),
+            Object.entries(doc.properties).map(([prop, propDoc]) => [
+              prop,
+              {
+                description: propDoc.description,
+                helpUrl: propDoc.helpUrl,
+                helpTitle: propDoc.helpTitle,
+              },
+            ]),
           ),
         },
       ]),

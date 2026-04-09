@@ -94,6 +94,13 @@ export function extractPropertyDocs($: CheerioAPI): Map<string, string> {
 }
 
 /**
+ * Extract the document title from `<title>` tag.
+ */
+export function extractTitle($: CheerioAPI): string {
+  return $("title").first().text().trim() || "";
+}
+
+/**
  * Extract the overview text: the first `<p>` after `<h2>概要</h2>`.
  */
 export function extractOverview($: CheerioAPI): string | null {

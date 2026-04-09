@@ -17,7 +17,7 @@ export function getHover(file: FileNode, position: Position): Hover | null {
 
     const lines = [`**${result.name}**`];
     if (doc.description) lines.push("", doc.description);
-    lines.push("", `[Help](${doc.helpUrl})`);
+    lines.push("", `[${doc.helpTitle || "Help"}](${doc.helpUrl})`);
 
     return {
       contents: { kind: MarkupKind.Markdown, value: lines.join("\n") },
@@ -33,9 +33,13 @@ export function getHover(file: FileNode, position: Position): Hover | null {
     // Also try to get the object doc for a help link
     const objDoc = result.parentObject ? getObjectDoc(result.parentObject) : undefined;
 
+    // Use property-level helpUrl if available, fall back to object-level
+    const helpUrl = propDoc?.helpUrl ?? objDoc?.helpUrl;
+    const helpTitle = propDoc?.helpTitle ?? objDoc?.helpTitle;
+
     const lines = [`**${result.name}**`];
     if (propDoc?.description) lines.push("", propDoc.description);
-    if (objDoc?.helpUrl) lines.push("", `[Help](${objDoc.helpUrl})`);
+    if (helpUrl) lines.push("", `[${helpTitle || "Help"}](${helpUrl})`);
 
     if (lines.length === 1) return null; // No useful info
     return {
