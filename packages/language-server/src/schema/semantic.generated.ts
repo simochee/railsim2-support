@@ -1656,7 +1656,7 @@ export const semanticSchema: SemanticSchema = {
       },
       LocalCoord: {
         type: "vector-3d",
-        required: true,
+        required: false,
         multiple: false
       },
       DirLink: {

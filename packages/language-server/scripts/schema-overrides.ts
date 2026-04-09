@@ -266,6 +266,15 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
     },
   },
 
+  // ── Joint3D: LocalCoord は BNF 上必須だが実装では省略可能 ──
+  // vendor/CNamedObject.cpp:258-259 で確認: if-else パターン（デフォルト V3ZERO）
+  // ※ JointZY/JointZYX の LocalCoord は throw パターン（必須）なので override しない
+  Joint3D: {
+    properties: {
+      LocalCoord: { required: false },
+    },
+  },
+
   // ── ChangeMaterial: MaterialID is expression (variable arity) ──
   ChangeMaterial: {
     properties: {
