@@ -5,6 +5,7 @@
  * - Processes banner CSS Module (postcss-modules) at build time
  * - Injects an "unofficial mirror" banner via transformIndexHtml
  * - Provides rollup input entries for MPA build
+ * - Outputs all pages under /help/ for flat URL structure
  *
  * Original help documents: Copyright (C) 2003-2009 インターネット停留所
  * Licensed under LGPL v2.1 — see vendor/railsim2/Distribution/jp/RailSim2/COPYING.txt
@@ -17,20 +18,21 @@ import postcss from "postcss";
 import postcssModules from "postcss-modules";
 import iconv from "iconv-lite";
 
+const REPO_ROOT = resolve(__dirname, "../../..");
 const RAILSIM2_ROOT = resolve(
-  __dirname,
-  "../../vendor/railsim2/Distribution/jp/RailSim2",
+  REPO_ROOT,
+  "vendor/railsim2/Distribution/jp/RailSim2",
 );
 const HELP_SRC = resolve(RAILSIM2_ROOT, "Help");
 const PAGES_OUT = resolve(__dirname, "../pages");
-const HELP_OUT = resolve(PAGES_OUT, "Help");
+const HELP_OUT = resolve(PAGES_OUT, "help");
 
 const GLOBAL_CSS_SRC = resolve(__dirname, "../global.css");
 const BANNER_CSS_SRC = resolve(__dirname, "../banner.module.css");
 
 function loadIcon(name: string): string {
   const svg = readFileSync(
-    resolve(__dirname, `../../node_modules/@tabler/icons/icons/outline/${name}.svg`),
+    resolve(REPO_ROOT, `node_modules/@tabler/icons/icons/outline/${name}.svg`),
     "utf-8",
   );
   // Strip class attribute and collapse to single line
@@ -97,10 +99,10 @@ function modernizeHtml(html: string): string {
 
   html = html.replace(/&(nbsp|amp|lt|gt|quot)([^;])/g, "&$1;$2");
 
-  // Inject CSS links so Vite can bundle them
+  // Inject CSS links (relative paths for /help/ base)
   html = html.replace(
     /<\/head>/i,
-    '<link rel="stylesheet" href="/global.css">\n<link rel="stylesheet" href="/banner.css">\n</head>',
+    '<link rel="stylesheet" href="global.css">\n<link rel="stylesheet" href="banner.css">\n</head>',
   );
 
   return html;
@@ -109,8 +111,8 @@ function modernizeHtml(html: string): string {
 function processIndexHtml(html: string): string {
   html = modernizeHtml(html);
 
-  // Fix case-inconsistent links: help/ → Help/
-  html = html.replace(/href="help\//g, 'href="Help/');
+  // Flatten links: Help/xxx and help/xxx → just xxx (same directory)
+  html = html.replace(/href="[Hh]elp\//g, 'href="');
 
   // Fix COPYING.txt link to point to GitHub
   html = html.replace(
@@ -124,17 +126,17 @@ function processIndexHtml(html: string): string {
 function generatePages(bannerCss: string): Record<string, string> {
   mkdirSync(HELP_OUT, { recursive: true });
 
-  // Copy global.css and write processed banner CSS
-  copyFileSync(GLOBAL_CSS_SRC, resolve(PAGES_OUT, "global.css"));
-  writeFileSync(resolve(PAGES_OUT, "banner.css"), bannerCss, "utf-8");
+  // Copy global.css and write processed banner CSS into help/
+  copyFileSync(GLOBAL_CSS_SRC, resolve(HELP_OUT, "global.css"));
+  writeFileSync(resolve(HELP_OUT, "banner.css"), bannerCss, "utf-8");
 
-  // Root index.html
+  // Root index.html → help/index.html
   const indexRaw = readShiftJIS(resolve(RAILSIM2_ROOT, "index.html"));
-  writeFileSync(resolve(PAGES_OUT, "index.html"), processIndexHtml(indexRaw), "utf-8");
+  writeFileSync(resolve(HELP_OUT, "index.html"), processIndexHtml(indexRaw), "utf-8");
 
-  // Help/*.html + assets
+  // Help/*.html + assets → help/ (flat)
   const inputs: Record<string, string> = {
-    index: resolve(PAGES_OUT, "index.html"),
+    "help/index": resolve(HELP_OUT, "index.html"),
   };
 
   for (const file of readdirSync(HELP_SRC)) {
@@ -144,7 +146,7 @@ function generatePages(bannerCss: string): Record<string, string> {
 
     if (ext === ".html") {
       writeFileSync(destPath, modernizeHtml(readShiftJIS(srcPath)), "utf-8");
-      inputs[`Help/${file.replace(".html", "")}`] = destPath;
+      inputs[`help/${file.replace(".html", "")}`] = destPath;
     } else if ([".css", ".png", ".jpg", ".gif", ".ico"].includes(ext)) {
       if (ext === ".css") {
         writeFileSync(destPath, readShiftJIS(srcPath), "utf-8");

@@ -2,7 +2,7 @@ node_modules/
 out/
 dist/
 vendor/
-docs-site/
+apps/website/
 *.generated.ts
 *.vsix
 pnpm-lock.yaml

@@ -1,6 +1,6 @@
 node_modules/
 out/
 *.vsix
-docs-site/pages/
-docs-site/dist/
+apps/website/pages/
+apps/website/dist/
 tsconfig.tsbuildinfo

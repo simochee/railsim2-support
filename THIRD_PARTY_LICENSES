@@ -3,7 +3,7 @@ Third-Party Licenses
 
 RailSim II Help Documentation
 -----------------------------
-Files: vendor/railsim2/**, docs-site generated output, src/server/hoverData.generated.ts
+Files: vendor/railsim2/**, apps/website generated output, src/server/hoverData.generated.ts
 
 Copyright (C) 2003-2012 インターネット停留所 (Intaanetto Teiryuujo)
 Source: https://github.com/aizentranza/railsim2
