@@ -252,8 +252,7 @@ describe("getCompletions", () => {
   });
 
   it("PrimaryAssembly body with existing FrontCabin → FrontCabin excluded", () => {
-    const src =
-      'PrimaryAssembly {\n  FrontCabin {\n  }\n  \n}';
+    const src = "PrimaryAssembly {\n  FrontCabin {\n  }\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(3, 2), "Train2.txt");
     const labels = items.map((i) => i.label);
@@ -292,7 +291,7 @@ describe("getCompletions", () => {
   });
 
   it("vector-3d property → 3 placeholders", () => {
-    const src = 'Headlight {\n  \n}';
+    const src = "Headlight {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2));
     const coord = items.find((i) => i.label === "SourceCoord");

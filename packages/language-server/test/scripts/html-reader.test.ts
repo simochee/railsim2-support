@@ -102,9 +102,7 @@ describe("extractOverview", () => {
     const $ = readHelpHtml(path.join(HELP_DIR, "pi_rail.html"));
     const overview = extractOverview($);
 
-    expect(overview).toBe(
-      "レールプラグインは、線路のレールを表現するために使用されます。",
-    );
+    expect(overview).toBe("レールプラグインは、線路のレールを表現するために使用されます。");
   });
 
   it("extracts overview text from pi_sym_piston_zy.html", () => {

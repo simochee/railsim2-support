@@ -698,7 +698,9 @@ Object3D "Door" {
 }
 `;
     const diags = validate(src);
-    const dupErrors = diags.filter((d) => d.message.includes("Duplicate child object 'StaticMove'"));
+    const dupErrors = diags.filter((d) =>
+      d.message.includes("Duplicate child object 'StaticMove'"),
+    );
     expect(dupErrors).toHaveLength(0);
   });
 });

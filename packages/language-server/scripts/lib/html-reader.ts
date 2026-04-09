@@ -41,7 +41,7 @@ export function extractBnfBlocks($: CheerioAPI): BnfBlock[] {
     const nontermName = match[1].trim();
 
     // Find the next sibling <pre class="ind"> or <pre class="ind_j">
-    const preInd = preNonterm.nextAll('pre.ind, pre.ind_j').first();
+    const preInd = preNonterm.nextAll("pre.ind, pre.ind_j").first();
     if (preInd.length === 0) return;
 
     const rawHtml = preInd.html() ?? "";
@@ -49,7 +49,7 @@ export function extractBnfBlocks($: CheerioAPI): BnfBlock[] {
 
     // Collect refs from <a class="nonterm"> inside the ind block
     const refs: string[] = [];
-    preInd.find('a.nonterm').each((_j, a) => {
+    preInd.find("a.nonterm").each((_j, a) => {
       const refText = $(a).text().trim();
       if (refText && !refs.includes(refText)) {
         refs.push(refText);

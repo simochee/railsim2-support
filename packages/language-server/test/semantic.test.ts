@@ -79,7 +79,9 @@ describe("semanticSchema", () => {
   });
 
   it("Sound に MouseDownWaveFileName が定義されている", () => {
-    expect(semanticSchema["Sound"].properties["MouseDownWaveFileName"]).toMatchObject({ type: "filename" });
+    expect(semanticSchema["Sound"].properties["MouseDownWaveFileName"]).toMatchObject({
+      type: "filename",
+    });
   });
 });
 
