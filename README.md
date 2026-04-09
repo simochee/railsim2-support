@@ -1,5 +1,6 @@
 # RailSim2 Support
 
+[![Visual Studio Code - RailSim2 Support](https://img.shields.io/badge/Visual_Studio_Code-RailSim2_Support-blue?logo=visual-studio-code&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar)
 [![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/simochee.vscode-railsim2-grammar)](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/simochee.vscode-railsim2-grammar)](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar)
 
