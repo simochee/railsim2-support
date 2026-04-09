@@ -145,7 +145,7 @@ export const semanticSchema: SemanticSchema = {
         schemaKey: "Hexagon:LensFlare"
       },
       Texture: {
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -440,16 +440,16 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Profile: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Wireframe: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Interval: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       }
     },
   },
@@ -483,16 +483,16 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Profile: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Wireframe: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Interval: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       }
     },
   },
@@ -1314,38 +1314,38 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       Frame: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       NumberedFrame: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       SlideUVFrame: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       TiledUVFrame: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       RotationUVFrame: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       ShiftTexture: {
         type: "expression",
         required: false,
-        multiple: true,
+        multiple: false,
         arity: 2
       }
     },
@@ -1556,46 +1556,46 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       ConnectRail: {
         type: "integer",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         arity: 2
       },
       BranchRail: {
         type: "integer",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         arity: 2
       },
       DisconnectRail: {
         type: "integer",
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       }
     },
     children: {
       Headlight: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Particle: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       SoundEffect: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       }
     },
     nameParameter: "expression",
@@ -1604,46 +1604,46 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       ConnectRail: {
         type: "integer",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         arity: 2
       },
       BranchRail: {
         type: "integer",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         arity: 2
       },
       DisconnectRail: {
         type: "integer",
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       }
     },
     children: {
       Headlight: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Particle: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       SoundEffect: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -1708,125 +1708,125 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       }
     },
     children: {
       StaticRotation: {
-        required: true,
+        required: false,
         multiple: true
       },
       StaticMove: {
-        required: true,
+        required: false,
         multiple: true
       },
       DynamicRotation: {
-        required: true,
+        required: false,
         multiple: true
       },
       TrackWind: {
-        required: true,
+        required: false,
         multiple: true
       },
       Windmill: {
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeMaterial: {
-        required: true,
+        required: false,
         multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       Joint3D: {
         required: true,
@@ -1897,85 +1897,85 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
@@ -1992,40 +1992,40 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       StaticRotation: {
-        required: true,
+        required: false,
         multiple: true
       },
       StaticMove: {
-        required: true,
+        required: false,
         multiple: true
       },
       DynamicRotation: {
-        required: true,
+        required: false,
         multiple: true
       },
       TrackWind: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Windmill: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ChangeMaterial: {
-        required: true,
+        required: false,
         multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       JointZYX: {
         required: true,
@@ -2070,85 +2070,85 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
@@ -2160,40 +2160,40 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       StaticRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       StaticMove: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       DynamicRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       TrackWind: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Windmill: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ChangeMaterial: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       JointZYX: {
         required: true,
@@ -2236,85 +2236,85 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
@@ -2326,40 +2326,40 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       StaticRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       StaticMove: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       DynamicRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       TrackWind: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Windmill: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ChangeMaterial: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       JointZYX: {
         required: true,
@@ -2550,17 +2550,17 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       ConnectRail: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       BranchRail: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       DisconnectRail: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -2570,52 +2570,52 @@ export const semanticSchema: SemanticSchema = {
         multiple: true
       },
       Body: {
-        required: true,
+        required: false,
         multiple: true
       },
       Object3D: {
-        required: true,
+        required: false,
         multiple: true
       },
       ObjectZY: {
-        required: true,
+        required: false,
         multiple: true
       },
       TriangleZY: {
-        required: true,
+        required: false,
         multiple: true
       },
       CrankZY: {
-        required: true,
+        required: false,
         multiple: true
       },
       PistonZY: {
-        required: true,
+        required: false,
         multiple: true
       },
       Headlight: {
-        required: true,
+        required: false,
         multiple: true
       },
       Particle: {
-        required: true,
+        required: false,
         multiple: true
       },
       SoundEffect: {
-        required: true,
+        required: false,
         multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       FrontCabin: {
         required: false,
@@ -2624,18 +2624,6 @@ export const semanticSchema: SemanticSchema = {
       TailCabin: {
         required: false,
         multiple: false
-      },
-      Link: {
-        required: false,
-        multiple: true
-      },
-      DefineSwitch: {
-        required: false,
-        multiple: true
-      },
-      DefineAnimation: {
-        required: false,
-        multiple: true
       }
     },
   },
@@ -2685,85 +2673,85 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
@@ -2790,40 +2778,40 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       StaticRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       StaticMove: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       DynamicRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       TrackWind: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Windmill: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ChangeMaterial: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       }
     },
     nameParameter: "string",
@@ -2890,153 +2878,133 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeModel: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       AnalogClock: {
         type: "enum",
-        required: true,
-        multiple: false,
+        required: false,
+        multiple: true,
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoReceiveShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       NoShadow: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       Transparent: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       EnvMap: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       AlphaZeroTest: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true
       },
       ChangeTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
-        required: true,
+        required: false,
         multiple: true,
         arity: 2
       }
     },
     children: {
       StaticRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       StaticMove: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       DynamicRotation: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       TrackWind: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Windmill: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       ChangeMaterial: {
-        required: true,
+        required: false,
         multiple: true
       },
       ApplySwitch: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       If: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Else: {
         required: false,
-        multiple: false
+        multiple: true
       },
       JointZY: {
         required: true,
         multiple: true
       },
       Tilt: {
-        required: false,
+        required: true,
         multiple: false
-      },
-      Headlight: {
-        required: false,
-        multiple: true
-      },
-      FrontCabin: {
-        required: false,
-        multiple: false
-      },
-      TailCabin: {
-        required: false,
-        multiple: false
-      },
-      Axle: {
-        required: false,
-        multiple: true
-      },
-      Object3D: {
-        required: false,
-        multiple: true
       }
     },
     nameParameter: "string",
@@ -3151,16 +3119,16 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Profile: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Wireframe: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       },
       Interval: {
-        required: true,
-        multiple: false
+        required: false,
+        multiple: true
       }
     },
   },

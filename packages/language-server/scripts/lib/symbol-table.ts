@@ -190,15 +190,18 @@ export class SymbolTable {
    * Expand an array of GrammarRules into the given ResolvedObject.
    * `parentObjectName` is set when we are inside an inline-block body
    * (used for schemaKey generation in union-blocks).
+   * `refQuantifier` carries the parent ref's min/max quantifier so that
+   * child objects inherit the correct required/multiple flags.
    */
   private expandRules(
     rules: GrammarRule[],
     target: ResolvedObject,
     visiting: Set<string>,
     parentObjectName: string | undefined,
+    refQuantifier?: { min: number; max: number },
   ): void {
     for (const rule of rules) {
-      this.expandRule(rule, target, visiting, parentObjectName);
+      this.expandRule(rule, target, visiting, parentObjectName, refQuantifier);
     }
   }
 
@@ -207,6 +210,7 @@ export class SymbolTable {
     target: ResolvedObject,
     visiting: Set<string>,
     parentObjectName: string | undefined,
+    refQuantifier?: { min: number; max: number },
   ): void {
     switch (rule.kind) {
       case "property":
@@ -234,15 +238,15 @@ export class SymbolTable {
         break;
 
       case "inline-block":
-        this.expandInlineBlock(rule, target, visiting, parentObjectName);
+        this.expandInlineBlock(rule, target, visiting, parentObjectName, refQuantifier);
         break;
 
       case "union-block":
-        this.expandUnionBlock(rule, target, visiting, parentObjectName);
+        this.expandUnionBlock(rule, target, visiting, parentObjectName, refQuantifier);
         break;
 
       case "union":
-        this.expandUnion(rule, target, visiting, parentObjectName);
+        this.expandUnion(rule, target, visiting, parentObjectName, refQuantifier);
         break;
     }
   }
@@ -266,12 +270,36 @@ export class SymbolTable {
       // so that inline-blocks inside the ref are registered as children
       // rather than being flattened into the target.
       const refParent = parentObjectName ?? "__ref__";
-      this.expandRules(sym.rules, target, new Set(visiting), refParent);
+      // Propagate the ref's quantifier (min/max) so child objects inherit
+      // the correct required/multiple flags from BNF (e.g., * → optional, 1+ → required).
+      const quantifier = { min: rule.min, max: rule.max };
+      this.expandRules(sym.rules, target, new Set(visiting), refParent, quantifier);
     } else {
-      // Pure properties/refs — resolve and merge
+      // Pure properties/refs — resolve and merge.
+      // Apply the ref's quantifier: if the ref is optional (min=0), all
+      // merged properties/children become optional; if max>1, they become multiple.
       const resolved = this.resolveInternal(rule.symbol, new Set(visiting));
-      mergeProperties(target, resolved);
-      mergeChildren(target, resolved);
+      const isRefOptional = rule.min === 0;
+      const isRefMultiple = rule.max > 1;
+
+      for (const [name, prop] of Object.entries(resolved.properties)) {
+        if (!target.properties[name]) {
+          target.properties[name] = {
+            ...prop,
+            ...(isRefOptional && { required: false }),
+            ...(isRefMultiple && { multiple: true }),
+          };
+        }
+      }
+      for (const [name, child] of Object.entries(resolved.children)) {
+        if (!target.children[name]) {
+          target.children[name] = {
+            ...child,
+            ...(isRefOptional && { required: false }),
+            ...(isRefMultiple && { multiple: true }),
+          };
+        }
+      }
     }
   }
 
@@ -280,6 +308,7 @@ export class SymbolTable {
     target: ResolvedObject,
     visiting: Set<string>,
     parentObjectName: string | undefined,
+    refQuantifier?: { min: number; max: number },
   ): void {
     if (parentObjectName === undefined) {
       // Top-level inline-block: flatten its body into target.
@@ -291,9 +320,15 @@ export class SymbolTable {
       // Registration in allObjects happens in registerTopLevelObjects.
     } else {
       // Nested inline-block: register as a child.
+      // Combine the inline-block's own optional flag with the parent ref's quantifier.
+      // e.g., "body-object *" → ref min=0 → child required=false, multiple=true
+      //        "axle-object 1+" → ref min=1 → child required=true, multiple=true
+      //        "( FrontCabin{...} ) opt" → inline-block optional=true → required=false
+      const isRefOptional = refQuantifier != null && refQuantifier.min === 0;
+      const isRefMultiple = refQuantifier != null && refQuantifier.max > 1;
       target.children[rule.objectName] = {
-        required: !rule.optional,
-        multiple: false,
+        required: !rule.optional && !isRefOptional,
+        multiple: isRefMultiple,
       };
 
       // Create a separate resolved object for this child
@@ -311,6 +346,7 @@ export class SymbolTable {
     target: ResolvedObject,
     visiting: Set<string>,
     parentObjectName: string | undefined,
+    refQuantifier?: { min: number; max: number },
   ): void {
     for (const objName of rule.objectNames) {
       const effectiveParent =
@@ -319,9 +355,12 @@ export class SymbolTable {
           : undefined;
       const schemaKey = effectiveParent ? `${objName}:${effectiveParent}` : undefined;
 
+      // Union alternatives are inherently optional (you pick one),
+      // but multiple is inherited from the parent ref's quantifier.
+      const isRefMultiple = refQuantifier != null && refQuantifier.max > 1;
       target.children[objName] = {
         required: false,
-        multiple: false,
+        multiple: isRefMultiple,
         schemaKey,
       };
 
@@ -337,9 +376,11 @@ export class SymbolTable {
     target: ResolvedObject,
     visiting: Set<string>,
     parentObjectName: string | undefined,
+    refQuantifier?: { min: number; max: number },
   ): void {
     for (const alt of rule.alternatives) {
-      this.expandRules(alt, target, visiting, parentObjectName);
+      // Propagate refQuantifier so nested inline-blocks get correct required/multiple.
+      this.expandRules(alt, target, visiting, parentObjectName, refQuantifier);
     }
   }
 }
