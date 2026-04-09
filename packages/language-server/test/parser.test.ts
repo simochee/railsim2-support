@@ -448,7 +448,9 @@ ApplySwitch "_FRONT" {
   });
 
   it("should have bodyRange for CaseNode and defaultRange for ApplySwitchNode", () => {
-    const { file, diagnostics } = parse('ApplySwitch "_X" { Case 0: Coord = 10; Default: Coord = 20; }');
+    const { file, diagnostics } = parse(
+      'ApplySwitch "_X" { Case 0: Coord = 10; Default: Coord = 20; }',
+    );
     expect(diagnostics).toHaveLength(0);
     const sw = file.body[0] as ApplySwitchNode;
     expect(sw.cases[0].bodyRange).toBeDefined();

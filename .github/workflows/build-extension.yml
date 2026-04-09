@@ -32,7 +32,7 @@ jobs:
         run: pnpm --filter @railsim2-support/language-server build
 
       - name: Package extension
-        run: pnpm --filter @railsim2-support/vscode-extension package
+        run: pnpm --filter railsim2-support package
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v4

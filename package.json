@@ -8,7 +8,7 @@
         "build": "pnpm -r build",
         "test": "pnpm -r test",
         "generate": "pnpm --filter @railsim2-support/language-server generate",
-        "generate:grammar": "pnpm --filter @railsim2-support/vscode-extension generate:grammar",
+        "generate:grammar": "pnpm --filter railsim2-support generate:grammar",
         "docs:build": "vite build --config docs-site/vite.config.ts",
         "docs:dev": "vite --config docs-site/vite.config.ts --open",
         "docs:preview": "vite preview --config docs-site/vite.config.ts",

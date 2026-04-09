@@ -69,10 +69,11 @@ describe("formatter", () => {
   // --- = alignment ---
 
   it("should align = in consecutive property groups", () => {
-    const input = "Body {\nModelFileName = \"body.x\";\nModelScale = 1.0;\nCoord = 0.0, 0.0, 0.0;\n}\n";
+    const input =
+      'Body {\nModelFileName = "body.x";\nModelScale = 1.0;\nCoord = 0.0, 0.0, 0.0;\n}\n';
     const result = format(input);
     expect(result).toBe(
-      "Body {\n\tModelFileName = \"body.x\";\n\tModelScale    = 1.0;\n\tCoord         = 0.0, 0.0, 0.0;\n}\n",
+      'Body {\n\tModelFileName = "body.x";\n\tModelScale    = 1.0;\n\tCoord         = 0.0, 0.0, 0.0;\n}\n',
     );
   });
 
@@ -125,10 +126,10 @@ describe("formatter", () => {
   });
 
   it("should align = across comments within property groups", () => {
-    const input = "Body {\nModelFileName = \"a\";\n// divider\nCoord = 1;\n}";
+    const input = 'Body {\nModelFileName = "a";\n// divider\nCoord = 1;\n}';
     const result = format(input);
     // Comments don't break alignment groups
-    expect(result).toContain("\tModelFileName = \"a\";");
+    expect(result).toContain('\tModelFileName = "a";');
     expect(result).toContain("\t// divider");
     expect(result).toContain("\tCoord         = 1;");
   });
@@ -212,7 +213,7 @@ ApplySwitch "_FRONT"{Case 0:Coord=0.0,0.0,0.0;Case 1:Coord=1.0,0.0,0.0;Default:C
     expect(result).toContain("PluginHeader {\n");
     // PluginType(10), PluginName(10), PluginAuthor(12), RailSimVersion(14) → align to 14
     expect(result).toContain("\tPluginType     = Train;\n");
-    expect(result).toContain("\tPluginName     = \"Test Train\";\n");
+    expect(result).toContain('\tPluginName     = "Test Train";\n');
     expect(result).toContain("\tRailSimVersion = 2;\n");
     expect(result).toContain('\tObject3D "headlight" {\n');
     expect(result).toContain("\t} Else {\n");

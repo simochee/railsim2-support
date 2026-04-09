@@ -96,7 +96,10 @@ interface NodeGroup {
   maxNameLength: number;
 }
 
-function groupNodes(nodes: readonly (TopLevelNode | BodyNode)[], sourceLines: string[]): NodeGroup[] {
+function groupNodes(
+  nodes: readonly (TopLevelNode | BodyNode)[],
+  sourceLines: string[],
+): NodeGroup[] {
   const groups: NodeGroup[] = [];
   let currentGroup: (PropertyNode | CommentNode)[] = [];
 
@@ -134,7 +137,11 @@ function groupNodes(nodes: readonly (TopLevelNode | BodyNode)[], sourceLines: st
   return groups;
 }
 
-function countBlankLines(prevEndLine: number, nextStartLine: number, sourceLines: string[]): number {
+function countBlankLines(
+  prevEndLine: number,
+  nextStartLine: number,
+  sourceLines: string[],
+): number {
   let count = 0;
   for (let line = prevEndLine + 1; line < nextStartLine; line++) {
     if (line < sourceLines.length && sourceLines[line].trim() === "") count++;
@@ -216,7 +223,11 @@ function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
   return hasTupleParen ? `(${vals})` : vals;
 }
 
-function conditionText(node: IfNode | ApplySwitchNode, keyword: string, ctx: FormatContext): string {
+function conditionText(
+  node: IfNode | ApplySwitchNode,
+  keyword: string,
+  ctx: FormatContext,
+): string {
   // Extract condition/switchName from source: after keyword to before '{'
   const nodeStartOff = posToOffset(ctx.source, node.range.start);
   const nodeEndOff = posToOffset(ctx.source, node.range.end);
@@ -311,7 +322,6 @@ function exprText(expr: ExprNode, ctx: FormatContext): string {
   return raw;
 }
 
-
 function normalizeOperatorSpacing(text: string): string {
   const parts: string[] = [];
   let i = 0;
@@ -329,7 +339,16 @@ function normalizeOperatorSpacing(text: string): string {
     }
     // Two-char operators
     const two = text.slice(i, i + 2);
-    if (two === "==" || two === "!=" || two === "<=" || two === ">=" || two === "<<" || two === ">>" || two === "&&" || two === "||") {
+    if (
+      two === "==" ||
+      two === "!=" ||
+      two === "<=" ||
+      two === ">=" ||
+      two === "<<" ||
+      two === ">>" ||
+      two === "&&" ||
+      two === "||"
+    ) {
       // Trim trailing space from parts, add space + op + space
       trimTrailingSpace(parts);
       parts.push(` ${two} `);
@@ -339,7 +358,19 @@ function normalizeOperatorSpacing(text: string): string {
     }
     // Single-char binary operators (but not unary - or + after operator/paren/start)
     const ch = text[i];
-    if ((ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "<" || ch === ">" || ch === "&" || ch === "|" || ch === "^") && isBinaryContext(text, i)) {
+    if (
+      (ch === "+" ||
+        ch === "-" ||
+        ch === "*" ||
+        ch === "/" ||
+        ch === "%" ||
+        ch === "<" ||
+        ch === ">" ||
+        ch === "&" ||
+        ch === "|" ||
+        ch === "^") &&
+      isBinaryContext(text, i)
+    ) {
       trimTrailingSpace(parts);
       parts.push(` ${ch} `);
       i++;
@@ -357,7 +388,8 @@ function normalizeOperatorSpacing(text: string): string {
   }
 
   function trimTrailingSpace(arr: string[]): void {
-    while (arr.length > 0 && (arr[arr.length - 1] === " " || arr[arr.length - 1] === "\t")) arr.pop();
+    while (arr.length > 0 && (arr[arr.length - 1] === " " || arr[arr.length - 1] === "\t"))
+      arr.pop();
   }
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "@railsim2-support/vscode-extension",
+  "name": "railsim2-support",
   "displayName": "RailSim2 Support",
   "version": "0.0.1",
   "description": "RailSim2 プラグイン定義ファイルの開発支援",

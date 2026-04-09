@@ -294,7 +294,11 @@ export function parse(source: string): ParseResult {
     return lines * 10000 + (range.end.character - range.start.character);
   }
 
-  function collectSlots(nodes: (TopLevelNode | BodyNode)[], containerRange: Range, slots: BodySlot[]): void {
+  function collectSlots(
+    nodes: (TopLevelNode | BodyNode)[],
+    containerRange: Range,
+    slots: BodySlot[],
+  ): void {
     slots.push({ body: nodes, range: containerRange });
     for (const node of nodes) {
       switch (node.type) {
@@ -356,7 +360,8 @@ export function parse(source: string): ParseResult {
 
     for (const slot of slots) {
       slot.body.sort((a, b) => {
-        if (a.range.start.line !== b.range.start.line) return a.range.start.line - b.range.start.line;
+        if (a.range.start.line !== b.range.start.line)
+          return a.range.start.line - b.range.start.line;
         return a.range.start.character - b.range.start.character;
       });
     }
@@ -710,7 +715,8 @@ export function parse(source: string): ParseResult {
     const body = parseBody(true);
     // bodyRange ends at the next Case/Default/rbrace (what peek() points to now)
     const bodyEnd = posOf(peek());
-    const endPos = body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
+    const endPos =
+      body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
 
     return {
       type: "case",
