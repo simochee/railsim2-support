@@ -1,5 +1,8 @@
 # RailSim2 Support
 
+[![VS Marketplace](https://img.shields.io/visual-studio-marketplace/v/simochee.vscode-railsim2-grammar)](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/simochee.vscode-railsim2-grammar)](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar)
+
 RailSim2 プラグイン定義ファイルの開発支援を提供する VS Code 拡張機能です。
 
 ## Features
