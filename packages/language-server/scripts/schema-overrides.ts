@@ -410,6 +410,16 @@ export const additionalSchemas: Record<string, AdditionalSchema> = {
     },
     children: {},
   },
+  // ── Model:Pole — Pole2.txt の Model は ModelFileName + ModelScale のみ ──
+  // vendor/CPolePlugin.cpp:29-31: 両方とも throw パターン（必須）
+  // ※ Skin の Model（Arrow/Link/Segment/Compass/WindDir）とは別定義
+  "Model:Pole": {
+    properties: {
+      ModelFileName: { type: "filename", required: true, multiple: false },
+      ModelScale: { type: "float", required: true, multiple: false },
+    },
+    children: {},
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -453,7 +463,7 @@ export const fileSchemaOverrides: Record<string, FileSchemaEntry[]> = {
   "Pole2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
-    { name: "Model", required: false, multiple: true },
+    { name: "Model", required: false, multiple: true, schemaKey: "Model:Pole" },
   ],
   "Train2.txt": [
     { name: "PluginHeader", required: true, multiple: false },

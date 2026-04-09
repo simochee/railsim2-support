@@ -3244,6 +3244,22 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
     },
+  },
+  "Model:Pole": {
+    properties: {
+      ModelFileName: {
+        type: "filename",
+        required: true,
+        multiple: false
+      },
+      ModelScale: {
+        type: "float",
+        required: true,
+        multiple: false
+      }
+    },
+    children: {
+    },
   }
 };
 
@@ -3278,7 +3294,7 @@ export const fileSchemas: FileSchema = {
   "Pole2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
-    { name: "Model", required: false, multiple: true }
+    { name: "Model", required: false, multiple: true, schemaKey: "Model:Pole" }
   ],
   "Rail2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
