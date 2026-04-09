@@ -13,7 +13,8 @@
   "exports": {
     "./node": "./out/server/server.js",
     "./keywords": "./out/shared/keywords.js",
-    "./schema": "./out/schema/semantic.generated.js"
+    "./schema": "./out/schema/semantic.generated.js",
+    "./formatter": "./out/server/formatter.js"
   },
   "scripts": {
     "build": "tsc",

@@ -14,6 +14,7 @@ import { getHover } from "./hoverProvider.js";
 import { tokenize } from "./tokenizer.js";
 import { validateUnknownKeywords } from "./validator/unknownKeywordValidator.js";
 import { validateSchema } from "./validator/schemaValidator.js";
+import { format } from "./formatter.js";
 import type { FileNode } from "../shared/ast.js";
 import type { Token } from "../shared/tokens.js";
 import type { Diagnostic } from "../shared/diagnostics.js";
@@ -65,6 +66,7 @@ connection.onInitialize(() => ({
       resolveProvider: false,
     },
     hoverProvider: true,
+    documentFormattingProvider: true,
   },
 }));
 
@@ -117,6 +119,32 @@ connection.onCompletion((params) => {
 
 documents.onDidClose((event) => {
   parseCache.delete(event.document.uri);
+});
+
+connection.onDocumentFormatting((params) => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) return [];
+
+  const text = doc.getText();
+  const formatted = format(text, {
+    indentChar: params.options.insertSpaces ? " " : "\t",
+    indentSize: params.options.insertSpaces ? params.options.tabSize : 1,
+  });
+
+  if (formatted === text) return [];
+
+  const lastLine = doc.lineCount > 0 ? doc.lineCount - 1 : 0;
+  const lastChar = doc.getText().length - doc.offsetAt({ line: lastLine, character: 0 });
+
+  return [
+    {
+      range: {
+        start: { line: 0, character: 0 },
+        end: { line: lastLine, character: lastChar },
+      },
+      newText: formatted,
+    },
+  ];
 });
 
 connection.onHover((params) => {
