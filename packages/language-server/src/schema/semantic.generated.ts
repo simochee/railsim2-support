@@ -136,17 +136,17 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Circle: {
         required: false,
-        multiple: false,
+        multiple: true,
         schemaKey: "Circle:LensFlare"
       },
       Hexagon: {
         required: false,
-        multiple: false,
+        multiple: true,
         schemaKey: "Hexagon:LensFlare"
       },
       Texture: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -208,7 +208,7 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Set: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -320,11 +320,17 @@ export const semanticSchema: SemanticSchema = {
   },
   Face: {
     properties: {
+      MaterialID: {
+        type: "integer",
+        required: false,
+        multiple: false
+      }
     },
     children: {
       Vertex: {
         required: true,
-        multiple: false
+        multiple: true,
+        schemaKey: "Vertex:Profile"
       }
     },
   },
@@ -334,21 +340,27 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Material: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Face: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
   Line: {
     properties: {
+      MaterialID: {
+        type: "integer",
+        required: false,
+        multiple: false
+      }
     },
     children: {
       Vertex: {
         required: true,
-        multiple: false
+        multiple: true,
+        schemaKey: "Vertex:Wireframe"
       }
     },
   },
@@ -368,7 +380,7 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Line: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -667,6 +679,16 @@ export const semanticSchema: SemanticSchema = {
         type: "float",
         required: true,
         multiple: false
+      },
+      ModelFileName: {
+        type: "filename",
+        required: false,
+        multiple: false
+      },
+      ModelScale: {
+        type: "float",
+        required: false,
+        multiple: false
       }
     },
     children: {
@@ -755,10 +777,9 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       Cursor2DAnimFrame: {
-        type: "integer",
+        type: "expression",
         required: false,
-        multiple: true,
-        arity: 2
+        multiple: true
       }
     },
     children: {
@@ -1027,10 +1048,9 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       EditBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       EditFontColor: {
         type: "color",
@@ -1043,16 +1063,14 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       ConvertClauseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 2
+        multiple: false
       },
       SelectedBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       }
     },
     children: {
@@ -1061,16 +1079,14 @@ export const semanticSchema: SemanticSchema = {
   ListView: {
     properties: {
       DefaultBaseColorOdd: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       DefaultBaseColorEven: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       DefaultFontColor: {
         type: "color",
@@ -1078,10 +1094,9 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       SelectedBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       SelectedFontColor: {
         type: "color",
@@ -1100,10 +1115,9 @@ export const semanticSchema: SemanticSchema = {
   PluginTree: {
     properties: {
       DefaultBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       DefaultFontColor: {
         type: "color",
@@ -1111,10 +1125,9 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       SelectedBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       SelectedFontColor: {
         type: "color",
@@ -1148,10 +1161,9 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       SelectedBaseColor: {
-        type: "color",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 4
+        multiple: false
       },
       SelectedFontColor: {
         type: "color",
@@ -1303,32 +1315,38 @@ export const semanticSchema: SemanticSchema = {
       Frame: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       NumberedFrame: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       SlideUVFrame: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       TiledUVFrame: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       RotationUVFrame: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
+      },
+      ShiftTexture: {
+        type: "expression",
+        required: false,
+        multiple: true,
+        arity: 2
       }
     },
     children: {
@@ -1493,10 +1511,9 @@ export const semanticSchema: SemanticSchema = {
   ChangeMaterial: {
     properties: {
       MaterialID: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       Diffuse: {
         type: "expression",
@@ -1692,7 +1709,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -1702,104 +1719,102 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       }
     },
     children: {
       StaticRotation: {
         required: true,
-        multiple: false
+        multiple: true
       },
       StaticMove: {
         required: true,
-        multiple: false
+        multiple: true
       },
       DynamicRotation: {
         required: true,
-        multiple: false
+        multiple: true
       },
       TrackWind: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Windmill: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ChangeMaterial: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ApplySwitch: {
         required: true,
@@ -1815,6 +1830,22 @@ export const semanticSchema: SemanticSchema = {
       },
       Joint3D: {
         required: true,
+        multiple: true
+      },
+      CrankZY: {
+        required: false,
+        multiple: true
+      },
+      PistonZY: {
+        required: false,
+        multiple: true
+      },
+      Link: {
+        required: false,
+        multiple: true
+      },
+      Slide: {
+        required: false,
         multiple: false
       }
     },
@@ -1867,7 +1898,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -1877,77 +1908,75 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       FixPosition: {
@@ -1964,15 +1993,15 @@ export const semanticSchema: SemanticSchema = {
     children: {
       StaticRotation: {
         required: true,
-        multiple: false
+        multiple: true
       },
       StaticMove: {
         required: true,
-        multiple: false
+        multiple: true
       },
       DynamicRotation: {
         required: true,
-        multiple: false
+        multiple: true
       },
       TrackWind: {
         required: true,
@@ -1984,7 +2013,7 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeMaterial: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ApplySwitch: {
         required: true,
@@ -2000,7 +2029,19 @@ export const semanticSchema: SemanticSchema = {
       },
       JointZYX: {
         required: true,
-        multiple: false
+        multiple: true
+      },
+      CrankZY: {
+        required: false,
+        multiple: true
+      },
+      PistonZY: {
+        required: false,
+        multiple: true
+      },
+      Link: {
+        required: false,
+        multiple: true
       }
     },
     nameParameter: "string",
@@ -2030,7 +2071,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -2040,77 +2081,75 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       LinkCoord: {
@@ -2169,7 +2208,7 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Link: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -2198,7 +2237,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -2208,77 +2247,75 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       Direction: {
@@ -2337,11 +2374,11 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Link: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Slide: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -2351,7 +2388,7 @@ export const semanticSchema: SemanticSchema = {
     children: {
       Link: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -2381,7 +2418,7 @@ export const semanticSchema: SemanticSchema = {
     children: {
       LensFlare: {
         required: true,
-        multiple: false
+        multiple: true
       }
     },
   },
@@ -2512,63 +2549,61 @@ export const semanticSchema: SemanticSchema = {
   PrimaryAssembly: {
     properties: {
       ConnectRail: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 2
+        multiple: true
       },
       BranchRail: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: false,
-        arity: 2
+        multiple: true
       },
       DisconnectRail: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: false
+        multiple: true
       }
     },
     children: {
       Axle: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Body: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Object3D: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ObjectZY: {
         required: true,
-        multiple: false
+        multiple: true
       },
       TriangleZY: {
         required: true,
-        multiple: false
+        multiple: true
       },
       CrankZY: {
         required: true,
-        multiple: false
+        multiple: true
       },
       PistonZY: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Headlight: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Particle: {
         required: true,
-        multiple: false
+        multiple: true
       },
       SoundEffect: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ApplySwitch: {
         required: true,
@@ -2589,6 +2624,18 @@ export const semanticSchema: SemanticSchema = {
       TailCabin: {
         required: false,
         multiple: false
+      },
+      Link: {
+        required: false,
+        multiple: true
+      },
+      DefineSwitch: {
+        required: false,
+        multiple: true
+      },
+      DefineAnimation: {
+        required: false,
+        multiple: true
       }
     },
   },
@@ -2639,7 +2686,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -2649,77 +2696,75 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       Diameter: {
@@ -2846,7 +2891,7 @@ export const semanticSchema: SemanticSchema = {
       ChangeModel: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       AnalogClock: {
@@ -2856,77 +2901,75 @@ export const semanticSchema: SemanticSchema = {
         enumValues: ["Hour", "Minute", "Second"]
       },
       NoCastShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoReceiveShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       NoShadow: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       Transparent: {
-        type: "integer",
+        type: "expression",
         required: true,
         multiple: true
       },
       EnvMap: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       AlphaZeroTest: {
-        type: "integer",
+        type: "expression",
         required: true,
-        multiple: true,
-        arity: 2
+        multiple: true
       },
       ChangeTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ShiftTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 3
       },
       ScaleTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 5
       },
       RotateTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 4
       },
       TransformTexture: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 7
       },
       SetAnimation: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       },
       ChangeAlpha: {
         type: "expression",
         required: true,
-        multiple: false,
+        multiple: true,
         arity: 2
       }
     },
@@ -2953,7 +2996,7 @@ export const semanticSchema: SemanticSchema = {
       },
       ChangeMaterial: {
         required: true,
-        multiple: false
+        multiple: true
       },
       ApplySwitch: {
         required: true,
@@ -2969,11 +3012,31 @@ export const semanticSchema: SemanticSchema = {
       },
       JointZY: {
         required: true,
-        multiple: false
+        multiple: true
       },
       Tilt: {
-        required: true,
+        required: false,
         multiple: false
+      },
+      Headlight: {
+        required: false,
+        multiple: true
+      },
+      FrontCabin: {
+        required: false,
+        multiple: false
+      },
+      TailCabin: {
+        required: false,
+        multiple: false
+      },
+      Axle: {
+        required: false,
+        multiple: true
+      },
+      Object3D: {
+        required: false,
+        multiple: true
       }
     },
     nameParameter: "string",
@@ -3038,9 +3101,10 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       PluginType: {
-        type: "identifier",
+        type: "enum",
         required: true,
-        multiple: false
+        multiple: false,
+        enumValues: ["Rail", "Tie", "Girder", "Pier", "Line", "Pole", "Train", "Station", "Struct", "Surface", "Env", "Skin"]
       },
       PluginName: {
         type: "string",
@@ -3064,8 +3128,8 @@ export const semanticSchema: SemanticSchema = {
         arity: 4
       },
       Description: {
-        type: "float",
-        required: true,
+        type: "string",
+        required: false,
         multiple: true
       }
     },
@@ -3160,6 +3224,58 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       }
     },
+  },
+  "Vertex:Profile": {
+    properties: {
+      Coord: {
+        type: "vector-2d",
+        required: true,
+        multiple: false
+      },
+      Normal: {
+        type: "vector-2d",
+        required: false,
+        multiple: false
+      },
+      TexU: {
+        type: "float",
+        required: false,
+        multiple: false
+      },
+      IgnoreCant: {
+        type: "yes-no",
+        required: false,
+        multiple: false
+      },
+      Diffuse: {
+        type: "color",
+        required: false,
+        multiple: false
+      }
+    },
+    children: {
+    },
+  },
+  "Vertex:Wireframe": {
+    properties: {
+      Coord: {
+        type: "vector-3d",
+        required: true,
+        multiple: false
+      },
+      IgnoreCant: {
+        type: "yes-no",
+        required: false,
+        multiple: false
+      },
+      Diffuse: {
+        type: "color",
+        required: false,
+        multiple: false
+      }
+    },
+    children: {
+    },
   }
 };
 
@@ -3167,76 +3283,91 @@ export const fileSchemas: FileSchema = {
   "Env2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "EnvInfo", required: true, multiple: false },
-    { name: "Landscape", required: true, multiple: false },
-    { name: "Sun", required: true, multiple: false },
-    { name: "Moon", required: true, multiple: false }
+    { name: "Landscape", required: false, multiple: true },
+    { name: "Sun", required: false, multiple: false },
+    { name: "Moon", required: false, multiple: false }
   ],
   "Girder2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
-    { name: "GirderInfo", required: true, multiple: false }
+    { name: "GirderInfo", required: true, multiple: false },
+    { name: "Profile", required: false, multiple: true }
   ],
   "Line2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
-    { name: "LineInfo", required: true, multiple: false }
+    { name: "LineInfo", required: true, multiple: false },
+    { name: "Wireframe", required: false, multiple: true },
+    { name: "Interval", required: false, multiple: true }
   ],
   "Pier2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PierInfo", required: true, multiple: false },
-    { name: "Joint", required: true, multiple: false },
-    { name: "Head", required: true, multiple: false },
-    { name: "Base", required: true, multiple: false }
+    { name: "Base", required: false, multiple: false },
+    { name: "Head", required: false, multiple: false },
+    { name: "Joint", required: false, multiple: true },
+    { name: "Profile", required: false, multiple: true },
+    { name: "Interval", required: false, multiple: true }
   ],
   "Pole2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
-    { name: "Model", required: true, multiple: false }
+    { name: "Model", required: false, multiple: true }
   ],
   "Rail2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "RailInfo", required: true, multiple: false },
-    { name: "SoundInfo", required: true, multiple: false }
+    { name: "SoundInfo", required: false, multiple: false },
+    { name: "Profile", required: false, multiple: true },
+    { name: "Wireframe", required: false, multiple: true },
+    { name: "Interval", required: false, multiple: true }
   ],
   "Skin2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
-    { name: "NormalCursor", required: true, multiple: false },
-    { name: "ResizeCursor1", required: true, multiple: false },
-    { name: "ResizeCursor2", required: true, multiple: false },
-    { name: "ResizeCursor3", required: true, multiple: false },
-    { name: "ResizeCursor4", required: true, multiple: false },
-    { name: "Interface", required: true, multiple: false },
-    { name: "Background", required: true, multiple: false },
-    { name: "Frame", required: true, multiple: false },
-    { name: "EditCtrl", required: true, multiple: false },
-    { name: "ListView", required: true, multiple: false },
-    { name: "PluginTree", required: true, multiple: false },
-    { name: "PopupMenu", required: true, multiple: false },
-    { name: "Model", required: true, multiple: false },
-    { name: "Sound", required: true, multiple: false }
+    { name: "NormalCursor", required: false, multiple: false },
+    { name: "ResizeCursor1", required: false, multiple: false },
+    { name: "ResizeCursor2", required: false, multiple: false },
+    { name: "ResizeCursor3", required: false, multiple: false },
+    { name: "ResizeCursor4", required: false, multiple: false },
+    { name: "Interface", required: false, multiple: false },
+    { name: "Background", required: false, multiple: false },
+    { name: "PopupMenu", required: false, multiple: false },
+    { name: "ListView", required: false, multiple: false },
+    { name: "EditCtrl", required: false, multiple: false },
+    { name: "PluginTree", required: false, multiple: false },
+    { name: "Frame", required: false, multiple: false },
+    { name: "Model", required: false, multiple: false },
+    { name: "Sound", required: false, multiple: false }
   ],
   "Station2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StationInfo", required: true, multiple: false },
-    { name: "Platform", required: true, multiple: false },
-    { name: "PrimaryAssembly", required: true, multiple: false }
+    { name: "Platform", required: false, multiple: true },
+    { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
+    { name: "PrimaryAssembly", required: false, multiple: false }
   ],
   "Struct2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StructInfo", required: true, multiple: false },
-    { name: "PrimaryAssembly", required: true, multiple: false }
+    { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
+    { name: "PrimaryAssembly", required: false, multiple: false }
   ],
   "Surface2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "SurfaceInfo", required: true, multiple: false },
-    { name: "PrimaryAssembly", required: true, multiple: false }
+    { name: "PrimaryAssembly", required: false, multiple: false }
   ],
   "Tie2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
-    { name: "TieInfo", required: true, multiple: false }
+    { name: "TieInfo", required: true, multiple: false },
+    { name: "Profile", required: false, multiple: true }
   ],
   "Train2.txt": [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TrainInfo", required: true, multiple: false },
-    { name: "PrimaryAssembly", required: true, multiple: false }
+    { name: "DefineSwitch", required: false, multiple: true },
+    { name: "DefineAnimation", required: false, multiple: true },
+    { name: "PrimaryAssembly", required: false, multiple: false }
   ]
 };
 
