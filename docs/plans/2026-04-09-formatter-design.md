@@ -166,8 +166,8 @@ Default: `{ indentChar: "\t", indentSize: 1, alignEquals: true }`
 | Semicolon | プロパティ末尾に必ず `;` |
 | Blank lines | 元ソースの空行をそのまま保持 |
 | Comments | value をそのまま出力、インデントのみ調整 |
-| Expressions | 二項演算子前後にスペース (`1 + 2`) |
-| Comma | `, ` (カンマ後スペース) |
+| Expressions | source からそのまま抽出（括弧・元の書式を完全保持） |
+| Comma | `, ` (カンマ後スペース、複数値プロパティのみ正規化) |
 | `{` | 名前/引数後スペース + `{` |
 | `}` | 単独行、親と同じインデント |
 | Case/Default | ApplySwitch 内で1段インデント、body はさらに1段 |
