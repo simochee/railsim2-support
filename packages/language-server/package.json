@@ -13,12 +13,12 @@
   "exports": {
     "./node": "./out/server/server.js",
     "./keywords": "./out/shared/keywords.js",
-    "./schema": "./out/schema/semantic.js"
+    "./schema": "./out/schema/semantic.generated.js"
   },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "generate:hover-data": "tsx scripts/extract-hover-data.ts"
+    "generate": "tsx scripts/extract-hover-data.ts"
   },
   "dependencies": {
     "vscode-languageserver": "^9.0.1",
