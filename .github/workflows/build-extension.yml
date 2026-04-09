@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build language server
+        run: pnpm --filter @lollipop-onl/railsim2-language-server build
+
       - name: Package extension
         run: pnpm --filter vscode-railsim2-grammar package
 

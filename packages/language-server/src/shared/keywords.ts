@@ -11,11 +11,14 @@ import { semanticSchema } from "../schema/semantic.generated.js";
 // semantic schema からの自動導出
 // ---------------------------------------------------------------------------
 
+/** 制御キーワード — オブジェクト名から除外 */
+const CONTROL_EXCLUDE = new Set(["ApplySwitch", "If", "Else", "Case", "Default"]);
+
 function deriveObjectNames(): string[] {
   const names = new Set<string>();
   for (const key of Object.keys(semanticSchema)) {
     const name = key.includes(":") ? key.split(":")[0] : key;
-    names.add(name);
+    if (!CONTROL_EXCLUDE.has(name)) names.add(name);
   }
   return [...names].sort();
 }
