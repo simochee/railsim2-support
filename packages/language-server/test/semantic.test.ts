@@ -17,7 +17,7 @@ describe("semanticSchema", () => {
     const ph = semanticSchema["PluginHeader"];
     expect(ph).toBeDefined();
     expect(ph.properties["RailSimVersion"]).toMatchObject({ type: "float", required: true });
-    expect(ph.properties["PluginType"]).toMatchObject({ type: "identifier", required: true });
+    expect(ph.properties["PluginType"]).toMatchObject({ type: "enum", required: true });
     expect(ph.properties["PluginName"]).toMatchObject({ type: "string", required: true });
     expect(ph.properties["PluginAuthor"]).toMatchObject({ type: "string", required: true });
   });
@@ -73,7 +73,7 @@ describe("semanticSchema", () => {
 
   it("ChangeMaterial に MaterialID/Emissive が定義されている", () => {
     const cm = semanticSchema["ChangeMaterial"];
-    expect(cm.properties["MaterialID"]).toMatchObject({ type: "integer" });
+    expect(cm.properties["MaterialID"]).toMatchObject({ type: "expression" });
     expect(cm.properties["Emissive"]).toMatchObject({ type: "vector-3d" });
     expect(cm.properties["Diffuse"]).toMatchObject({ type: "expression", arity: 4 });
   });

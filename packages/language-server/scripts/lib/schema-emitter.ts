@@ -11,6 +11,8 @@ import type {
 import type { GrammarRule } from "./bnf-parser.js";
 import {
 	schemaOverrides,
+	additionalSchemas,
+	fileSchemaOverrides,
 	type SchemaOverride,
 } from "../schema-overrides.js";
 
@@ -48,6 +50,12 @@ function convertProperty(rp: ResolvedProperty): EmittedProperty {
 	if (rp.type.startsWith("enum:")) {
 		result.type = "enum";
 		result.enumValues = rp.type.slice(5).split(",");
+		return result;
+	}
+	// Handle enum type set by override (with enumValues on ResolvedProperty)
+	if (rp.type === "enum" && rp.enumValues) {
+		result.type = "enum";
+		result.enumValues = rp.enumValues;
 		return result;
 	}
 
@@ -100,14 +108,23 @@ function applyOverrides(
 		if (override.properties) {
 			for (const [propName, patch] of Object.entries(override.properties)) {
 				if (obj.properties[propName]) {
-					Object.assign(obj.properties[propName], patch);
+					// Handle arity: null → delete arity (make expression variable-length)
+					if (patch.arity === null) {
+						delete (obj.properties[propName] as Record<string, unknown>).arity;
+						const rest = { ...patch };
+						delete rest.arity;
+						Object.assign(obj.properties[propName], rest);
+					} else {
+						Object.assign(obj.properties[propName], patch);
+					}
 				} else {
 					// New property from override
+					const arity = patch.arity === null ? undefined : (patch.arity ?? 1);
 					obj.properties[propName] = {
 						type: patch.type ?? "expression",
 						required: patch.required ?? false,
 						multiple: patch.multiple ?? false,
-						arity: patch.arity ?? 1,
+						arity: arity ?? 1,
 					};
 				}
 			}
@@ -126,6 +143,22 @@ function applyOverrides(
 				}
 			}
 		}
+	}
+
+	// Add additional schemas (context-dependent variants like Vertex:Profile)
+	for (const [name, schema] of Object.entries(additionalSchemas)) {
+		objects[name] = {
+			properties: Object.fromEntries(
+				Object.entries(schema.properties).map(([k, v]) => [k, {
+					type: v.type,
+					required: v.required,
+					multiple: v.multiple,
+					arity: v.arity ?? 1,
+				}]),
+			),
+			children: schema.children,
+			nameParameter: schema.nameParameter,
+		};
 	}
 
 	return objects;
@@ -246,6 +279,11 @@ function indent(level: number): string {
 	return INDENT.repeat(level);
 }
 
+/** Quote a property key if it contains special characters */
+function quoteKey(name: string): string {
+	return /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name) ? name : `"${name}"`;
+}
+
 function emitPropertyValue(prop: EmittedProperty, level: number): string {
 	const parts: string[] = [];
 	parts.push(`${indent(level)}type: "${prop.type}"`);
@@ -324,8 +362,11 @@ export function emitSemanticSchema(table: SymbolTable): string {
 	// Apply overrides
 	applyOverrides(allObjects);
 
-	// Build file schemas
+	// Build file schemas and apply overrides
 	const fileSchemas = buildFileSchemas(table);
+	for (const [fileName, entries] of Object.entries(fileSchemaOverrides)) {
+		fileSchemas[fileName] = entries;
+	}
 
 	// Generate code
 	const lines: string[] = [];
@@ -346,7 +387,7 @@ export function emitSemanticSchema(table: SymbolTable): string {
 	for (let i = 0; i < objectEntries.length; i++) {
 		const [name, obj] = objectEntries[i];
 		const comma = i < objectEntries.length - 1 ? "," : "";
-		lines.push(`${indent(1)}${name}: {`);
+		lines.push(`${indent(1)}${quoteKey(name)}: {`);
 		lines.push(emitObjectSchema(obj, 2));
 		lines.push(`${indent(1)}}${comma}`);
 	}

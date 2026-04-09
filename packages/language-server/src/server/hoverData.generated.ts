@@ -118,7 +118,10 @@ export const objectDocs: Record<string, ObjectDoc> = {
         "description": "レールの端点に対し橋脚の設置開始位置をずらしたい場合に、その距離を指定します。デフォルト値は 0.0 です。"
       },
       "BuildMinAlt": {
-        "description": "地表に対し線路がどの程度高く設置された場合に橋脚を設置するか指TaperX, TaperY"
+        "description": "地表に対し線路がどの程度高く設置された場合に橋脚を設置するか指"
+      },
+      "TaperX, TaperY": {
+        "description": "橋脚連続部に、延長方向に対するテーパを設定したい場合に指定します。テーパの値は正値でなければなりません。"
       },
       "TaperZ": {
         "description": "Z 方向のテーパは XY 方向のテーパと若干異なり、interval による等間隔配置オブジェクトを延長方向に伸縮して配置したい場合に指定します。"
@@ -184,7 +187,10 @@ export const objectDocs: Record<string, ObjectDoc> = {
         "description": "車輌の最大減速度を [(km/h)/s] で指定します。(参考) RS1 用車両プラグインについては、4.0 としています。"
       },
       "TiltSpeed": {
-        "description": "車輌が振り子機能を使用する場合、振り子の反応速度を指定します。この値は 0.0～1.0 間で指定し、大きい値を指定するほど高速DoorClosingTime"
+        "description": "車輌が振り子機能を使用する場合、振り子の反応速度を指定します。この値は 0.0～1.0 間で指定し、大きい値を指定するほど高速"
+      },
+      "DoorClosingTime": {
+        "description": "車両のドアを閉めるのに要する時間を秒単位で指定します。_DOOR1、_DOOR2 等のスイッチと、static-mover 等のカスタマイザを使用してドア開閉のアニメーションを実装した場合に指定します。"
       },
       "FrontCabin": {
         "description": "前方の運転席の視点位置を指定します。運転席モードで使用されます。省略した場合は車輌前方の適当な位置が指定されます。"
@@ -320,7 +326,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
         "description": "\"img0.png\", \"img1.png\", \"img2.png\", ..."
       },
       "\"img%3d.png\"": {
-        "description": "\"img 0.png\", \"img &nbsp1.png\", \"img &nbsp2.png\", ..."
+        "description": "\"img  0.png\", \"img  1.png\", \"img  2.png\", ..."
       },
       "\"img%03d.png\"": {
         "description": "\"img000.png\", \"img001.png\", \"img002.png\", ..."

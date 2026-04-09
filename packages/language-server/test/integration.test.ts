@@ -245,7 +245,7 @@ PluginHeader {
   PluginType = Train;
   PluginName = "Test";
   PluginAuthor = "Author";
-  Description = 1;
+  Description = "desc";
 }
 TrainInfo {
   FrontLimit = 10.0;
@@ -427,7 +427,7 @@ describe("integration: completion", () => {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 RailInfo {
   Gauge = 1.067;

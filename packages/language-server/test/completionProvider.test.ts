@@ -53,14 +53,14 @@ describe("findContext", () => {
     }
   });
 
-  it("Vertex inside Face (Profile context) → schemaKey Vertex (no schemaKey override)", () => {
+  it("Vertex inside Face (Profile context) → schemaKey Vertex:Profile", () => {
     const src = "Profile {\n  Face {\n    Vertex {\n      \n    }\n  }\n}";
     const { file, tokens } = setup(src);
     const ctx = findContext(file, tokens, pos(3, 6), "Rail2.txt");
     expect(ctx.type).toBe("objectBody");
     if (ctx.type === "objectBody") {
       expect(ctx.objectName).toBe("Vertex");
-      expect(ctx.schemaKey).toBe("Vertex");
+      expect(ctx.schemaKey).toBe("Vertex:Profile");
     }
   });
 
@@ -318,13 +318,13 @@ describe("getCompletions", () => {
     expect(ac!.insertText).toContain("${1|Hour,");
   });
 
-  it("identifier property → = ${1:name};", () => {
+  it("enum property → = ${1|...|};", () => {
     const src = "PluginHeader {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2));
     const pt = items.find((i) => i.label === "PluginType");
     expect(pt).toBeDefined();
-    expect(pt!.insertText).toBe("PluginType = ${1:name};");
+    expect(pt!.insertText).toContain("PluginType = ${1|");
   });
 
   it("nameParameter object → snippet with name placeholder", () => {

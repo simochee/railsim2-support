@@ -23,7 +23,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 RailInfo {
   Gauge = 1.067;
@@ -154,7 +154,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 RailInfo {
   Gauge = 1.0;
@@ -190,7 +190,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 `;
     const diags = validate(src, "Rail2.txt");
@@ -208,7 +208,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 RailInfo {
   Gauge = 1.0;
@@ -226,7 +226,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test2";
   PluginAuthor = "author2";
-  Description = 1;
+  Description = "desc";
 }
 `;
     const diags = validate(src, "Rail2.txt");
@@ -244,12 +244,12 @@ Profile {
   Material { UseTexture = yes; }
   Face {
     Vertex {
-      Coord = 1.0, 2.0, 3.0;
+      Coord = 1.0, 2.0;
     }
   }
 }
 `;
-    // Profile > Face > Vertex — Coord は vector-3d → OK
+    // Profile > Face > Vertex — Coord は vector-2d (Vertex:Profile) → OK
     expect(validate(src)).toEqual([]);
   });
 
@@ -269,13 +269,13 @@ UnknownObject {
   // ================================================================
   // 親コンテキスト依存
   // ================================================================
-  it("Profile内 Vertex と Wireframe内 Vertex は同じ Vertex スキーマを使う", () => {
+  it("Profile内 Vertex は vector-2d, Wireframe内 Vertex は vector-3d を使う", () => {
     const src = `
 Profile {
   Material { UseTexture = yes; }
   Face {
     Vertex {
-      Coord = 1.0, 2.0, 3.0;
+      Coord = 1.0, 2.0;
     }
   }
 }
@@ -360,7 +360,7 @@ PluginHeader {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 RailInfo {
   Gauge = 1.0;
@@ -434,7 +434,7 @@ RailInfo {
 Face {
   If (1) {
     Vertex {
-      Coord = 1.0, 2.0, 3.0;
+      Coord = 1.0, 2.0;
     }
   }
 }
@@ -575,7 +575,7 @@ PluginHeader {
   PluginType = Train;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 TrainInfo {
   FrontLimit = 10.65;
@@ -635,7 +635,7 @@ PluginHeader {
   PluginType = Train;
   PluginName = "test";
   PluginAuthor = "author";
-  Description = 1;
+  Description = "desc";
 }
 TrainInfo {
   FrontLimit = 10.0;
@@ -683,7 +683,7 @@ Body "Bogie1" {
     expect(invalidChild).toHaveLength(0);
   });
 
-  it("Object3D 内の複数 StaticMove は重複エラーになる (multiple=false)", () => {
+  it("Object3D 内の複数 StaticMove は multiple=true なので重複エラーにならない", () => {
     const src = `
 Object3D "Door" {
   ModelFileName = "door.x";
@@ -699,6 +699,6 @@ Object3D "Door" {
 `;
     const diags = validate(src);
     const dupErrors = diags.filter((d) => d.message.includes("Duplicate child object 'StaticMove'"));
-    expect(dupErrors).toHaveLength(1);
+    expect(dupErrors).toHaveLength(0);
   });
 });

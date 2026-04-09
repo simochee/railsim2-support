@@ -17,6 +17,7 @@ export interface ResolvedProperty {
 	required: boolean;
 	multiple: boolean;
 	arity: number;
+	enumValues?: string[];
 }
 
 export interface ResolvedChild {
