@@ -10,13 +10,13 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve, join } from "node:path";
-import { semanticSchema } from "@lollipop-onl/railsim2-language-server/schema";
+import { semanticSchema } from "@railsim2-support/language-server/schema";
 import {
   OBJECT_NAMES,
   CONTROL_KEYWORDS,
   PROPERTY_NAMES,
   CONSTANTS,
-} from "@lollipop-onl/railsim2-language-server/keywords";
+} from "@railsim2-support/language-server/keywords";
 
 const ROOT = resolve(import.meta.dirname!, "..");
 const GRAMMAR_PATH = join(ROOT, "syntaxes/railsim2.tmLanguage.json");

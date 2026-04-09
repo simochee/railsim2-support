@@ -1,10 +1,10 @@
 {
-  "name": "@lollipop-onl/railsim2-language-server",
+  "name": "@railsim2-support/language-server",
   "version": "0.1.0",
-  "description": "Language Server for RailSim II plugin definition files",
+  "description": "Language Server for RailSim2 plugin definition files",
   "license": "MIT",
   "bin": {
-    "railsim2-language-server": "./bin/railsim2-language-server.cjs"
+    "railsim2-support-language-server": "./bin/railsim2-language-server.cjs"
   },
   "files": [
     "out",

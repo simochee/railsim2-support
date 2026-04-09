@@ -72,7 +72,7 @@ function buildBannerHtml(cls: Record<string, string>): string {
       <span>このページは RailSim II ヘルプドキュメントの非公式ミラーです。</span>
     </span>
     <span class="${cls.links}">
-      <a href="https://github.com/lollipop-onl/vscode-railsim-grammer" target="_blank" rel="noopener">${iconVscode} 言語パック</a>
+      <a href="https://github.com/simochee/railsim2-support" target="_blank" rel="noopener">${iconVscode} RailSim2 Support</a>
       <a href="https://github.com/aizentranza/railsim2" target="_blank" rel="noopener">${iconGithub} aizentranza/railsim2</a>
     </span>
   </div>

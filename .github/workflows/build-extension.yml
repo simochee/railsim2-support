@@ -29,13 +29,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build language server
-        run: pnpm --filter @lollipop-onl/railsim2-language-server build
+        run: pnpm --filter @railsim2-support/language-server build
 
       - name: Package extension
-        run: pnpm --filter vscode-railsim2-grammar package
+        run: pnpm --filter @railsim2-support/vscode-extension package
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v4
         with:
-          name: vscode-railsim2-grammar
+          name: railsim2-support
           path: packages/vscode-extension/*.vsix

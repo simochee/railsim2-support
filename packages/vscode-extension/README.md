@@ -1,3 +1,3 @@
-# RailSim2 Plugin Grammar
+# RailSim2 Support
 
-Syntax highlighting and language support for RailSim II plugin definition files.
+RailSim2 プラグイン定義ファイルの開発支援を提供する VS Code 拡張機能です。

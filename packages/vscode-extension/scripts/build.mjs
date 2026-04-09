@@ -16,7 +16,7 @@ await esbuild.build({
 
 // Server: language-server の server.ts → out/server.js
 await esbuild.build({
-  entryPoints: [require.resolve("@lollipop-onl/railsim2-language-server/node")],
+  entryPoints: [require.resolve("@railsim2-support/language-server/node")],
   bundle: true,
   outfile: "out/server.js",
   format: "cjs",

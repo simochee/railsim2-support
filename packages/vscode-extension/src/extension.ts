@@ -18,7 +18,7 @@ export function activate(context: ExtensionContext) {
   const clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: "file", language: "railsim2" }],
   };
-  client = new LanguageClient("railsim2", "RailSim2 Language Server", serverOptions, clientOptions);
+  client = new LanguageClient("railsim2", "RailSim2 Support", serverOptions, clientOptions);
   client.start();
 }
 

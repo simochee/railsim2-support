@@ -1,34 +1,34 @@
 {
-  "name": "vscode-railsim2-grammar",
-  "displayName": "RailSim2 Plugin Grammar",
+  "name": "@railsim2-support/vscode-extension",
+  "displayName": "RailSim2 Support",
   "version": "0.0.1",
-  "description": "Syntax highlighting and language support for RailSim2 plugin definition",
+  "description": "RailSim2 プラグイン定義ファイルの開発支援",
   "categories": [
     "Programming Languages"
   ],
-  "homepage": "https://github.com/lollipop-onl/vscode-railsim-grammer",
+  "homepage": "https://github.com/simochee/railsim2-support",
   "bugs": {
-    "url": "https://github.com/lollipop-onl/vscode-railsim-grammer/issues",
+    "url": "https://github.com/simochee/railsim2-support/issues",
     "email": "lollipop@simochee.net"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/lollipop-onl/vscode-railsim-grammer.git"
+    "url": "git+ssh://git@github.com/simochee/railsim2-support.git"
   },
   "publisher": "simochee",
   "main": "./out/extension.js",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "pretest": "pnpm --filter @lollipop-onl/railsim2-language-server build",
+    "pretest": "pnpm --filter @railsim2-support/language-server build",
     "test": "vitest run",
-    "pregenerate:grammar": "pnpm --filter @lollipop-onl/railsim2-language-server build",
+    "pregenerate:grammar": "pnpm --filter @railsim2-support/language-server build",
     "generate:grammar": "tsx scripts/generateGrammar.ts",
     "package": "pnpm build && vsce package --no-dependencies",
     "publish": "pnpm build && vsce publish --no-dependencies"
   },
   "dependencies": {
-    "@lollipop-onl/railsim2-language-server": "workspace:*",
+    "@railsim2-support/language-server": "workspace:*",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {

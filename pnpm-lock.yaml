@@ -57,7 +57,7 @@ importers:
 
   packages/vscode-extension:
     dependencies:
-      '@lollipop-onl/railsim2-language-server':
+      '@railsim2-support/language-server':
         specifier: workspace:*
         version: link:../language-server
       vscode-languageclient:

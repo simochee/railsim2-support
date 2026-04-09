@@ -13,7 +13,7 @@ import {
   CONTROL_KEYWORDS,
   PROPERTY_NAMES,
   CONSTANTS,
-} from "@lollipop-onl/railsim2-language-server/keywords";
+} from "@railsim2-support/language-server/keywords";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
