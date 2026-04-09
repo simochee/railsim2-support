@@ -207,7 +207,7 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Set: {
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -232,11 +232,11 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       LensFlare: {
-        required: true,
+        required: false,
         multiple: false
       },
       Whiteout: {
-        required: true,
+        required: false,
         multiple: false
       },
       Lighting: {
@@ -343,7 +343,7 @@ export const semanticSchema: SemanticSchema = {
         multiple: true
       },
       Face: {
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -379,7 +379,7 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Line: {
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -2417,7 +2417,7 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       LensFlare: {
-        required: true,
+        required: false,
         multiple: true
       }
     },
@@ -2566,7 +2566,7 @@ export const semanticSchema: SemanticSchema = {
     },
     children: {
       Axle: {
-        required: true,
+        required: false,
         multiple: true
       },
       Body: {
@@ -3003,7 +3003,7 @@ export const semanticSchema: SemanticSchema = {
         multiple: true
       },
       Tilt: {
-        required: true,
+        required: false,
         multiple: false
       }
     },

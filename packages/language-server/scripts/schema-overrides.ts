@@ -87,7 +87,7 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
   // ── Profile / Face / Line / Wireframe: children multiple ──
   Profile: {
     children: {
-      Face: { multiple: true },
+      Face: { required: false, multiple: true },
       Material: { multiple: true },
     },
   },
@@ -109,14 +109,23 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
   },
   Wireframe: {
     children: {
-      Line: { multiple: true },
+      Line: { required: false, multiple: true },
     },
   },
 
   // ── Lighting: Set multiple ──
   Lighting: {
     children: {
-      Set: { multiple: true },
+      Set: { required: false, multiple: true },
+    },
+  },
+
+  // ── Sun: LensFlare / Whiteout は vendor で if-guard パターン（省略可能）──
+  // vendor/CEnvPlugin.cpp: if(tmp = m_SunLensFlare.Read(str)) str = tmp;
+  Sun: {
+    children: {
+      LensFlare: { required: false },
+      Whiteout: { required: false },
     },
   },
 
@@ -206,6 +215,8 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
     children: {
       // JointZY multiple is not derivable from BNF (BNF says exactly 2)
       JointZY: { multiple: true },
+      // vendor/CNamedObject.cpp: Tilt は if-guard パターン（デフォルト m_TiltMaxAngle = 0.0f）
+      Tilt: { required: false },
     },
   },
 
@@ -289,6 +300,10 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
       DisconnectRail: { type: "expression", arity: null },
       BranchRail: { type: "expression", arity: null },
     },
+    // vendor/CTrainPlugin.cpp: Axle は while-loop パターン（0個でもOK）
+    children: {
+      Axle: { required: false },
+    },
   },
 
   // ── DefineAnimation: type/arity overrides ──
@@ -359,7 +374,7 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
   // ── Headlight: LensFlare multiple (BNF says opt but multiple in practice) ──
   Headlight: {
     children: {
-      LensFlare: { multiple: true },
+      LensFlare: { required: false, multiple: true },
     },
   },
 
