@@ -10,6 +10,7 @@ export type ObjectNode = {
   body: BodyNode[];
   range: Range;
   nameRange: Range;
+  bodyRange: Range;
 };
 
 export type BodyNode = ObjectNode | PropertyNode | IfNode | ApplySwitchNode | CommentNode;
@@ -26,7 +27,9 @@ export type IfNode = {
   type: "if";
   condition: ExprNode;
   then: BodyNode[];
+  thenRange: Range;
   else_?: BodyNode[];
+  elseRange?: Range;
   range: Range;
 };
 
@@ -35,6 +38,7 @@ export type ApplySwitchNode = {
   switchName: ExprNode;
   cases: CaseNode[];
   default_?: BodyNode[];
+  defaultRange?: Range;
   range: Range;
 };
 
@@ -42,10 +46,16 @@ export type CaseNode = {
   type: "case";
   values: ExprNode[];
   body: BodyNode[];
+  bodyRange: Range;
   range: Range;
 };
 
-export type CommentNode = { type: "comment"; range: Range };
+export type CommentNode = {
+  type: "comment";
+  value: string;
+  kind: "line" | "block";
+  range: Range;
+};
 
 export type ExprNode =
   | { type: "number"; value: number; range: Range }

@@ -76,9 +76,15 @@ function posOf(token: Token): Position {
 }
 
 function endOf(token: Token): Position {
-  // Token length may span multiple lines for block comments, but for
-  // simplicity we compute the end assuming single-line tokens.
-  return { line: token.line, character: token.character + token.length };
+  const lastNl = token.value.lastIndexOf("\n");
+  if (lastNl === -1) {
+    return { line: token.line, character: token.character + token.length };
+  }
+  const lineCount = token.value.split("\n").length - 1;
+  return {
+    line: token.line + lineCount,
+    character: token.value.length - lastNl - 1,
+  };
 }
 
 function rangeOf(token: Token): Range {
@@ -268,12 +274,100 @@ export function parse(source: string): ParseResult {
   }
 
   // -----------------------------------------------------------------------
+  // Comment distribution
+  // -----------------------------------------------------------------------
+
+  interface BodySlot {
+    body: (TopLevelNode | BodyNode)[];
+    range: Range;
+  }
+
+  function containsPosition(range: Range, p: Position): boolean {
+    if (p.line < range.start.line || p.line > range.end.line) return false;
+    if (p.line === range.start.line && p.character < range.start.character) return false;
+    if (p.line === range.end.line && p.character >= range.end.character) return false;
+    return true;
+  }
+
+  function rangeSize(range: Range): number {
+    const lines = range.end.line - range.start.line;
+    return lines * 10000 + (range.end.character - range.start.character);
+  }
+
+  function collectSlots(nodes: (TopLevelNode | BodyNode)[], containerRange: Range, slots: BodySlot[]): void {
+    slots.push({ body: nodes, range: containerRange });
+    for (const node of nodes) {
+      switch (node.type) {
+        case "object":
+          collectSlots(node.body, node.bodyRange, slots);
+          break;
+        case "if":
+          collectSlots(node.then, node.thenRange, slots);
+          if (node.else_ && node.elseRange) {
+            collectSlots(node.else_, node.elseRange, slots);
+          }
+          break;
+        case "applySwitch":
+          for (const c of node.cases) {
+            collectSlots(c.body, c.bodyRange, slots);
+          }
+          if (node.default_ && node.defaultRange) {
+            collectSlots(node.default_, node.defaultRange, slots);
+          }
+          break;
+      }
+    }
+  }
+
+  function distributeComments(file: FileNode, cmtTokens: Token[]): void {
+    if (cmtTokens.length === 0) return;
+
+    const slots: BodySlot[] = [];
+    collectSlots(file.body, file.range, slots);
+
+    for (const ct of cmtTokens) {
+      const commentNode: CommentNode = {
+        type: "comment",
+        value: ct.value,
+        kind: ct.type === "lineComment" ? "line" : "block",
+        range: rangeOf(ct),
+      };
+
+      let bestSlot: BodySlot | null = null;
+      let bestSize = Infinity;
+
+      for (const slot of slots) {
+        if (containsPosition(slot.range, commentNode.range.start)) {
+          const size = rangeSize(slot.range);
+          if (size < bestSize) {
+            bestSize = size;
+            bestSlot = slot;
+          }
+        }
+      }
+
+      if (bestSlot) {
+        bestSlot.body.push(commentNode);
+      } else {
+        // Fallback: file body (for leading/trailing comments)
+        file.body.push(commentNode);
+      }
+    }
+
+    for (const slot of slots) {
+      slot.body.sort((a, b) => {
+        if (a.range.start.line !== b.range.start.line) return a.range.start.line - b.range.start.line;
+        return a.range.start.character - b.range.start.character;
+      });
+    }
+  }
+
+  // -----------------------------------------------------------------------
   // Top-level / body parsing
   // -----------------------------------------------------------------------
 
   function parseFile(): FileNode {
     const body: TopLevelNode[] = [];
-    const startPos: Position = tokens.length > 0 ? posOf(tokens[0]) : { line: 0, character: 0 };
 
     while (!check("eof")) {
       const node = parseTopLevel();
@@ -282,23 +376,18 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    // Add comment nodes — place them in the body in order
-    for (const ct of commentTokens) {
-      body.push({ type: "comment", range: rangeOf(ct) } as CommentNode);
-    }
-    // Sort body by start position
-    body.sort((a, b) => {
-      if (a.range.start.line !== b.range.start.line) return a.range.start.line - b.range.start.line;
-      return a.range.start.character - b.range.start.character;
-    });
+    const eofToken = tokens[pos]; // the EOF token
+    const fileEnd: Position = { line: eofToken.line, character: eofToken.character };
 
-    const endPos = tokens.length > 0 ? endOf(tokens[tokens.length - 1]) : { line: 0, character: 0 };
-
-    return {
+    const file: FileNode = {
       type: "file",
       body,
-      range: rangeSpan(startPos, endPos),
+      range: rangeSpan({ line: 0, character: 0 }, fileEnd),
     };
+
+    distributeComments(file, commentTokens);
+
+    return file;
   }
 
   function parseTopLevel(): TopLevelNode | null {
@@ -367,7 +456,7 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    expect("lbrace", "Expected '{'");
+    const openBrace = expect("lbrace", "Expected '{'");
     const body = parseBody();
     const closeBrace = expect("rbrace", "Expected '}'");
     const endPos = closeBrace.length > 0 ? endOf(closeBrace) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
@@ -379,6 +468,7 @@ export function parse(source: string): ParseResult {
       body,
       range: rangeSpan(startPos, endPos),
       nameRange,
+      bodyRange: rangeSpan(endOf(openBrace), posOf(closeBrace)),
     };
   }
 
@@ -530,17 +620,20 @@ export function parse(source: string): ParseResult {
 
     const condition = parseExpr();
 
-    expect("lbrace", "Expected '{'");
+    const thenOpen = expect("lbrace", "Expected '{'");
     const thenBody = parseBody();
     let lastBrace = expect("rbrace", "Expected '}'");
+    const thenRange = rangeSpan(endOf(thenOpen), posOf(lastBrace));
 
     let elseBody: BodyNode[] | undefined;
+    let elseRange: Range | undefined;
 
     if (checkValue("identifier", "Else")) {
       advance(); // "Else"
-      expect("lbrace", "Expected '{'");
+      const elseOpen = expect("lbrace", "Expected '{'");
       elseBody = parseBody();
       lastBrace = expect("rbrace", "Expected '}'");
+      elseRange = rangeSpan(endOf(elseOpen), posOf(lastBrace));
     }
 
     const endPos = lastBrace.length > 0 ? endOf(lastBrace) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
@@ -549,7 +642,9 @@ export function parse(source: string): ParseResult {
       type: "if",
       condition,
       then: thenBody,
+      thenRange,
       else_: elseBody,
+      elseRange,
       range: rangeSpan(startPos, endPos),
     };
   }
@@ -564,14 +659,18 @@ export function parse(source: string): ParseResult {
 
     const cases: CaseNode[] = [];
     let default_: BodyNode[] | undefined;
+    let defaultRange: Range | undefined;
 
     while (!check("rbrace") && !check("eof")) {
       if (checkValue("identifier", "Case")) {
         cases.push(parseCase());
       } else if (checkValue("identifier", "Default")) {
         advance(); // "Default"
-        expect("colon", "Expected ':'");
+        const colonToken = expect("colon", "Expected ':'");
+        const bodyStart = endOf(colonToken);
         default_ = parseBody(true);
+        // defaultRange ends at the next rbrace/eof (what peek() points to now)
+        defaultRange = rangeSpan(bodyStart, posOf(peek()));
       } else {
         addError(`Expected 'Case' or 'Default' in ApplySwitch`, rangeOf(peek()));
         const before = pos;
@@ -589,6 +688,7 @@ export function parse(source: string): ParseResult {
       switchName,
       cases,
       default_,
+      defaultRange,
       range: rangeSpan(startPos, endPos),
     };
   }
@@ -604,16 +704,19 @@ export function parse(source: string): ParseResult {
       values.push(parseExpr());
     }
 
-    expect("colon", "Expected ':'");
+    const colonToken = expect("colon", "Expected ':'");
+    const bodyStart = endOf(colonToken);
 
     const body = parseBody(true);
-    const endPos =
-      body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
+    // bodyRange ends at the next Case/Default/rbrace (what peek() points to now)
+    const bodyEnd = posOf(peek());
+    const endPos = body.length > 0 ? body[body.length - 1].range.end : endOf(tokens[pos - 1] ?? caseToken);
 
     return {
       type: "case",
       values,
       body,
+      bodyRange: rangeSpan(bodyStart, bodyEnd),
       range: rangeSpan(startPos, endPos),
     };
   }

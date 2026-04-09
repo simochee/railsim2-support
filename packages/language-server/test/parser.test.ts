@@ -1,6 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { parse } from "../src/server/parser.js";
-import type { ObjectNode, PropertyNode, IfNode, ApplySwitchNode } from "../src/shared/ast.js";
+import type {
+  ObjectNode,
+  PropertyNode,
+  IfNode,
+  ApplySwitchNode,
+  CommentNode,
+} from "../src/shared/ast.js";
 
 describe("parser", () => {
   // Basics
@@ -60,14 +66,17 @@ describe("parser", () => {
     expect(inner.name).toBe("Profile");
   });
 
-  it("should skip comments in AST body", () => {
+  it("should distribute comments into correct bodies", () => {
     const { file, diagnostics } = parse("// top comment\nBody { // inner\n}");
     expect(diagnostics).toHaveLength(0);
-    // Comments are stored as CommentNode in the file body
-    const comments = file.body.filter((n) => n.type === "comment");
-    expect(comments.length).toBe(2);
+    // Top comment is in file body, inner comment is in object body
+    const fileComments = file.body.filter((n) => n.type === "comment");
+    expect(fileComments.length).toBe(1);
     const objects = file.body.filter((n) => n.type === "object");
     expect(objects.length).toBe(1);
+    const obj = objects[0] as ObjectNode;
+    const innerComments = obj.body.filter((n) => n.type === "comment");
+    expect(innerComments.length).toBe(1);
   });
 
   // If/Else — verify exact AST shape
@@ -414,5 +423,99 @@ ApplySwitch "_FRONT" {
     expect(asNode).toBeDefined();
     // The ApplySwitch's range.end should extend to EOF
     expect(asNode.range.end.line).toBeGreaterThanOrEqual(3);
+  });
+
+  // --- bodyRange tests ---
+
+  it("should have bodyRange for ObjectNode (content area inside braces)", () => {
+    const { file, diagnostics } = parse("Body { Coord = 1; }");
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    expect(obj.bodyRange).toBeDefined();
+    // '{' is at char 5, so bodyRange.start is char 6 (after '{')
+    expect(obj.bodyRange.start.character).toBe(6);
+    // '}' is at char 18, so bodyRange.end is char 18 (before '}')
+    expect(obj.bodyRange.end.character).toBe(18);
+  });
+
+  it("should have thenRange and elseRange for IfNode", () => {
+    const { file, diagnostics } = parse("Body { If 1 { Coord = 0; } Else { Coord = 1; } }");
+    expect(diagnostics).toHaveLength(0);
+    const body = file.body[0] as ObjectNode;
+    const ifNode = body.body[0] as IfNode;
+    expect(ifNode.thenRange).toBeDefined();
+    expect(ifNode.elseRange).toBeDefined();
+  });
+
+  it("should have bodyRange for CaseNode and defaultRange for ApplySwitchNode", () => {
+    const { file, diagnostics } = parse('ApplySwitch "_X" { Case 0: Coord = 10; Default: Coord = 20; }');
+    expect(diagnostics).toHaveLength(0);
+    const sw = file.body[0] as ApplySwitchNode;
+    expect(sw.cases[0].bodyRange).toBeDefined();
+    expect(sw.defaultRange).toBeDefined();
+  });
+
+  // --- Comment distribution tests ---
+
+  it("should place comments inside object bodies", () => {
+    const { file, diagnostics } = parse("Body {\n  // inner comment\n  Coord = 1;\n}");
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body.filter((n) => n.type === "object")[0] as ObjectNode;
+    const innerComments = obj.body.filter((n) => n.type === "comment");
+    expect(innerComments).toHaveLength(1);
+  });
+
+  it("should place leading comment in file body", () => {
+    const { file, diagnostics } = parse("// top comment\nBody { }");
+    expect(diagnostics).toHaveLength(0);
+    expect(file.body[0].type).toBe("comment");
+    expect(file.body[1].type).toBe("object");
+  });
+
+  it("should handle comments-only file", () => {
+    const { file } = parse("// only a comment");
+    expect(file.body).toHaveLength(1);
+    expect(file.body[0].type).toBe("comment");
+  });
+
+  it("should place comment in If then branch", () => {
+    const { file } = parse("Body { If 1 {\n  // then comment\n  Coord = 0;\n} }");
+    const obj = file.body.filter((n) => n.type === "object")[0] as ObjectNode;
+    const ifNode = obj.body.find((n) => n.type === "if") as IfNode;
+    const thenComments = ifNode.then.filter((n) => n.type === "comment");
+    expect(thenComments).toHaveLength(1);
+  });
+
+  it("should preserve comment value and kind", () => {
+    const { file } = parse("// line comment\n/* block comment */\nBody { }");
+    const comments = file.body.filter((n) => n.type === "comment") as CommentNode[];
+    expect(comments).toHaveLength(2);
+    expect(comments[0].value).toBe("// line comment");
+    expect(comments[0].kind).toBe("line");
+    expect(comments[1].value).toBe("/* block comment */");
+    expect(comments[1].kind).toBe("block");
+  });
+
+  it("should place Case boundary comment in case body", () => {
+    const { file } = parse('ApplySwitch "_X" { Case 0: // case comment\n Coord = 10; }');
+    const sw = file.body.filter((n) => n.type !== "comment")[0] as ApplySwitchNode;
+    const caseComments = sw.cases[0].body.filter((n) => n.type === "comment");
+    expect(caseComments).toHaveLength(1);
+  });
+
+  it("should place Default boundary comment in default body", () => {
+    const { file } = parse('ApplySwitch "_X" { Default: // default comment\n Coord = 20; }');
+    const sw = file.body.filter((n) => n.type !== "comment")[0] as ApplySwitchNode;
+    const defaultComments = sw.default_!.filter((n) => n.type === "comment");
+    expect(defaultComments).toHaveLength(1);
+  });
+
+  it("should compute correct range.end for multi-line block comment", () => {
+    const { file } = parse("/* line1\nline2\nline3 */ Body { }");
+    const comment = file.body.find((n) => n.type === "comment");
+    expect(comment).toBeDefined();
+    // "/* line1\nline2\nline3 */" ends at line 2, character 8 ("line3 */".length)
+    expect(comment!.range.end.line).toBe(2);
+    expect(comment!.range.end.character).toBe(8);
   });
 });
