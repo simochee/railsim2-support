@@ -1,0 +1,16 @@
+{
+    "name": "@railsim2-support/website",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview"
+    },
+    "dependencies": {
+        "@iconify-json/tabler": "^1.2.33",
+        "astro": "^5.7.0",
+        "astro-icon": "^1.1.5",
+        "iconv-lite": "^0.7.2"
+    }
+}

@@ -9,9 +9,9 @@
         "test": "pnpm -r test",
         "generate": "pnpm --filter @railsim2-support/language-server generate",
         "generate:grammar": "pnpm --filter railsim2-support generate:grammar",
-        "docs:build": "vite build --config apps/website/vite.config.ts",
-        "docs:dev": "vite --config apps/website/vite.config.ts --open",
-        "docs:preview": "vite preview --config apps/website/vite.config.ts",
+        "docs:build": "pnpm --filter @railsim2-support/website build",
+        "docs:dev": "pnpm --filter @railsim2-support/website dev",
+        "docs:preview": "pnpm --filter @railsim2-support/website preview",
         "lint": "oxlint",
         "lint:fix": "oxlint --fix",
         "fmt": "oxfmt packages/",
@@ -23,13 +23,9 @@
         ]
     },
     "devDependencies": {
-        "@tabler/icons": "^3.41.1",
-        "iconv-lite": "^0.7.2",
         "oxfmt": "0.44.0",
         "oxlint": "^1.59.0",
-        "postcss-modules": "^6.0.1",
         "tsx": "^4.21.0",
-        "typescript": "^6.0.2",
-        "vite": "^8.0.7"
+        "typescript": "^6.0.2"
     }
 }

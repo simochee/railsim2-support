@@ -1,0 +1,30 @@
+---
+import Banner from "../components/Banner.astro";
+import { getVendorCss } from "../lib/vendor";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const vendorCss = getVendorCss();
+---
+
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{title}</title>
+    <Fragment set:html={`<style>${vendorCss}</style>`} />
+    <style is:global>
+      body {
+        margin: 0;
+        padding-bottom: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <Banner />
+    <slot />
+  </body>
+</html>

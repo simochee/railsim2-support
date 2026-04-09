@@ -1,0 +1,19 @@
+---
+import HelpLayout from "../layouts/HelpLayout.astro";
+import { getHelpPages } from "../lib/vendor";
+
+export function getStaticPaths() {
+  return getHelpPages()
+    .filter((p) => p.slug !== "index")
+    .map((page) => ({
+      params: { slug: page.slug },
+      props: { title: page.title, body: page.body },
+    }));
+}
+
+const { title, body } = Astro.props;
+---
+
+<HelpLayout title={title}>
+  <Fragment set:html={body} />
+</HelpLayout>

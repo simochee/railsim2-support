@@ -1,0 +1,10 @@
+---
+import HelpLayout from "../layouts/HelpLayout.astro";
+import { getHelpPages } from "../lib/vendor";
+
+const index = getHelpPages().find((p) => p.slug === "index")!;
+---
+
+<HelpLayout title={index.title}>
+  <Fragment set:html={index.body} />
+</HelpLayout>

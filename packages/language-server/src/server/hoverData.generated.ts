@@ -26,7 +26,7 @@ export interface ObjectDoc {
 export const objectDocs: Record<string, ObjectDoc> = {
   "RailInfo": {
     "description": "レールプラグインは、線路のレールを表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_rail.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_rail.html",
     "properties": {
       "Gauge": {
         "description": "レールのゲージ幅を設定します。狭軌の場合は 1067 [mm] ですので、メートルに直して Gauge = 1.067; と指定します。この値は、カントに対してカーブの内側にあるレールの高さを一定に保つために参照されます。"
@@ -65,12 +65,12 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "SoundInfo": {
     "description": "",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_rail.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_rail.html",
     "properties": {}
   },
   "TieInfo": {
     "description": "枕木プラグインは、線路の枕木やバラストなどの連続構成物を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_tie.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_tie.html",
     "properties": {
       "Height": {
         "description": "枕木の高さを指定します。"
@@ -82,7 +82,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "GirderInfo": {
     "description": "橋桁プラグインは、高架線路の土台や壁面などの連続構成物を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_girder.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_girder.html",
     "properties": {
       "Height": {
         "description": "橋桁の土台部分の厚さを指定します。"
@@ -100,7 +100,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PierInfo": {
     "description": "橋脚プラグインは、高架線路の橋脚を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_pier.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_pier.html",
     "properties": {
       "TrackNum": {
         "description": "ひとつの橋脚で何本の線路をカバーするか指定します。デフォルト値は 1 です。"
@@ -130,7 +130,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "LineInfo": {
     "description": "架線プラグインは、電化路線の架線を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_line.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_line.html",
     "properties": {
       "TrolleyAlt": {
         "description": "レール表面に対するトロリ線の高さを指定します。"
@@ -151,7 +151,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PoleInfo": {
     "description": "架線柱プラグインは、架線を支持する架線柱を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_pole.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_pole.html",
     "properties": {
       "TrackNum": {
         "description": "ひとつの架線柱オブジェクトで何本の線路をカバーするか指定します。デフォルト値は 1 です。"
@@ -169,7 +169,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "TrainInfo": {
     "description": "車輌プラグインは、レール上を走る鉄道車輌を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_train.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_train.html",
     "properties": {
       "FrontLimit": {
         "description": "車輌の前方連結位置を指定します。車輌の前方がローカル座標系 Z 軸正方向に対応します。"
@@ -202,17 +202,17 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "StationInfo": {
     "description": "駅舎プラグインは、列車が停車するためのホームを持った駅舎として使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_station.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_station.html",
     "properties": {}
   },
   "StructInfo": {
     "description": "施設プラグインは、その他の建物、構造物などを表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_struct.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_struct.html",
     "properties": {}
   },
   "SurfaceInfo": {
     "description": "地形プラグインは、レイアウトの土台となる地形を表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_surface.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_surface.html",
     "properties": {
       "SizeX": {
         "description": "地形の X 軸 (東西方向) のサイズを指定します。"
@@ -224,7 +224,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "EnvInfo": {
     "description": "環境プラグインは、シーンの背景や天体の動きなどを表現するために使用されます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_env.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_env.html",
     "properties": {
       "Latitude": {
         "description": "環境の緯度を指定します。"
@@ -239,7 +239,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Profile": {
     "description": "レール・枕木・橋桁・橋脚・架線の 5 種類を含む。プロファイルプラグインは、連続な断面構造を持ったプラグインを統括する抽象プラグインクラスです。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_profile.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_profile.html",
     "properties": {
       "UseTexture": {
         "description": "テクスチャを使用するかどうか指定します。以下のフィールドはこのオプションを yes に指定した場合のみ記述します。"
@@ -254,7 +254,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Material": {
     "description": "指定された材質番号のアルファ値を変更します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_alpha_changer.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_alpha_changer.html",
     "properties": {
       "ChangeAlpha": {
         "description": "アルファ値を変更する材質番号と、変更後のアルファ値を指定します。変更後のアルファ値には定数のほか、昼間 1.0 となり夕方から夜にかけて徐々に 0.0 となる DayAlpha、その逆で夜間 1.0 となり昼にかけて徐々に 0.0 となる NightAlpha という変数を使用することもできます。なお、DayAlpha + NightAlpha = 1.0 という関係があります。"
@@ -278,7 +278,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "DefineAnimation": {
     "description": "texture-animation で作成したアニメーションを指定した材質番号に貼り付けます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_animation_applier.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_animation_applier.html",
     "properties": {
       "SetAnimation": {
         "description": "アニメーションを適用する材質番号と、texture-animation で定義したアニメーション名を指定します。"
@@ -308,7 +308,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Frame": {
     "description": "1 枚の画像からなるアニメーションの単一フレームを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_animation_frame.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_animation_frame.html",
     "properties": {
       "Frame": {
         "description": "テクスチャファイル名と、このフレームを表示する時間をゲーム内フレーム時間 (1/30 秒単位) で指定します。"
@@ -317,7 +317,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "NumberedFrame": {
     "description": "複数の連番画像ファイルからなるアニメーションのフレームを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_animation_numbered_frame.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_animation_numbered_frame.html",
     "properties": {
       "Frame": {
         "description": "連番テクスチャファイル名の書式、開始番号、終了番号、フレーム表示時間の順序で指定します。ファイル名の書式については下記を参照してください。"
@@ -335,7 +335,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Texture": {
     "description": "アニメーションフレームの UV マッピングに座標変換を施します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_animation_texture_transformer.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_animation_texture_transformer.html",
     "properties": {
       "ChangeTexture": {
         "description": "UV 座標を平行移動します。移動する u, v 値の順に指定します。"
@@ -353,7 +353,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Axle": {
     "description": "車輌プラグインの車軸を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_axle_object.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_axle_object.html",
     "properties": {
       "Axle": {
         "description": "直後にオブジェクト名を書きます。このオブジェクト名は、車軸に車輌本体などを乗せるために参照されます。"
@@ -374,7 +374,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Body": {
     "description": "車輌の台車や本体を構成する基本的なオブジェクトです。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_body_object.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_body_object.html",
     "properties": {
       "Body": {
         "description": "直後にオブジェクト名を書きます。このオブジェクト名は、台車に斜体を乗せたり、車体にパンタグラフ等を固定するために参照されます。"
@@ -383,7 +383,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Tilt": {
     "description": "body-object において振り子式の車体を設定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_body_tilt_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_body_tilt_info.html",
     "properties": {
       "TiltRatio": {
         "description": "カーブのきつさと車輌の速度に対して、どの程度振り子が振れるかを指定します。大体 0.1～10.0 程度のオーダーで指定します。"
@@ -398,7 +398,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PistonZY": {
     "description": "crank-zy のピストン部分を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_crank_slide_zy.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_crank_slide_zy.html",
     "properties": {
       "Slide": {
         "description": "直後にオブジェクト名を書きます。このオブジェクト名は、他のオブジェクトがこのオブジェクトを親として参照する場合に使用されます。"
@@ -410,7 +410,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "NormalCursor": {
     "description": "スキンのカーソルに関する情報を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_cursor_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_cursor_info.html",
     "properties": {
       "TexFileName": {
         "description": "カーソルに使用するテクスチャファイル名を指定します。"
@@ -449,7 +449,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "DefineSwitch": {
     "description": "カスタマイザを条件付で適用します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_customizer_switch_applier.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_customizer_switch_applier.html",
     "properties": {
       "ApplySwitch": {
         "description": "直後に条件評価のための式を指定します。式の値が Case に続いて指定された 1 個以上の値のうちのいずれかに一致する場合、: に続いて指定されたカスタマイザを適用します。最後に Default で始まる文を記述すると、他の Case に一致しなかった場合にこの部分が処理されます。C 言語の switch～case ステートメントに類似していますが、break 文のようなものを指定しなくても連続した Case の内容が続けて適用されることはありません。スイッチ番号は線形にスキャンされ、番号の対応する Case が複数あればすべて処理されます。"
@@ -545,7 +545,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "DynamicRotation": {
     "description": "対象オブジェクトを動的に回転します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_dynamic_rotator.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_dynamic_rotator.html",
     "properties": {
       "RotationAxis": {
         "description": "回転軸をオブジェクトのローカル座標系で指定します。デフォルト値は Z 軸になります。"
@@ -563,7 +563,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Landscape": {
     "description": "環境プラグインの背景地形に関する定義を行います。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_env_landscape_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_env_landscape_info.html",
     "properties": {
       "ModelFileName": {
         "description": "オブジェクトの *.x ファイルを指定します。"
@@ -575,7 +575,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Lighting": {
     "description": "環境プラグインのシーン全体のライティングに関する設定を行います。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_env_lighting.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_env_lighting.html",
     "properties": {
       "NightThreshold": {
         "description": "夜と昼を切り替える太陽の高さを指定します。太陽の高さは、地面となす角のコサインの値で表されます。つまり、-1.0～1.0 の間で指定します。"
@@ -599,7 +599,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Moon": {
     "description": "環境プラグインの月に関する定義を行います。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_env_moon_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_env_moon_info.html",
     "properties": {
       "ModelFileName": {
         "description": "オブジェクトの *.x ファイルを指定します。"
@@ -620,7 +620,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Sun": {
     "description": "環境プラグインの太陽に関する定義を行います。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_env_sun_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_env_sun_info.html",
     "properties": {
       "ModelFileName": {
         "description": "オブジェクトの *.x ファイルを指定します。"
@@ -635,7 +635,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Headlight": {
     "description": "ヘッドライトのレンズフレア・エフェクトを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_headlight_applier.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_headlight_applier.html",
     "properties": {
       "AttachObject": {
         "description": "固定先のオブジェクト名を指定します。オブジェクト名は object-3d や body-object で定義されたものです。"
@@ -653,7 +653,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Interval": {
     "description": "プロファイルプラグインの等間隔配置オブジェクト定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_interval.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_interval.html",
     "properties": {
       "IgnoreCant": {
         "description": "配置するオブジェクトの姿勢が線路のカントによる影響を無視するかどうか設定します。デフォルト値は no です。"
@@ -674,7 +674,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "LensFlare": {
     "description": "レンズフレアのパターンを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_lens_flare.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_lens_flare.html",
     "properties": {
       "StartAngle": {
         "description": "光源方向に対し、フレアの描画を始める視線方向の角度を指定します。"
@@ -689,7 +689,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "ChangeMaterial": {
     "description": "特定の材質に対して環境マッピングを設定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_material_changer.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_material_changer.html",
     "properties": {
       "MaterialID": {
         "description": "材質を変更する材質番号を指定します。"
@@ -713,7 +713,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Model": {
     "description": "オブジェクトに使用する *.x ファイルを差し替えます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_model_changer.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_model_changer.html",
     "properties": {
       "ChangeModel": {
         "description": "差し替える *.x ファイル、差し替え後のスケールを設定します。"
@@ -752,7 +752,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Object3D": {
     "description": "モデルプラグインで使用される *.x ファイル単位のオブジェクトを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_named_object_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_named_object_info.html",
     "properties": {
       "ModelFileName": {
         "description": "オブジェクトの *.x ファイルを指定します。"
@@ -773,7 +773,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Joint3D": {
     "description": "object-3d などの固定位置を指定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_object_joint_3d.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_object_joint_3d.html",
     "properties": {
       "JointZY": {
         "description": "直後に固定先のオブジェクト名を指定します。オブジェクト名は axle-object や body-object で定義されたものです。"
@@ -812,7 +812,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "JointZY": {
     "description": "body-object の固定位置を指定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_object_joint_zy.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_object_joint_zy.html",
     "properties": {
       "JointZY": {
         "description": "直後に固定先のオブジェクト名を指定します。オブジェクト名は axle-object や body-object 等で定義されたものです。"
@@ -827,7 +827,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "JointZYX": {
     "description": "object-zy 等の固定位置を指定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_object_joint_zyx.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_object_joint_zyx.html",
     "properties": {
       "JointZY": {
         "description": "直後に固定先のオブジェクト名を指定します。オブジェクト名は axle-object や body-object 等で定義されたものです。"
@@ -845,7 +845,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "ObjectZY": {
     "description": "車輌プラグインにおいて、任意の 2 点を結ぶようなオブジェクトを配置します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_object_zy.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_object_zy.html",
     "properties": {
       "ObjectZY": {
         "description": "直後にオブジェクト名を書きます。このオブジェクト名は、他のオブジェクトがこのオブジェクトを親として参照する場合に使用されます。"
@@ -860,7 +860,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Particle": {
     "description": "煙や噴水などのパーティクル (粒子) エフェクトを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_particle_applier.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_particle_applier.html",
     "properties": {
       "TextureFileName": {
         "description": "パーティクルの表現に使用するテクスチャファイルを指定します。"
@@ -917,7 +917,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Base": {
     "description": "橋脚プラグインの橋脚底部を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_pier_base_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_pier_base_info.html",
     "properties": {
       "ModelFileName": {
         "description": "使用する *.x ファイルを指定します。"
@@ -932,7 +932,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Head": {
     "description": "橋脚プラグインの橋脚頭部を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_pier_head_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_pier_head_info.html",
     "properties": {
       "ModelFileName": {
         "description": "使用する *.x ファイルを指定します。"
@@ -947,7 +947,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Joint": {
     "description": "橋脚プラグインの線路支持部を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_pier_joint_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_pier_joint_info.html",
     "properties": {
       "ModelFileName": {
         "description": "使用する *.x ファイルを指定します。"
@@ -962,7 +962,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Platform": {
     "description": "駅舎プラグインにプラットフォームを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_platform.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_platform.html",
     "properties": {
       "TrackNum": {
         "description": "複線用のプラグインを用いて 2 本以上のプラットフォームを同時に設置したい場合に指定します。デフォルト値は 1 です。"
@@ -1010,7 +1010,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PluginHeader": {
     "description": "プラグインのヘッダ情報を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_plugin_header.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_plugin_header.html",
     "properties": {
       "RailSimVersion": {
         "description": "そのプラグインが対応する RailSim のバージョンを指定します。通常、そのプラグインが作成された時点での RailSim の最新バージョンを指定します。例えば、Version 2.00 の場合は RailSimVersion = 2.00; と書きます。"
@@ -1037,7 +1037,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Vertex": {
     "description": "断面の頂点を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_profile_vertex.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_profile_vertex.html",
     "properties": {
       "IgnoreCant": {
         "description": "カントの影響を無視するかどうか指定します。バラストの底辺など、カントの影響を無視すべき頂点で yes を指定します。デフォルト値は no です。"
@@ -1055,7 +1055,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Background": {
     "description": "スキンの画面背景に関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_background_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_background_info.html",
     "properties": {
       "UseWallpaper": {
         "description": "プラグイン選択画面等の背景に壁紙画像を使用するかどうか指定します。"
@@ -1073,7 +1073,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "EditCtrl": {
     "description": "スキンのエディットボックスに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_editctrl_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_editctrl_info.html",
     "properties": {
       "DefaultFontColor": {
         "description": "フォーカスがない時のフォント色を指定します。"
@@ -1097,7 +1097,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Interface": {
     "description": "スキンのフレームインターフェイスに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_frame_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_frame_info.html",
     "properties": {
       "FrameTexFileName": {
         "description": "フレームに使用するテクスチャのファイル名を指定します。画像はサンプルを参考に作成してください。"
@@ -1136,7 +1136,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "ListView": {
     "description": "スキンのリストビューに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_listview_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_listview_info.html",
     "properties": {
       "DefaultBaseColorOdd": {
         "description": "奇数列の背景色を指定します。"
@@ -1160,7 +1160,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PluginTree": {
     "description": "スキンのプラグインツリービューに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_plugintree_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_plugintree_info.html",
     "properties": {
       "DefaultBaseColor": {
         "description": "ツリー要素の通常の背景色を指定します。"
@@ -1181,7 +1181,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "PopupMenu": {
     "description": "スキンのポップアップメニューに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_popupmenu_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_popupmenu_info.html",
     "properties": {
       "DefaultFontColor": {
         "description": "通常のフォント色を指定します。"
@@ -1202,7 +1202,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "SoundEffect": {
     "description": "スキンの各種サウンドに関する定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_skin_sound_info.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_skin_sound_info.html",
     "properties": {
       "MouseDownWaveFileName": {
         "description": "マウスのボタンを押した時の音に使用する .wav ファイル名を指定します。.wav ファイルは短すぎると再生できない場合がありますので、100～200 [ms] 程度は長さを取ってください。"
@@ -1226,7 +1226,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Sound": {
     "description": "オブジェクトにサウンドエフェクトを取り付けます。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_sound_effector.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_sound_effector.html",
     "properties": {
       "WaveFileName": {
         "description": "再生する .wav ファイルを指定します。短すぎると再生できないことがありますので、100～200 [ms] 程度は長さを取ってください。"
@@ -1247,7 +1247,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "StaticMove": {
     "description": "対象オブジェクトを静的に移動します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_static_mover.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_static_mover.html",
     "properties": {
       "Displacement": {
         "description": "元の位置からの変位を、オブジェクトの移動前のローカル座標系ベクトルで指定します。"
@@ -1256,7 +1256,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "StaticRotation": {
     "description": "対象オブジェクトを静的に回転します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_static_rotator.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_static_rotator.html",
     "properties": {
       "RotationAxis": {
         "description": "回転軸をオブジェクトのローカル座標系で指定します。デフォルト値は Z 軸になります。"
@@ -1268,7 +1268,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Link": {
     "description": "triangle-zy 等の一辺を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_triangle_link_zy.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_triangle_link_zy.html",
     "properties": {
       "Link": {
         "description": "直後にオブジェクト名を書きます。このオブジェクト名は、他のオブジェクトがこのオブジェクトを親として参照する場合に使用されます。"
@@ -1280,7 +1280,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Whiteout": {
     "description": "太陽のホワイトアウトを定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_whiteout.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_whiteout.html",
     "properties": {
       "StartAngle": {
         "description": "光源方向に対し、ホワイトアウトの描画を始める視線方向の角度を指定します。"
@@ -1292,7 +1292,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "TrackWind": {
     "description": "風の方向を追跡します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_wind_tracker.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_wind_tracker.html",
     "properties": {
       "TrackSpeed": {
         "description": "風の追跡速度を設定します。正値を指定するとオブジェクトの Z 軸正方向が風下の方向と一致するように追跡し、負値の場合は風上になります。この数値には範囲の制限はありませんが、大体 0.1～10.0 程度後のオーダーで指定します。"
@@ -1304,7 +1304,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Windmill": {
     "description": "風の強さに応じた回転を設定します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_windmill.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_windmill.html",
     "properties": {
       "Directional": {
         "description": "風の方向と回転軸の一致度合いにより回転速度を変化させるかどうか設定します。回転軸が垂直になっているような風車の場合は no を指定します。デフォルト値は yes です。"
@@ -1322,7 +1322,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Wireframe": {
     "description": "プロファイルプラグインのワイヤフレーム定義です。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_wireframe.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_wireframe.html",
     "properties": {
       "MinInterval": {
         "description": "このワイヤフレームを適用する最小区間距離を指定します。ここで指定した距離以上 (同値含む) の場合にのみワイヤフレームが適用されます。省略した場合は距離の下限を設けません。"
@@ -1334,7 +1334,7 @@ export const objectDocs: Record<string, ObjectDoc> = {
   },
   "Vertex:Wireframe": {
     "description": "ラインを構成する頂点を定義します。",
-    "helpUrl": "https://railsim2-support.simochee.net/help/pi_sym_wireframe_vertex.html",
+    "helpUrl": "https://railsim2.simochee.net/pi_sym_wireframe_vertex.html",
     "properties": {
       "IgnoreCant": {
         "description": "カントの影響を無視するかどうか指定します。バラストの底辺など、カントの影響を無視すべき頂点で yes を指定します。デフォルト値は no です。"

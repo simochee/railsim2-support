@@ -1,6 +1,6 @@
 node_modules/
 out/
 *.vsix
-apps/website/pages/
-apps/website/dist/
+packages/website/dist/
+packages/website/.astro/
 tsconfig.tsbuildinfo
