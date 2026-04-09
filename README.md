@@ -16,10 +16,7 @@ RailSim2 プラグイン定義ファイルの開発支援を提供する VS Code
 
 ## Installation
 
-1. Visual Studio Code で拡張機能 `RailSim2 Support` を検索します
-2. 拡張機能をインストールします
-
-Done!
+[VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar) から拡張機能をインストールします。
 
 ## Supported versions
 
