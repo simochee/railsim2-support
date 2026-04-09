@@ -103,7 +103,7 @@ describe("PROPERTY_NAMES", () => {
 // ---------------------------------------------------------------------------
 
 describe("CONSTANTS", () => {
-  it.each(["DayAlpha", "Rail", "yes", "no"])("contains %s", (name) => {
+  it.each(["DayAlpha", "yes", "no", "Hour"])("contains %s", (name) => {
     expect(CONSTANTS).toContain(name);
   });
 

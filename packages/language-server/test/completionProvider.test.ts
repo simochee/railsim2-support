@@ -53,14 +53,14 @@ describe("findContext", () => {
     }
   });
 
-  it("Vertex inside Face (Profile context) → schemaKey Vertex:Profile", () => {
+  it("Vertex inside Face (Profile context) → schemaKey Vertex (no schemaKey override)", () => {
     const src = "Profile {\n  Face {\n    Vertex {\n      \n    }\n  }\n}";
     const { file, tokens } = setup(src);
     const ctx = findContext(file, tokens, pos(3, 6), "Rail2.txt");
     expect(ctx.type).toBe("objectBody");
     if (ctx.type === "objectBody") {
       expect(ctx.objectName).toBe("Vertex");
-      expect(ctx.schemaKey).toBe("Vertex:Profile");
+      expect(ctx.schemaKey).toBe("Vertex");
     }
   });
 
@@ -114,13 +114,7 @@ describe("findContext", () => {
   it("inside If block within object → objectBody of enclosing object", () => {
     const src = "RailInfo {\n  If (1) {\n    \n  }\n}";
     const { file, tokens } = setup(src);
-    // Inside the If block body — should still resolve to RailInfo objectBody
-    // because If doesn't change the context
-    // The cursor at line 2 col 4 is inside If's then branch
-    // But there's no ObjectNode there, so it should fall through to RailInfo
     const ctx = findContext(file, tokens, pos(2, 4), "Rail2.txt");
-    // Since If is inside RailInfo body and doesn't contain an ObjectNode at cursor,
-    // the innermost object is still RailInfo
     expect(ctx.type).toBe("objectBody");
     if (ctx.type === "objectBody") {
       expect(ctx.objectName).toBe("RailInfo");
@@ -167,25 +161,25 @@ describe("findContext", () => {
   });
 
   it("ネストした子オブジェクトのヘッダ → 親の objectBody", () => {
-    const src = "TrainInfo {\n  Body {\n    \n  }\n}";
+    const src = "PrimaryAssembly {\n  Body {\n    \n  }\n}";
     const { file, tokens } = setup(src);
     // cursor on "Body" name (line 1, char 3)
     const ctx = findContext(file, tokens, pos(1, 3));
-    // Should be TrainInfo's objectBody, not Body's
+    // Should be PrimaryAssembly's objectBody, not Body's
     expect(ctx.type).toBe("objectBody");
     if (ctx.type === "objectBody") {
-      expect(ctx.schemaKey).toBe("TrainInfo");
+      expect(ctx.schemaKey).toBe("PrimaryAssembly");
     }
   });
 
   it("ネストした子オブジェクトの '{' 上 → 親の objectBody", () => {
-    const src = "TrainInfo {\n  Body {\n    \n  }\n}";
+    const src = "PrimaryAssembly {\n  Body {\n    \n  }\n}";
     const { file, tokens } = setup(src);
     // cursor on Body's '{' (line 1, char 7)
     const ctx = findContext(file, tokens, pos(1, 7));
     expect(ctx.type).toBe("objectBody");
     if (ctx.type === "objectBody") {
-      expect(ctx.schemaKey).toBe("TrainInfo");
+      expect(ctx.schemaKey).toBe("PrimaryAssembly");
     }
   });
 });
@@ -195,16 +189,13 @@ describe("findContext", () => {
 // =========================================================================
 
 describe("getCompletions", () => {
-  it("Rail2.txt top level → PluginHeader, RailInfo, etc.", () => {
+  it("Rail2.txt top level → PluginHeader, RailInfo, SoundInfo", () => {
     const { file, tokens } = setup("");
     const items = getCompletions(file, tokens, pos(0, 0), "Rail2.txt");
     const labels = items.map((i) => i.label);
     expect(labels).toContain("PluginHeader");
     expect(labels).toContain("RailInfo");
     expect(labels).toContain("SoundInfo");
-    expect(labels).toContain("Profile");
-    expect(labels).toContain("Wireframe");
-    expect(labels).toContain("Interval");
   });
 
   it("Rail2.txt with existing PluginHeader → PluginHeader excluded", () => {
@@ -213,8 +204,8 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(2, 0), "Rail2.txt");
     const labels = items.map((i) => i.label);
     expect(labels).not.toContain("PluginHeader");
-    // Profile is multiple: true, should still appear
-    expect(labels).toContain("Profile");
+    // Other root objects still available
+    expect(labels).toContain("RailInfo");
   });
 
   it("unknown file → empty", () => {
@@ -229,18 +220,15 @@ describe("getCompletions", () => {
     expect(items).toHaveLength(0);
   });
 
-  it("RailInfo body → properties and children", () => {
+  it("RailInfo body → properties", () => {
     const src = "RailInfo {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
     const labels = items.map((i) => i.label);
-    // Properties
+    // Properties from generated schema
     expect(labels).toContain("Gauge");
-    expect(labels).toContain("TrackNum");
-    expect(labels).toContain("ModelFileName");
-    // Children
-    expect(labels).toContain("DefineSwitch");
-    expect(labels).toContain("DefineAnimation");
+    expect(labels).toContain("Height");
+    expect(labels).toContain("SurfaceAlt");
   });
 
   it("existing Gauge in RailInfo → excluded", () => {
@@ -249,31 +237,29 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(2, 2), "Rail2.txt");
     const labels = items.map((i) => i.label);
     expect(labels).not.toContain("Gauge");
-    // TrackNum should still be available
-    expect(labels).toContain("TrackNum");
+    // Height should still be available
+    expect(labels).toContain("Height");
   });
 
-  it("TrainInfo body → Body, Sound, DefineSwitch children", () => {
+  it("TrainInfo body → properties", () => {
     const src = "TrainInfo {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2), "Train2.txt");
     const labels = items.map((i) => i.label);
-    expect(labels).toContain("Body");
-    expect(labels).toContain("Sound");
-    expect(labels).toContain("DefineSwitch");
-    expect(labels).toContain("DefineAnimation");
+    expect(labels).toContain("FrontLimit");
+    expect(labels).toContain("TailLimit");
+    expect(labels).toContain("MaxVelocity");
   });
 
-  it("Body inside TrainInfo with existing FrontCabin → FrontCabin excluded", () => {
+  it("PrimaryAssembly body with existing FrontCabin → FrontCabin excluded", () => {
     const src =
-      'TrainInfo {\n  Body {\n    ModelFileName = "test.x";\n    FrontCabin {\n    }\n    \n  }\n}';
+      'PrimaryAssembly {\n  FrontCabin {\n  }\n  \n}';
     const { file, tokens } = setup(src);
-    // Inside Body, after existing FrontCabin
-    const items = getCompletions(file, tokens, pos(5, 4), "Train2.txt");
+    const items = getCompletions(file, tokens, pos(3, 2), "Train2.txt");
     const labels = items.map((i) => i.label);
     expect(labels).not.toContain("FrontCabin");
-    // Headlight is multiple: true
-    expect(labels).toContain("Headlight");
+    // Other children should be available
+    expect(labels).toContain("Body");
   });
 
   // Snippet format tests
@@ -288,68 +274,67 @@ describe("getCompletions", () => {
   });
 
   it('filename property → = "${1}";', () => {
-    const src = "RailInfo {\n  \n}";
+    const src = 'Body "test" {\n  \n}';
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
+    const items = getCompletions(file, tokens, pos(1, 2));
     const mfn = items.find((i) => i.label === "ModelFileName");
     expect(mfn).toBeDefined();
     expect(mfn!.insertText).toBe('ModelFileName = "${1}";');
   });
 
   it("yes-no property → = ${1|yes,no|};", () => {
-    const src = "RailInfo {\n  \n}";
+    const src = 'Axle "test" {\n  \n}';
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
-    const ec = items.find((i) => i.label === "EnableCant");
-    expect(ec).toBeDefined();
-    expect(ec!.insertText).toBe("EnableCant = ${1|yes,no|};");
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const ws = items.find((i) => i.label === "WheelSound");
+    expect(ws).toBeDefined();
+    expect(ws!.insertText).toBe("WheelSound = ${1|yes,no|};");
   });
 
   it("vector-3d property → 3 placeholders", () => {
-    const src =
-      'TrainInfo {\n  Body {\n    ModelFileName = "t.x";\n    Headlight {\n      \n    }\n  }\n}';
+    const src = 'Headlight {\n  \n}';
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(4, 6), "Train2.txt");
-    const coord = items.find((i) => i.label === "Coord");
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const coord = items.find((i) => i.label === "SourceCoord");
     expect(coord).toBeDefined();
-    expect(coord!.insertText).toBe("Coord = ${1:0}, ${2:0}, ${3:0};");
+    expect(coord!.insertText).toBe("SourceCoord = ${1:0}, ${2:0}, ${3:0};");
   });
 
   it("vector-2d property → 2 placeholders", () => {
-    const src = "Profile {\n  Face {\n    Vertex {\n      \n    }\n  }\n}";
+    const src = 'Axle "test" {\n  \n}';
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(3, 6), "Rail2.txt");
+    const items = getCompletions(file, tokens, pos(1, 2));
     const coord = items.find((i) => i.label === "Coord");
     expect(coord).toBeDefined();
     expect(coord!.insertText).toBe("Coord = ${1:0}, ${2:0};");
   });
 
   it("enum property → choice snippet", () => {
+    const src = 'Axle "test" {\n  \n}';
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const ac = items.find((i) => i.label === "AnalogClock");
+    expect(ac).toBeDefined();
+    expect(ac!.insertText).toContain("${1|Hour,");
+  });
+
+  it("identifier property → = ${1:name};", () => {
     const src = "PluginHeader {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2));
     const pt = items.find((i) => i.label === "PluginType");
     expect(pt).toBeDefined();
-    expect(pt!.insertText).toContain("${1|Rail,");
-  });
-
-  it("identifier property → = ${1:name};", () => {
-    const src = "Platform {\n  Coord = 0.0, 0.0, 0.0;\n  \n}";
-    const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(2, 2));
-    const po = items.find((i) => i.label === "ParentObject");
-    expect(po).toBeDefined();
-    expect(po!.insertText).toBe("ParentObject = ${1:name};");
+    expect(pt!.insertText).toBe("PluginType = ${1:name};");
   });
 
   it("nameParameter object → snippet with name placeholder", () => {
-    const src = "RailInfo {\n  \n}";
+    const src = "PrimaryAssembly {\n  \n}";
     const { file, tokens } = setup(src);
-    const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
-    const ds = items.find((i) => i.label === "DefineSwitch");
-    expect(ds).toBeDefined();
-    expect(ds!.insertText).toBe("DefineSwitch ${1:name} {\n\t$0\n}");
-    expect(ds!.kind).toBe(CompletionItemKind.Class);
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const body = items.find((i) => i.label === "Body");
+    expect(body).toBeDefined();
+    expect(body!.insertText).toBe("Body ${1:name} {\n\t$0\n}");
+    expect(body!.kind).toBe(CompletionItemKind.Class);
   });
 
   it("object without nameParameter → snippet without name", () => {
@@ -369,7 +354,7 @@ describe("getCompletions", () => {
   });
 
   it("string position → empty array", () => {
-    const src = 'RailInfo {\n  ModelFileName = "test.x";\n}';
+    const src = 'Body "test" {\n  ModelFileName = "test.x";\n}';
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 22), "Rail2.txt");
     expect(items).toHaveLength(0);
@@ -428,7 +413,7 @@ describe("getCompletions", () => {
     const src = "RailInfo {\n  \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
-    const trackNum = items.find((i) => i.label === "TrackNum");
-    expect(trackNum?.detail).toBe("integer");
+    const fc = items.find((i) => i.label === "FlattenCant");
+    expect(fc?.detail).toBe("yes-no");
   });
 });

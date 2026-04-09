@@ -5,7 +5,7 @@
  * Control/case keywords are structural and defined here directly.
  */
 
-import { semanticSchema } from "../schema/semantic.js";
+import { semanticSchema } from "../schema/semantic.generated.js";
 
 // ---------------------------------------------------------------------------
 // semantic schema からの自動導出
@@ -102,9 +102,9 @@ export const CONSTANT_SET: ReadonlySet<string> = new Set(CONSTANTS);
 export type IdentifierKind = "object" | "control" | "case" | "property" | "constant" | "unknown";
 
 export function classifyIdentifier(name: string): IdentifierKind {
-  if (OBJECT_NAME_SET.has(name)) return "object";
   if (CONTROL_KEYWORD_SET.has(name)) return "control";
   if (CASE_KEYWORD_SET.has(name)) return "case";
+  if (OBJECT_NAME_SET.has(name)) return "object";
   if (PROPERTY_NAME_SET.has(name)) return "property";
   if (CONSTANT_SET.has(name)) return "constant";
   return "unknown";

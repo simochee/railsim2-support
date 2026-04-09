@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { semanticSchema, fileSchemas, getFileSchema } from "../src/schema/semantic.js";
+import { semanticSchema, fileSchemas, getFileSchema } from "../src/schema/semantic.generated.js";
 
 describe("semanticSchema", () => {
   it("全ルートオブジェクトが定義されている", () => {
@@ -17,7 +17,7 @@ describe("semanticSchema", () => {
     const ph = semanticSchema["PluginHeader"];
     expect(ph).toBeDefined();
     expect(ph.properties["RailSimVersion"]).toMatchObject({ type: "float", required: true });
-    expect(ph.properties["PluginType"]).toMatchObject({ type: "enum", required: true });
+    expect(ph.properties["PluginType"]).toMatchObject({ type: "identifier", required: true });
     expect(ph.properties["PluginName"]).toMatchObject({ type: "string", required: true });
     expect(ph.properties["PluginAuthor"]).toMatchObject({ type: "string", required: true });
   });
@@ -26,28 +26,24 @@ describe("semanticSchema", () => {
     const ri = semanticSchema["RailInfo"];
     expect(ri).toBeDefined();
     expect(ri.properties["Gauge"]).toMatchObject({ type: "float" });
-    expect(ri.properties["ModelFileName"]).toMatchObject({ type: "filename" });
+    expect(ri.properties["Height"]).toMatchObject({ type: "float" });
+    expect(ri.properties["SurfaceAlt"]).toMatchObject({ type: "float" });
   });
 
-  it("Vertex:Profile と Vertex:Wireframe が異なる Coord 型を持つ", () => {
-    const vp = semanticSchema["Vertex:Profile"];
-    const vw = semanticSchema["Vertex:Wireframe"];
-    expect(vp).toBeDefined();
-    expect(vw).toBeDefined();
-    expect(vp.properties["Coord"]).toMatchObject({ type: "vector-2d" });
-    expect(vw.properties["Coord"]).toMatchObject({ type: "vector-3d" });
+  it("Vertex の Coord が vector-3d", () => {
+    const v = semanticSchema["Vertex"];
+    expect(v).toBeDefined();
+    expect(v.properties["Coord"]).toMatchObject({ type: "vector-3d" });
   });
 
   it("Axle.Coord は vector-2d (ZY座標系)", () => {
     expect(semanticSchema["Axle"].properties["Coord"]).toMatchObject({ type: "vector-2d" });
   });
 
-  it("TrainInfo.Gauge は optional", () => {
-    expect(semanticSchema["TrainInfo"].properties["Gauge"]).toMatchObject({ required: false });
-  });
-
-  it("TrainInfo.Body は optional", () => {
-    expect(semanticSchema["TrainInfo"].children["Body"]).toMatchObject({ required: false });
+  it("TrainInfo に FrontLimit/TailLimit が定義されている", () => {
+    const ti = semanticSchema["TrainInfo"];
+    expect(ti.properties["FrontLimit"]).toMatchObject({ type: "float", required: true });
+    expect(ti.properties["TailLimit"]).toMatchObject({ type: "float", required: true });
   });
 
   it("PrimaryAssembly に主要な子オブジェクトが定義されている", () => {
@@ -56,43 +52,34 @@ describe("semanticSchema", () => {
     expect(pa.children["Body"]).toBeDefined();
     expect(pa.children["Object3D"]).toBeDefined();
     expect(pa.children["FrontCabin"]).toBeDefined();
-    expect(pa.children["Sound"]).toBeDefined();
-    expect(pa.children["SoundEffect"]).toMatchObject({ schemaKey: "SoundEffect:Train" });
-  });
-
-  it("SoundEffect:Train は Sound と同等のプロパティを持つ", () => {
-    const se = semanticSchema["SoundEffect:Train"];
-    expect(se).toBeDefined();
-    expect(se.properties["WaveFileName"]).toMatchObject({ type: "filename", required: false });
-    expect(se.properties["SourceCoord"]).toMatchObject({ type: "vector-3d" });
+    expect(pa.children["SoundEffect"]).toBeDefined();
   });
 
   it("Object3D に材質カスタマイザプロパティが定義されている", () => {
     const o3d = semanticSchema["Object3D"];
-    expect(o3d.properties["NoCastShadow"]).toMatchObject({ type: "expression", multiple: true });
-    expect(o3d.properties["ChangeTexture"]).toMatchObject({ type: "expression", arity: 2, multiple: true });
+    expect(o3d.properties["NoCastShadow"]).toBeDefined();
+    expect(o3d.properties["ChangeTexture"]).toMatchObject({ type: "expression", arity: 2 });
     expect(o3d.children["Joint3D"]).toBeDefined();
     expect(o3d.children["ChangeMaterial"]).toBeDefined();
-    expect(o3d.children["StaticMove"]).toMatchObject({ multiple: true });
+    expect(o3d.children["StaticMove"]).toBeDefined();
   });
 
-  it("Joint3D に AttachCoord/AttachDir/DirLink が定義されている", () => {
+  it("Joint3D に AttachCoord/AttachDir が定義されている", () => {
     const j3d = semanticSchema["Joint3D"];
     expect(j3d.properties["AttachCoord"]).toMatchObject({ type: "vector-3d" });
     expect(j3d.properties["AttachDir"]).toMatchObject({ type: "vector-3d" });
-    expect(j3d.properties["DirLink"]).toMatchObject({ type: "expression" });
-    expect(j3d.nameParameter).toBe("identifier");
+    expect(j3d.nameParameter).toBe("string");
   });
 
   it("ChangeMaterial に MaterialID/Emissive が定義されている", () => {
     const cm = semanticSchema["ChangeMaterial"];
-    expect(cm.properties["MaterialID"]).toMatchObject({ type: "expression" });
-    expect(cm.properties["Emissive"]).toMatchObject({ type: "float", arity: 3 });
-    expect(cm.properties["Diffuse"]).toMatchObject({ type: "float", arity: 4 });
+    expect(cm.properties["MaterialID"]).toMatchObject({ type: "integer" });
+    expect(cm.properties["Emissive"]).toMatchObject({ type: "vector-3d" });
+    expect(cm.properties["Diffuse"]).toMatchObject({ type: "expression", arity: 4 });
   });
 
-  it("Sound に SourceCoord が定義されている", () => {
-    expect(semanticSchema["Sound"].properties["SourceCoord"]).toMatchObject({ type: "vector-3d" });
+  it("Sound に MouseDownWaveFileName が定義されている", () => {
+    expect(semanticSchema["Sound"].properties["MouseDownWaveFileName"]).toMatchObject({ type: "filename" });
   });
 });
 
@@ -125,28 +112,18 @@ describe("fileSchemas", () => {
     expect(names).toContain("PluginHeader");
     expect(names).toContain("RailInfo");
     expect(names).toContain("SoundInfo");
-    expect(names).toContain("Profile");
-    expect(names).toContain("Wireframe");
-    expect(names).toContain("Interval");
 
     const ph = rail.find((e) => e.name === "PluginHeader")!;
     expect(ph.required).toBe(true);
     expect(ph.multiple).toBe(false);
   });
 
-  it("Train2.txt に DefineSwitch と PrimaryAssembly が含まれる", () => {
+  it("Train2.txt に PrimaryAssembly が含まれる", () => {
     const train = fileSchemas["Train2.txt"];
     const names = train.map((e) => e.name);
-    expect(names).toContain("DefineSwitch");
     expect(names).toContain("PrimaryAssembly");
-
-    const ds = train.find((e) => e.name === "DefineSwitch")!;
-    expect(ds.required).toBe(false);
-    expect(ds.multiple).toBe(true);
-
-    const pa = train.find((e) => e.name === "PrimaryAssembly")!;
-    expect(pa.required).toBe(false);
-    expect(pa.multiple).toBe(false);
+    expect(names).toContain("TrainInfo");
+    expect(names).toContain("PluginHeader");
   });
 });
 

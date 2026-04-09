@@ -10,9 +10,9 @@ describe("resolveSchemaKey", () => {
     expect(resolveSchemaKey("Face", "Profile")).toBe("Face");
   });
 
-  it("親あり + schemaKey あり → schemaKey を返す", () => {
-    // Face's children has Vertex with schemaKey "Vertex:Profile"
-    expect(resolveSchemaKey("Vertex", "Face")).toBe("Vertex:Profile");
+  it("親あり + schemaKey あり → schemaKey を���す", () => {
+    // LensFlare's children has Circle with schemaKey "Circle:LensFlare"
+    expect(resolveSchemaKey("Circle", "LensFlare")).toBe("Circle:LensFlare");
   });
 
   it("親あり + 子が存在しない → オブジェクト名そのまま", () => {

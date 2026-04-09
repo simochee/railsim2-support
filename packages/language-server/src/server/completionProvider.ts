@@ -2,7 +2,7 @@ import { CompletionItem, CompletionItemKind, InsertTextFormat } from "vscode-lan
 import type { Token, Position } from "../shared/tokens.js";
 import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast.js";
 import type { PropertySchema } from "../schema/schemaTypes.js";
-import { semanticSchema, getFileSchema } from "../schema/semantic.js";
+import { semanticSchema, getFileSchema } from "../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
 
 // ---------------------------------------------------------------------------

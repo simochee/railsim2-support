@@ -8,7 +8,7 @@ import type {
 } from "../../shared/ast.js";
 import type { Diagnostic } from "../../shared/diagnostics.js";
 import type { ObjectSchema, PropertySchema } from "../../schema/schemaTypes.js";
-import { semanticSchema, getFileSchema } from "../../schema/semantic.js";
+import { semanticSchema, getFileSchema } from "../../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../../schema/schemaUtils.js";
 
 /**

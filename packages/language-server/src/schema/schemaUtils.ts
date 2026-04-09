@@ -1,4 +1,4 @@
-import { semanticSchema } from "./semantic.js";
+import { semanticSchema } from "./semantic.generated.js";
 
 export function resolveSchemaKey(nodeName: string, parentSchemaKey: string | undefined): string {
   if (parentSchemaKey) {

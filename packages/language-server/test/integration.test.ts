@@ -245,12 +245,14 @@ PluginHeader {
   PluginType = Train;
   PluginName = "Test";
   PluginAuthor = "Author";
+  Description = 1;
 }
 TrainInfo {
-  Gauge = 1.067;
-  Body {
-    ModelFileName = "body.x";
-  }
+  FrontLimit = 10.0;
+  TailLimit = -10.0;
+  MaxVelocity = 100.0;
+  MaxAcceleration = 2.0;
+  MaxDeceleration = 3.0;
 }`;
     const diagnostics = validateTextDocument(input);
     expect(diagnostics).toHaveLength(0);
@@ -425,6 +427,7 @@ describe("integration: completion", () => {
   PluginType = Rail;
   PluginName = "test";
   PluginAuthor = "author";
+  Description = 1;
 }
 RailInfo {
   Gauge = 1.067;
@@ -432,14 +435,12 @@ RailInfo {
 }`;
     const { file } = parse(src);
     const tokens = tokenize(src);
-    const items = getCompletions(file, tokens, { line: 8, character: 2 }, "Rail2.txt");
+    const items = getCompletions(file, tokens, { line: 9, character: 2 }, "Rail2.txt");
     const itemLabels = items.map((i) => i.label);
     // Gauge は既出なので除外
     expect(itemLabels).not.toContain("Gauge");
     // 他のプロパティは表示
-    expect(itemLabels).toContain("TrackNum");
-    expect(itemLabels).toContain("ModelFileName");
-    // 子オブジェクト
-    expect(itemLabels).toContain("DefineSwitch");
+    expect(itemLabels).toContain("Height");
+    expect(itemLabels).toContain("SurfaceAlt");
   });
 });
