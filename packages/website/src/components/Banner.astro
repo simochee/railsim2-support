@@ -2,13 +2,14 @@
 import { Icon } from "astro-icon/components";
 ---
 
-<div class="banner">
+<div class="banner" data-pagefind-ignore="all">
   <div class="banner-inner">
     <span class="banner-left">
       <span class="banner-badge">UNOFFICIAL</span>
       <span>このページは <a href="https://github.com/aizentranza/railsim2" target="_blank" rel="noopener">RailSim II ヘルプドキュメント</a>の非公式ミラーです。</span>
     </span>
     <span class="banner-links">
+      <pagefind-modal-trigger data-pf-theme="dark"></pagefind-modal-trigger>
       <a href="https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar" target="_blank" rel="noopener">
         <Icon name="tabler:brand-vscode" /> VS Code 拡張機能
       </a>
@@ -29,7 +30,7 @@ import { Icon } from "astro-icon/components";
   .banner-inner {
     max-width: 1024px;
     margin: 0 auto;
-    padding: 10px 16px;
+    padding: 4px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -94,4 +95,5 @@ import { Icon } from "astro-icon/components";
     flex-shrink: 0;
     stroke-width: 1.5;
   }
+
 </style>

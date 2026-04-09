@@ -1,5 +1,6 @@
 ---
 import Banner from "../components/Banner.astro";
+import SearchDialog from "../components/SearchDialog.astro";
 import { getVendorCss } from "../lib/vendor";
 
 interface Props {
@@ -25,6 +26,9 @@ const vendorCss = getVendorCss();
   </head>
   <body>
     <Banner />
-    <slot />
+    <main data-pagefind-body>
+      <slot />
+    </main>
+    <SearchDialog />
   </body>
 </html>

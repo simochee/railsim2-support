@@ -10,6 +10,7 @@ import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AstroIntegration } from "astro";
 import icon from "astro-icon";
+import pagefind from "astro-pagefind";
 
 const HELP_SRC = resolve(
   import.meta.dirname,
@@ -73,5 +74,5 @@ function vendorImages(): AstroIntegration {
 export default defineConfig({
   site: "https://railsim2.simochee.net",
   build: { format: "preserve" },
-  integrations: [vendorImages(), icon()],
+  integrations: [pagefind(), vendorImages(), icon()],
 });
