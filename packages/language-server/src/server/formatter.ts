@@ -69,7 +69,7 @@ function formatNodeList(
   ctx: FormatContext,
   parts: string[],
 ): void {
-  const groups = groupNodes(nodes);
+  const groups = groupNodes(nodes, ctx.sourceLines);
   let prevEndLine = -1;
 
   for (const group of groups) {
@@ -79,8 +79,8 @@ function formatNodeList(
         for (let b = 0; b < blanks; b++) parts.push("\n");
       }
 
-      if (group.type === "properties" && ctx.opts.alignEquals) {
-        parts.push(formatPropertyAligned(node as PropertyNode, depth, group.maxNameLength, ctx));
+      if (group.type === "properties" && ctx.opts.alignEquals && node.type === "property") {
+        parts.push(formatPropertyAligned(node, depth, group.maxNameLength, ctx));
       } else {
         parts.push(formatNode(node, depth, ctx));
       }
@@ -96,21 +96,35 @@ interface NodeGroup {
   maxNameLength: number;
 }
 
-function groupNodes(nodes: readonly (TopLevelNode | BodyNode)[]): NodeGroup[] {
+function groupNodes(nodes: readonly (TopLevelNode | BodyNode)[], sourceLines: string[]): NodeGroup[] {
   const groups: NodeGroup[] = [];
-  let currentProps: PropertyNode[] = [];
+  let currentGroup: (PropertyNode | CommentNode)[] = [];
 
   function flush(): void {
-    if (currentProps.length > 0) {
-      const maxLen = Math.max(...currentProps.map((p) => p.name.length));
-      groups.push({ type: "properties", nodes: [...currentProps], maxNameLength: maxLen });
-      currentProps = [];
+    if (currentGroup.length > 0) {
+      const props = currentGroup.filter((n): n is PropertyNode => n.type === "property");
+      if (props.length > 0) {
+        const maxLen = Math.max(...props.map((p) => p.name.length));
+        groups.push({ type: "properties", nodes: [...currentGroup], maxNameLength: maxLen });
+      } else {
+        for (const n of currentGroup) {
+          groups.push({ type: "mixed", nodes: [n], maxNameLength: 0 });
+        }
+      }
+      currentGroup = [];
     }
   }
 
   for (const node of nodes) {
-    if (node.type === "property") {
-      currentProps.push(node);
+    if (node.type === "property" || node.type === "comment") {
+      // Blank line between previous node and this one breaks the alignment group
+      if (currentGroup.length > 0) {
+        const prev = currentGroup[currentGroup.length - 1];
+        if (countBlankLines(prev.range.end.line, node.range.start.line, sourceLines) > 0) {
+          flush();
+        }
+      }
+      currentGroup.push(node);
     } else {
       flush();
       groups.push({ type: "mixed", nodes: [node], maxNameLength: 0 });
@@ -202,9 +216,28 @@ function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
   return hasTupleParen ? `(${vals})` : vals;
 }
 
+function conditionText(node: IfNode | ApplySwitchNode, keyword: string, ctx: FormatContext): string {
+  // Extract condition/switchName from source: after keyword to before '{'
+  const nodeStartOff = posToOffset(ctx.source, node.range.start);
+  const nodeEndOff = posToOffset(ctx.source, node.range.end);
+
+  // Find the first '{' after the keyword in the node's range
+  const afterKeyword = nodeStartOff + keyword.length;
+  let braceOff = afterKeyword;
+  let inString = false;
+  while (braceOff < nodeEndOff) {
+    if (ctx.source[braceOff] === '"') inString = !inString;
+    if (!inString && ctx.source[braceOff] === "{") break;
+    braceOff++;
+  }
+
+  const raw = ctx.source.slice(afterKeyword, braceOff).trim();
+  return normalizeOperatorSpacing(raw);
+}
+
 function formatIf(node: IfNode, depth: number, ctx: FormatContext): string {
   const prefix = ind(depth, ctx);
-  let result = `${prefix}If ${exprText(node.condition, ctx)} {\n`;
+  let result = `${prefix}If ${conditionText(node, "If", ctx)} {\n`;
 
   const thenParts: string[] = [];
   formatNodeList(node.then, depth + 1, ctx, thenParts);
@@ -223,7 +256,7 @@ function formatIf(node: IfNode, depth: number, ctx: FormatContext): string {
 
 function formatApplySwitch(node: ApplySwitchNode, depth: number, ctx: FormatContext): string {
   const prefix = ind(depth, ctx);
-  let result = `${prefix}ApplySwitch ${exprText(node.switchName, ctx)} {\n`;
+  let result = `${prefix}ApplySwitch ${conditionText(node, "ApplySwitch", ctx)} {\n`;
 
   let prevEndLine = node.range.start.line;
 
@@ -272,11 +305,82 @@ function exprText(expr: ExprNode, ctx: FormatContext): string {
   // Extract directly from source to preserve original formatting:
   // - number literals (1.0 stays 1.0)
   // - parenthesized expressions ((1+2)*3 keeps parens)
-  // - operator spacing is already in source
   const start = posToOffset(ctx.source, expr.range.start);
   const end = posToOffset(ctx.source, expr.range.end);
   const raw = ctx.source.slice(start, end).trim();
   return raw;
+}
+
+/**
+ * Extract expression from source and normalize spacing around binary operators.
+ * Used for If conditions and ApplySwitch switch names.
+ * Preserves parentheses (since they come from source) while ensuring "op" has spaces.
+ */
+function exprTextNormalized(expr: ExprNode, ctx: FormatContext): string {
+  const raw = exprText(expr, ctx);
+  // Normalize: ensure spaces around binary operators
+  // Match operators: ==, !=, <=, >=, <<, >>, &&, ||, +, -, *, /, %, <, >, &, |, ^
+  // but not inside strings
+  return normalizeOperatorSpacing(raw);
+}
+
+function normalizeOperatorSpacing(text: string): string {
+  const parts: string[] = [];
+  let i = 0;
+  while (i < text.length) {
+    // Skip strings
+    if (text[i] === '"') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== '"') {
+        if (text[j] === "\\") j++;
+        j++;
+      }
+      parts.push(text.slice(i, j + 1));
+      i = j + 1;
+      continue;
+    }
+    // Two-char operators
+    const two = text.slice(i, i + 2);
+    if (two === "==" || two === "!=" || two === "<=" || two === ">=" || two === "<<" || two === ">>" || two === "&&" || two === "||") {
+      // Trim trailing space from parts, add space + op + space
+      trimTrailingSpace(parts);
+      parts.push(` ${two} `);
+      i += 2;
+      skipSpaces();
+      continue;
+    }
+    // Single-char binary operators (but not unary - or + after operator/paren/start)
+    const ch = text[i];
+    if ((ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "<" || ch === ">" || ch === "&" || ch === "|" || ch === "^") && isBinaryContext(text, i)) {
+      trimTrailingSpace(parts);
+      parts.push(` ${ch} `);
+      i++;
+      skipSpaces();
+      continue;
+    }
+    parts.push(text[i]);
+    i++;
+  }
+  // Clean up double spaces
+  return parts.join("").replace(/  +/g, " ");
+
+  function skipSpaces(): void {
+    while (i < text.length && (text[i] === " " || text[i] === "\t")) i++;
+  }
+
+  function trimTrailingSpace(arr: string[]): void {
+    while (arr.length > 0 && (arr[arr.length - 1] === " " || arr[arr.length - 1] === "\t")) arr.pop();
+  }
+}
+
+function isBinaryContext(text: string, pos: number): boolean {
+  // A +/- is binary if preceded by a value character (digit, letter, ), ")
+  // It's unary if preceded by operator, (, =, start, or nothing
+  let j = pos - 1;
+  while (j >= 0 && (text[j] === " " || text[j] === "\t")) j--;
+  if (j < 0) return false;
+  const prev = text[j];
+  return /[0-9a-zA-Z_)\]"]/.test(prev);
 }
 
 function posToOffset(source: string, pos: { line: number; character: number }): number {

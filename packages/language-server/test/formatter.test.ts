@@ -30,6 +30,18 @@ describe("formatter", () => {
     );
   });
 
+  it("should normalize spaces around operators in If conditions", () => {
+    const input = 'Body { If "サウンド"==0 { Coord = 1; } }';
+    const result = format(input);
+    expect(result).toContain('If "サウンド" == 0 {');
+  });
+
+  it("should preserve parens in If condition expressions", () => {
+    const input = 'If ("_YEAR"/10)%10 { Body { } }';
+    const result = format(input);
+    expect(result).toContain('If ("_YEAR" / 10) % 10 {');
+  });
+
   it("should preserve expression formatting from source", () => {
     const input = "Body{X=1+2*3;}";
     const result = format(input);
@@ -62,6 +74,16 @@ describe("formatter", () => {
     expect(result).toBe(
       "Body {\n\tModelFileName = \"body.x\";\n\tModelScale    = 1.0;\n\tCoord         = 0.0, 0.0, 0.0;\n}\n",
     );
+  });
+
+  it("should break alignment groups at blank lines", () => {
+    const input = "Body {\n\tA = 1;\n\n\tLongName = 2;\n}\n";
+    const result = format(input);
+    // A and LongName are in separate groups (blank line between them)
+    expect(result).toContain("\tA = 1;");
+    expect(result).toContain("\tLongName = 2;");
+    // A should NOT be padded to match LongName
+    expect(result).not.toContain("\tA        = 1;");
   });
 
   it("should break alignment groups at non-property nodes", () => {
@@ -102,12 +124,29 @@ describe("formatter", () => {
     expect(result).toBe("Body {\n\t/* multi\nline */\n\tCoord = 1;\n}\n");
   });
 
-  it("should break alignment groups at comments", () => {
+  it("should align = across comments within property groups", () => {
     const input = "Body {\nModelFileName = \"a\";\n// divider\nCoord = 1;\n}";
     const result = format(input);
+    // Comments don't break alignment groups
     expect(result).toContain("\tModelFileName = \"a\";");
     expect(result).toContain("\t// divider");
-    expect(result).toContain("\tCoord = 1;");
+    expect(result).toContain("\tCoord         = 1;");
+  });
+
+  it("should align = with interleaved comments like RailSim2 style", () => {
+    const input = `TrainInfo {
+FrontLimit = 10.65;
+// 前方連結位置
+TailLimit = -10.65;
+MaxVelocity = 100.0;
+MaxAcceleration = 2.1;
+DoorClosingTime = 4.0;
+}`;
+    const result = format(input);
+    expect(result).toContain("\tFrontLimit      = 10.65;");
+    expect(result).toContain("\tTailLimit       = -10.65;");
+    expect(result).toContain("\tMaxAcceleration = 2.1;");
+    expect(result).toContain("\tDoorClosingTime = 4.0;");
   });
 
   // --- Negative values in tuple ---
