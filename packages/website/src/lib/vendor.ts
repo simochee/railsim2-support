@@ -46,6 +46,8 @@ function fixHelpPageLinks(html: string): string {
 function fixIndexPageLinks(html: string): string {
   // Help/xxx.html and help/xxx.html → xxx.html (flatten)
   html = html.replace(/href="[Hh]elp\//g, 'href="');
+  // Help/xxx.png → xxx.png (flatten image paths)
+  html = html.replace(/src="[Hh]elp\//g, 'src="');
   // Self-referencing index link
   html = html.replace(/href="index\.html"/g, 'href="/"');
   // COPYING.txt → GitHub
