@@ -402,19 +402,3 @@ function rulesHaveBlocks(rules: GrammarRule[]): boolean {
         )),
   );
 }
-
-function mergeProperties(target: ResolvedObject, source: ResolvedObject): void {
-  for (const [name, prop] of Object.entries(source.properties)) {
-    if (!target.properties[name]) {
-      target.properties[name] = { ...prop };
-    }
-  }
-}
-
-function mergeChildren(target: ResolvedObject, source: ResolvedObject): void {
-  for (const [name, child] of Object.entries(source.children)) {
-    if (!target.children[name]) {
-      target.children[name] = { ...child };
-    }
-  }
-}

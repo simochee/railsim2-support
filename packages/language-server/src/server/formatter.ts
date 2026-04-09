@@ -311,18 +311,6 @@ function exprText(expr: ExprNode, ctx: FormatContext): string {
   return raw;
 }
 
-/**
- * Extract expression from source and normalize spacing around binary operators.
- * Used for If conditions and ApplySwitch switch names.
- * Preserves parentheses (since they come from source) while ensuring "op" has spaces.
- */
-function exprTextNormalized(expr: ExprNode, ctx: FormatContext): string {
-  const raw = exprText(expr, ctx);
-  // Normalize: ensure spaces around binary operators
-  // Match operators: ==, !=, <=, >=, <<, >>, &&, ||, +, -, *, /, %, <, >, &, |, ^
-  // but not inside strings
-  return normalizeOperatorSpacing(raw);
-}
 
 function normalizeOperatorSpacing(text: string): string {
   const parts: string[] = [];
