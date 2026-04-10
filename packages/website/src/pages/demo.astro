@@ -58,7 +58,15 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         color: #e0e0e0;
         font-size: 14px;
       }
-      .demo-format-btn {
+      .demo-select-sm {
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: #2d2d2d;
+        color: #e0e0e0;
+        font-size: 13px;
+      }
+      .demo-btn {
         padding: 4px 12px;
         border-radius: 4px;
         border: 1px solid #555;
@@ -68,8 +76,14 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         cursor: pointer;
         transition: background 0.15s;
       }
-      .demo-format-btn:hover {
+      .demo-btn:hover {
         background: #3d3d3d;
+      }
+      .demo-separator {
+        width: 1px;
+        height: 20px;
+        background: #555;
+        flex-shrink: 0;
       }
       .editor-wrapper {
         height: calc(100vh - 140px);

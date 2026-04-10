@@ -208,10 +208,16 @@ export function applyDiagnostics(
   monaco.editor.setModelMarkers(model, "railsim2-lsp", markers);
 }
 
+export interface FormatOptions {
+  tabSize: number;
+  insertSpaces: boolean;
+}
+
 export async function formatDocument(
   conn: ProtocolConnection,
   monaco: typeof Monaco,
   editor: Monaco.editor.ICodeEditor,
+  options: FormatOptions,
 ): Promise<void> {
   const model = editor.getModel();
   if (!model) return;
@@ -219,7 +225,7 @@ export async function formatDocument(
   try {
     const edits = await conn.sendRequest(DocumentFormattingRequest.type, {
       textDocument: { uri: model.uri.toString() },
-      options: { tabSize: 2, insertSpaces: true },
+      options,
     });
     if (!edits || edits.length === 0) return;
 

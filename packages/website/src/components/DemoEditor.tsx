@@ -3,7 +3,7 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import { setupGrammar } from "../lib/grammar";
-import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument } from "../lib/lsp";
+import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
 
 interface Sample {
@@ -28,6 +28,8 @@ const LOCAL_FILE_KEY = "__local__";
 export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [activeFile, setActiveFile] = useState(samples[0].fileName);
   const [localFileName, setLocalFileName] = useState<string | null>(null);
+  const [insertSpaces, setInsertSpaces] = useState(false);
+  const [tabSize, setTabSize] = useState(1);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -35,6 +37,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const disposedRef = useRef(false);
   const openedFileRef = useRef<OpenedFile | null>(null);
   const versionRef = useRef(2);
+  const formatOptionsRef = useRef<FormatOptions>({ tabSize: 1, insertSpaces: false });
 
   const switchToModel = useCallback((key: string) => {
     const conn = connRef.current;
@@ -130,9 +133,31 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const ed = editorRef.current;
     const monaco = monacoRef.current;
     if (conn && ed && monaco) {
-      formatDocument(conn, monaco, ed);
+      formatDocument(conn, monaco, ed, formatOptionsRef.current);
     }
   }, []);
+
+  const handleInsertSpacesChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const spaces = e.target.value === "spaces";
+      setInsertSpaces(spaces);
+      setTabSize(spaces ? 2 : 1);
+      formatOptionsRef.current = {
+        insertSpaces: spaces,
+        tabSize: spaces ? 2 : 1,
+      };
+    },
+    [],
+  );
+
+  const handleTabSizeChange = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const size = Number(e.target.value);
+      setTabSize(size);
+      formatOptionsRef.current = { ...formatOptionsRef.current, tabSize: size };
+    },
+    [],
+  );
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -222,18 +247,39 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             </option>
           )}
         </select>
+        <span className="demo-separator" />
+        <select
+          value={insertSpaces ? "spaces" : "tab"}
+          onChange={handleInsertSpacesChange}
+          className="demo-select-sm"
+        >
+          <option value="tab">Tab</option>
+          <option value="spaces">Spaces</option>
+        </select>
+        {insertSpaces && (
+          <select
+            value={tabSize}
+            onChange={handleTabSizeChange}
+            className="demo-select-sm"
+          >
+            <option value={2}>2</option>
+            <option value={4}>4</option>
+            <option value={8}>8</option>
+          </select>
+        )}
         <button
           type="button"
-          className="demo-format-btn"
+          className="demo-btn"
           onClick={handleFormat}
         >
           Format
         </button>
         {FILE_ACCESS && (
           <>
+            <span className="demo-separator" />
             <button
               type="button"
-              className="demo-format-btn"
+              className="demo-btn"
               onClick={handleOpen}
             >
               Open
@@ -241,7 +287,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             {isLocalFile && (
               <button
                 type="button"
-                className="demo-format-btn"
+                className="demo-btn"
                 onClick={handleSave}
               >
                 Save
