@@ -111,6 +111,12 @@ describe("getReferencedSwitch", () => {
     const ifNode = file.body[0] as any;
     expect(getReferencedSwitch(ifNode.condition)).toBeNull();
   });
+
+  it("should return null for empty string literal", () => {
+    const { file } = parse('If "" == 0 { }');
+    const ifNode = file.body[0] as any;
+    expect(getReferencedSwitch(ifNode.condition)).toBeNull();
+  });
 });
 
 describe("SYSTEM_SWITCHES", () => {

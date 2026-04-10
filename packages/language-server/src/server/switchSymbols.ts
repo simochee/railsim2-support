@@ -83,9 +83,9 @@ export function buildSwitchIndex(file: FileNode): SwitchIndex {
 const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
 
 export function getReferencedSwitch(expr: ExprNode): string | null {
-  if (expr.type === "string") return expr.value;
+  if (expr.type === "string") return expr.value || null;
   if (expr.type === "binary" && COMPARISON_OPS.has(expr.op)) {
-    if (expr.left.type === "string") return expr.left.value;
+    if (expr.left.type === "string") return expr.left.value || null;
   }
   return null;
 }
