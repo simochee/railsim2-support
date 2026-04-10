@@ -76,8 +76,8 @@ Body { }
 });
 
 describe("getReferencedSwitch", () => {
-  it("should extract switch name from string literal", () => {
-    const { file } = parse('If "ライト" == 0 { }');
+  it("should extract switch name from standalone string literal", () => {
+    const { file } = parse('If "ライト" { }');
     const ifNode = file.body[0] as any;
     expect(getReferencedSwitch(ifNode.condition)).toBe("ライト");
   });
