@@ -21,9 +21,7 @@
   "browser": "./out/extension.browser.js",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "pretest": "pnpm --filter @railsim2-support/language-server build",
     "test": "vitest run",
-    "pregenerate:grammar": "pnpm --filter @railsim2-support/language-server build",
     "generate:grammar": "tsx scripts/generateGrammar.ts",
     "prepackage": "cp ../../THIRD_PARTY_LICENSES ./THIRD_PARTY_LICENSES",
     "package": "pnpm build && vsce package --no-dependencies",
