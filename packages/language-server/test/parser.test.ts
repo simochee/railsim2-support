@@ -512,6 +512,20 @@ ApplySwitch "_FRONT" {
     expect(defaultComments).toHaveLength(1);
   });
 
+  it("should set switchNameRange on ApplySwitchNode", () => {
+    const { file } = parse('ApplySwitch "_FRONT" {\n  Case 0:\n  Default:\n}');
+    const as = file.body[0] as ApplySwitchNode;
+    expect(as.switchNameRange).toEqual(as.switchName.range);
+  });
+
+  it("should set valuesRange on CaseNode", () => {
+    const { file } = parse('ApplySwitch "_FRONT" {\n  Case 0, 1:\n  Default:\n}');
+    const as = file.body[0] as ApplySwitchNode;
+    const c = as.cases[0];
+    expect(c.valuesRange.start).toEqual(c.values[0].range.start);
+    expect(c.valuesRange.end).toEqual(c.values[c.values.length - 1].range.end);
+  });
+
   it("should compute correct range.end for multi-line block comment", () => {
     const { file } = parse("/* line1\nline2\nline3 */ Body { }");
     const comment = file.body.find((n) => n.type === "comment");

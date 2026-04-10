@@ -753,6 +753,7 @@ export function parse(source: string): ParseResult {
     return {
       type: "applySwitch",
       switchName,
+      switchNameRange: switchName.range,
       cases,
       default_,
       defaultRange,
@@ -783,6 +784,7 @@ export function parse(source: string): ParseResult {
     return {
       type: "case",
       values,
+      valuesRange: rangeSpan(values[0].range.start, values[values.length - 1].range.end),
       body,
       bodyRange: rangeSpan(bodyStart, bodyEnd),
       range: rangeSpan(startPos, endPos),

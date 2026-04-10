@@ -38,6 +38,7 @@ export type IfNode = {
 export type ApplySwitchNode = {
   type: "applySwitch";
   switchName: ExprNode;
+  switchNameRange: Range;
   cases: CaseNode[];
   default_?: BodyNode[];
   defaultRange?: Range;
@@ -47,6 +48,7 @@ export type ApplySwitchNode = {
 export type CaseNode = {
   type: "case";
   values: ExprNode[];
+  valuesRange: Range;
   body: BodyNode[];
   bodyRange: Range;
   range: Range;
