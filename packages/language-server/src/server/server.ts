@@ -68,6 +68,17 @@ export function startServer(connection: Connection): void {
     },
   }));
 
+  documents.onDidOpen((event) => {
+    const cached = getOrParse(event.document);
+    const lspDiags: LspDiagnostic[] = cached.diagnostics.map((d) => ({
+      range: toLspRange(d.range),
+      severity: toLspSeverity(d.severity),
+      source: "railsim2",
+      message: d.message,
+    }));
+    connection.sendDiagnostics({ uri: event.document.uri, diagnostics: lspDiags });
+  });
+
   documents.onDidChangeContent((change) => {
     const cached = getOrParse(change.document);
     const lspDiags: LspDiagnostic[] = cached.diagnostics.map((d) => ({
