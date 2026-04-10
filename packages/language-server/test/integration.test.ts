@@ -418,7 +418,48 @@ describe("LSP conversion", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Suite 5: Completion integration
+// Suite 5: Switch validation integration
+// ---------------------------------------------------------------------------
+
+describe("switch validation integration", () => {
+  it("should warn on undefined switch reference", () => {
+    const diags = validateTextDocument(`
+Body {
+  If "存在しない" == 0 { }
+}
+    `);
+    expect(diags.some(d => d.message.includes("存在しない") && d.severity === "warning")).toBe(true);
+  });
+
+  it("should not warn on defined switch reference", () => {
+    const diags = validateTextDocument(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+}
+Body {
+  If "ライト" == 0 { }
+}
+    `);
+    expect(diags.some(d => d.message.includes("ライト") && d.severity === "warning")).toBe(false);
+  });
+
+  it("should not warn on system switch reference", () => {
+    const diags = validateTextDocument(`
+Body {
+  If "_FRONT" == 1 { }
+  ApplySwitch "_NIGHT" {
+    Case 0:
+    Default:
+  }
+}
+    `);
+    expect(diags.some(d => d.message.includes("_FRONT"))).toBe(false);
+    expect(diags.some(d => d.message.includes("_NIGHT"))).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Suite 6: Completion integration
 // ---------------------------------------------------------------------------
 
 describe("integration: completion", () => {

@@ -15,8 +15,11 @@ import { getHover } from "./hoverProvider.js";
 import { tokenize } from "./tokenizer.js";
 import { validateUnknownKeywords } from "./validator/unknownKeywordValidator.js";
 import { validateSchema } from "./validator/schemaValidator.js";
+import { buildSwitchIndex } from "./switchSymbols.js";
+import { validateSwitches } from "./validator/switchValidator.js";
 import { format } from "./formatter.js";
 import type { FileNode } from "../shared/ast.js";
+import type { SwitchIndex } from "./switchSymbols.js";
 import type { Token } from "../shared/tokens.js";
 import type { Diagnostic } from "../shared/diagnostics.js";
 import type { Range } from "../shared/tokens.js";
@@ -30,6 +33,7 @@ interface ParseCache {
   file: FileNode;
   tokens: Token[];
   diagnostics: Diagnostic[];
+  switchIndex: SwitchIndex;
 }
 
 export function startServer(connection: Connection): void {
@@ -46,12 +50,15 @@ export function startServer(connection: Connection): void {
     const tokens = tokenize(text);
     const keywordDiags = validateUnknownKeywords(file);
     const schemaDiags = validateSchema(file, fileName);
+    const switchIndex = buildSwitchIndex(file);
+    const switchDiags = validateSwitches(file, switchIndex);
 
     const entry: ParseCache = {
       version: doc.version,
       file,
       tokens,
-      diagnostics: [...parseDiags, ...keywordDiags, ...schemaDiags],
+      diagnostics: [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags],
+      switchIndex,
     };
     parseCache.set(doc.uri, entry);
     return entry;
@@ -96,7 +103,7 @@ export function startServer(connection: Connection): void {
 
     const fileName = Utils.basename(URI.parse(params.textDocument.uri));
     const cached = getOrParse(doc);
-    return getCompletions(cached.file, cached.tokens, params.position, fileName);
+    return getCompletions(cached.file, cached.tokens, params.position, fileName, cached.switchIndex);
   });
 
   documents.onDidClose((event) => {
@@ -151,7 +158,9 @@ export function validateTextDocument(text: string, fileName?: string): Diagnosti
   const { file, diagnostics: parseDiags } = parse(text);
   const keywordDiags = validateUnknownKeywords(file);
   const schemaDiags = validateSchema(file, fileName);
-  return [...parseDiags, ...keywordDiags, ...schemaDiags];
+  const switchIndex = buildSwitchIndex(file);
+  const switchDiags = validateSwitches(file, switchIndex);
+  return [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags];
 }
 
 export function toLspRange(range: Range) {
