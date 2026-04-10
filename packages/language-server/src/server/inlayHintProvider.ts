@@ -12,7 +12,7 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
   function posInRange(pos: Position): boolean {
     if (pos.line < range.start.line || pos.line > range.end.line) return false;
     if (pos.line === range.start.line && pos.character < range.start.character) return false;
-    if (pos.line === range.end.line && pos.character > range.end.character) return false;
+    if (pos.line === range.end.line && pos.character >= range.end.character) return false;
     return true;
   }
 
