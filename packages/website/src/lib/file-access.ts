@@ -16,10 +16,15 @@ export function isFileAccessSupported(): boolean {
   return "showOpenFilePicker" in window;
 }
 
+async function getEncodingJapanese() {
+  const mod = await import("encoding-japanese");
+  return mod.default;
+}
+
 async function detectEncoding(buffer: ArrayBuffer): Promise<Encoding> {
-  const { detect } = await import("encoding-japanese");
+  const Encoding = await getEncodingJapanese();
   const bytes = new Uint8Array(buffer);
-  const detected = detect(bytes);
+  const detected = Encoding.detect(bytes);
   return detected === "SJIS" ? "SJIS" : "UTF8";
 }
 
@@ -34,9 +39,9 @@ async function encode(text: string, encoding: Encoding): Promise<Uint8Array> {
   if (encoding === "UTF8") {
     return new TextEncoder().encode(text);
   }
-  const { convert } = await import("encoding-japanese");
+  const Encoding = await getEncodingJapanese();
   const unicodeArray = Array.from(text, (c) => c.charCodeAt(0));
-  const sjisArray = convert(unicodeArray, { to: "SJIS", from: "UNICODE" });
+  const sjisArray = Encoding.convert(unicodeArray, { to: "SJIS", from: "UNICODE" });
   return new Uint8Array(sjisArray);
 }
 
