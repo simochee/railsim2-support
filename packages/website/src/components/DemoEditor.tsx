@@ -301,7 +301,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           theme="vs-dark"
           onMount={handleMount}
           options={{
-            minimap: { enabled: false },
+            minimap: { enabled: true },
             fontSize: 14,
             scrollBeyondLastLine: false,
             automaticLayout: true,
