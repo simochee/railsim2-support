@@ -1,0 +1,105 @@
+import { describe, it, expect } from "vitest";
+import { parse } from "../src/server/parser.js";
+import { buildSwitchIndex } from "../src/server/switchSymbols.js";
+import { validateSwitches } from "../src/server/validator/switchValidator.js";
+
+describe("validateSwitches", () => {
+  it("should not warn for defined switches", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If "ライト" == 0 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should not warn for system switches", () => {
+    const { file } = parse(`
+Body {
+  If "_FRONT" == 1 { }
+  If "_NIGHT" == 0 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should warn for undefined switches in If", () => {
+    const { file } = parse(`
+Body {
+  If "未定義" == 0 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].message).toContain("未定義");
+  });
+
+  it("should warn for undefined switches in ApplySwitch", () => {
+    const { file } = parse(`
+Body {
+  ApplySwitch "未定義" {
+    Case 0:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].message).toContain("未定義");
+  });
+
+  it("should warn for duplicate DefineSwitch", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+}
+DefineSwitch "ライト" {
+  Entry = "ON";
+}
+Body { }
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags.length).toBeGreaterThanOrEqual(1);
+    expect(diags.some(d => d.message.includes("ライト"))).toBe(true);
+  });
+
+  it("should not warn when string is used in complex expression (&&, ||)", () => {
+    const { file } = parse(`
+Body {
+  If "ライト" == 0 && "サウンド" == 1 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    // Complex expression — getReferencedSwitch returns null, so no warning
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should point diagnostic range to the string literal in comparison", () => {
+    const { file } = parse(`
+Body {
+  If "未定義スイッチ" == 0 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    // Range should point to the string literal, not the whole expression
+    const ifNode = file.body[0] as any;
+    const bodyIf = ifNode.body[0] as any;
+    expect(diags[0].range).toEqual(bodyIf.condition.left.range);
+  });
+});
