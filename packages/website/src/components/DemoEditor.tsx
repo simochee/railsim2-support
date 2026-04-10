@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
+import { setupGrammar } from "../lib/grammar";
 
 interface Sample {
   fileName: string;
@@ -9,9 +10,10 @@ interface Sample {
 
 interface Props {
   samples: Sample[];
+  grammar: object;
 }
 
-export function DemoEditor({ samples }: Props) {
+export function DemoEditor({ samples, grammar }: Props) {
   const [activeFile, setActiveFile] = useState(samples[0].fileName);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
@@ -31,6 +33,8 @@ export function DemoEditor({ samples }: Props) {
 
     const firstModel = modelsRef.current.get(samples[0].fileName);
     if (firstModel) ed.setModel(firstModel);
+
+    setupGrammar(monaco, ed, grammar);
   };
 
   const handleFileChange = useCallback(

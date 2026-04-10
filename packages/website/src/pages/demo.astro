@@ -1,9 +1,17 @@
 ---
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import Banner from "../components/Banner.astro";
 import { DemoEditor } from "../components/DemoEditor";
 import { getSamples } from "../lib/samples";
 
 const samples = getSamples();
+
+const grammarPath = resolve(
+  import.meta.dirname,
+  "../../../vscode-extension/syntaxes/railsim2.tmLanguage.json",
+);
+const grammar = JSON.parse(readFileSync(grammarPath, "utf-8"));
 ---
 
 <!doctype html>
@@ -52,7 +60,7 @@ const samples = getSamples();
   <body>
     <Banner />
     <div class="demo-container">
-      <DemoEditor client:only="react" samples={samples} />
+      <DemoEditor client:only="react" samples={samples} grammar={grammar} />
     </div>
   </body>
 </html>
