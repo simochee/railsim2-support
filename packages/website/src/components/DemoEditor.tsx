@@ -2,6 +2,8 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
+import "@vscode/codicons/dist/codicon.css";
+import { VSCodeButton, VSCodeDropdown, VSCodeOption } from "@vscode/webview-ui-toolkit/react";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
@@ -138,8 +140,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, []);
 
   const handleInsertSpacesChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const spaces = e.target.value === "spaces";
+    (e: Event | React.FormEvent<HTMLElement>) => {
+      const target = e.target as HTMLElement & { value: string };
+      const spaces = target.value === "spaces";
       setInsertSpaces(spaces);
       setTabSize(spaces ? 2 : 1);
       formatOptionsRef.current = {
@@ -151,8 +154,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   );
 
   const handleTabSizeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const size = Number(e.target.value);
+    (e: Event | React.FormEvent<HTMLElement>) => {
+      const target = e.target as HTMLElement & { value: string };
+      const size = Number(target.value);
       setTabSize(size);
       formatOptionsRef.current = { ...formatOptionsRef.current, tabSize: size };
     },
@@ -160,8 +164,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   );
 
   const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const key = e.target.value;
+    (e: Event | React.FormEvent<HTMLElement>) => {
+      const target = e.target as HTMLElement & { value: string };
+      const key = target.value;
       setActiveFile(key);
       switchToModel(key);
     },
@@ -231,67 +236,46 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     <>
       <div className="demo-header">
         <label htmlFor="file-select">File:</label>
-        <select
-          id="file-select"
-          value={activeFile}
-          onChange={handleFileChange}
-        >
+        <VSCodeDropdown id="file-select" value={activeFile} onChange={handleFileChange}>
           {samples.map((s) => (
-            <option key={s.fileName} value={s.fileName}>
+            <VSCodeOption key={s.fileName} value={s.fileName}>
               {s.fileName}
-            </option>
+            </VSCodeOption>
           ))}
           {localFileName && (
-            <option value={LOCAL_FILE_KEY}>
+            <VSCodeOption value={LOCAL_FILE_KEY}>
               {localFileName}
-            </option>
+            </VSCodeOption>
           )}
-        </select>
+        </VSCodeDropdown>
         <span className="demo-separator" />
-        <select
-          value={insertSpaces ? "spaces" : "tab"}
-          onChange={handleInsertSpacesChange}
-          className="demo-select-sm"
-        >
-          <option value="tab">Tab</option>
-          <option value="spaces">Spaces</option>
-        </select>
+        <VSCodeDropdown value={insertSpaces ? "spaces" : "tab"} onChange={handleInsertSpacesChange}>
+          <VSCodeOption value="tab">Tab</VSCodeOption>
+          <VSCodeOption value="spaces">Spaces</VSCodeOption>
+        </VSCodeDropdown>
         {insertSpaces && (
-          <select
-            value={tabSize}
-            onChange={handleTabSizeChange}
-            className="demo-select-sm"
-          >
-            <option value={2}>2</option>
-            <option value={4}>4</option>
-            <option value={8}>8</option>
-          </select>
+          <VSCodeDropdown value={String(tabSize)} onChange={handleTabSizeChange}>
+            <VSCodeOption value="2">2</VSCodeOption>
+            <VSCodeOption value="4">4</VSCodeOption>
+            <VSCodeOption value="8">8</VSCodeOption>
+          </VSCodeDropdown>
         )}
-        <button
-          type="button"
-          className="demo-btn"
-          onClick={handleFormat}
-        >
+        <VSCodeButton appearance="secondary" onClick={handleFormat}>
+          <span className="codicon codicon-list-flat" slot="start" />
           Format
-        </button>
+        </VSCodeButton>
         {FILE_ACCESS && (
           <>
             <span className="demo-separator" />
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={handleOpen}
-            >
+            <VSCodeButton appearance="secondary" onClick={handleOpen}>
+              <span className="codicon codicon-folder-opened" slot="start" />
               Open
-            </button>
+            </VSCodeButton>
             {isLocalFile && (
-              <button
-                type="button"
-                className="demo-btn"
-                onClick={handleSave}
-              >
+              <VSCodeButton appearance="secondary" onClick={handleSave}>
+                <span className="codicon codicon-save" slot="start" />
                 Save
-              </button>
+              </VSCodeButton>
             )}
           </>
         )}

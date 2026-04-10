@@ -29,11 +29,37 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
     <meta charset="UTF-8" />
     <title>Live Demo - RailSim2 Support</title>
     <style is:global>
+      :root {
+        --vscode-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --vscode-font-size: 13px;
+        --vscode-foreground: #cccccc;
+        --vscode-focusBorder: #007fd4;
+        --vscode-editor-background: #1e1e1e;
+        --vscode-editor-foreground: #d4d4d4;
+        --vscode-button-background: #0e639c;
+        --vscode-button-foreground: #ffffff;
+        --vscode-button-hoverBackground: #1177bb;
+        --vscode-button-secondaryBackground: #3a3d41;
+        --vscode-button-secondaryForeground: #ffffff;
+        --vscode-button-secondaryHoverBackground: #45494e;
+        --vscode-input-background: #3c3c3c;
+        --vscode-input-foreground: #cccccc;
+        --vscode-input-border: #3c3c3c;
+        --vscode-dropdown-background: #3c3c3c;
+        --vscode-dropdown-foreground: #cccccc;
+        --vscode-dropdown-border: #3c3c3c;
+        --vscode-dropdown-listBackground: #1e1e1e;
+        --vscode-settings-dropdownBackground: #3c3c3c;
+        --vscode-settings-dropdownForeground: #cccccc;
+        --vscode-settings-dropdownBorder: #3c3c3c;
+        --vscode-panel-border: #2b2b2b;
+      }
       body {
         margin: 0;
-        background: #1e1e1e;
-        color: #e0e0e0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--vscode-editor-background);
+        color: var(--vscode-foreground);
+        font-family: var(--vscode-font-family);
+        font-size: var(--vscode-font-size);
       }
       .demo-container {
         max-width: 1200px;
@@ -43,52 +69,23 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
       .demo-header {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         margin-bottom: 12px;
       }
       .demo-header label {
-        font-size: 14px;
-        color: #ccc;
-      }
-      .demo-header select {
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid #555;
-        background: #2d2d2d;
-        color: #e0e0e0;
-        font-size: 14px;
-      }
-      .demo-select-sm {
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid #555;
-        background: #2d2d2d;
-        color: #e0e0e0;
         font-size: 13px;
-      }
-      .demo-btn {
-        padding: 4px 12px;
-        border-radius: 4px;
-        border: 1px solid #555;
-        background: #2d2d2d;
-        color: #e0e0e0;
-        font-size: 14px;
-        cursor: pointer;
-        transition: background 0.15s;
-      }
-      .demo-btn:hover {
-        background: #3d3d3d;
+        color: var(--vscode-foreground);
       }
       .demo-separator {
         width: 1px;
         height: 20px;
-        background: #555;
+        background: var(--vscode-panel-border);
         flex-shrink: 0;
       }
       .editor-wrapper {
         height: calc(100vh - 140px);
-        border: 1px solid #333;
-        border-radius: 4px;
+        border: 1px solid var(--vscode-panel-border);
+        border-radius: 2px;
         overflow: hidden;
       }
     </style>
