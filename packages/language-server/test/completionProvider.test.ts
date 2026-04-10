@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { findContext, getCompletions } from "../src/server/completionProvider.js";
 import { parse } from "../src/server/parser.js";
 import { tokenize } from "../src/server/tokenizer.js";
+import { buildSwitchIndex } from "../src/server/switchSymbols.js";
 import type { Position } from "../src/shared/tokens.js";
 import { CompletionItemKind, InsertTextFormat } from "vscode-languageserver";
 
@@ -10,6 +11,13 @@ function setup(source: string) {
   const tokens = tokenize(source);
   const { file } = parse(source);
   return { file, tokens };
+}
+
+function setupWithSwitch(source: string) {
+  const tokens = tokenize(source);
+  const { file } = parse(source);
+  const switchIndex = buildSwitchIndex(file);
+  return { file, tokens, switchIndex };
 }
 
 // Helper: position from 0-based line/char
@@ -414,5 +422,59 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
     const fc = items.find((i) => i.label === "FlattenCant");
     expect(fc?.detail).toBe("yes-no");
+  });
+});
+
+// =========================================================================
+// switch completions
+// =========================================================================
+
+describe("switch completions", () => {
+  it("ApplySwitch の文字列内でスイッチ名を補完する", () => {
+    const src =
+      'DefineSwitch "ライト" {\n  Entry = "点灯";\n  Entry = "消灯";\n}\nBody {\n  ApplySwitch "" {\n    Default:\n  }\n}';
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    // cursor inside "" after ApplySwitch (line 5, between the quotes)
+    const items = getCompletions(file, tokens, pos(5, 15), "Train2.txt", switchIndex);
+    expect(items.some((i) => i.label === "ライト")).toBe(true);
+    expect(items.some((i) => i.label === "_FRONT")).toBe(true);
+  });
+
+  it("If の文字列内でスイッチ名を補完する", () => {
+    const src =
+      'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If "" == 0 {\n  }\n}';
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    const items = getCompletions(file, tokens, pos(4, 6), "Train2.txt", switchIndex);
+    expect(items.some((i) => i.label === "ライト")).toBe(true);
+    expect(items.some((i) => i.label === "_NIGHT")).toBe(true);
+  });
+
+  it("Case の後で Entry インデックスを補完する", () => {
+    const src =
+      'DefineSwitch "ライト" {\n  Entry = "点灯";\n  Entry = "消灯";\n}\nBody {\n  ApplySwitch "ライト" {\n    Case :\n    Default:\n  }\n}';
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    // cursor after "Case " before ":"
+    const items = getCompletions(file, tokens, pos(6, 9), "Train2.txt", switchIndex);
+    expect(items.some((i) => i.label === "0" && i.detail === "点灯")).toBe(true);
+    expect(items.some((i) => i.label === "1" && i.detail === "消灯")).toBe(true);
+  });
+
+  it("通常の文字列内では補完しない", () => {
+    const src = 'Body "test" {\n  ModelFileName = "test.x";\n}';
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    const items = getCompletions(
+      file,
+      tokens,
+      pos(1, 22),
+      "Rail2.txt",
+      switchIndex,
+    );
+    expect(items).toHaveLength(0);
+  });
+
+  it("switchIndex なしでも既存の補完が動く", () => {
+    const { file, tokens } = setup("");
+    const items = getCompletions(file, tokens, pos(0, 0), "Rail2.txt");
+    expect(items.length).toBeGreaterThan(0);
   });
 });

@@ -4,6 +4,8 @@ import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast
 import type { PropertySchema } from "../schema/schemaTypes.js";
 import { semanticSchema, getFileSchema } from "../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
+import type { SwitchIndex } from "./switchSymbols.js";
+import { SYSTEM_SWITCHES } from "./switchSymbols.js";
 
 // ---------------------------------------------------------------------------
 // Context types
@@ -18,6 +20,8 @@ export type CompletionContext =
       parentChain: string[];
       body: BodyNode[];
     }
+  | { type: "switchRef"; switchIndex: SwitchIndex }
+  | { type: "caseValue"; switchName: string; switchIndex: SwitchIndex }
   | { type: "none" };
 
 // ---------------------------------------------------------------------------
@@ -62,7 +66,14 @@ export function findContext(
   tokens: Token[],
   position: Position,
   fileName?: string,
+  switchIndex?: SwitchIndex,
 ): CompletionContext {
+  // 0. Switch context detection (must run BEFORE generic string suppress)
+  if (switchIndex) {
+    const switchCtx = detectSwitchContext(tokens, position, file, switchIndex);
+    if (switchCtx) return switchCtx;
+  }
+
   // 1. Suppression: inside comment or string token
   for (const tok of tokens) {
     if (tok.type === "lineComment" || tok.type === "blockComment" || tok.type === "string") {
@@ -255,13 +266,22 @@ export function getCompletions(
   tokens: Token[],
   position: Position,
   fileName?: string,
+  switchIndex?: SwitchIndex,
 ): CompletionItem[] {
-  const ctx = findContext(file, tokens, position, fileName);
+  const ctx = findContext(file, tokens, position, fileName, switchIndex);
 
   if (ctx.type === "none") return [];
 
   if (ctx.type === "root") {
     return buildRootCompletions(file, ctx.fileName);
+  }
+
+  if (ctx.type === "switchRef") {
+    return buildSwitchRefCompletions(ctx.switchIndex);
+  }
+
+  if (ctx.type === "caseValue") {
+    return buildCaseValueCompletions(ctx.switchName, ctx.switchIndex);
   }
 
   return buildObjectBodyCompletions(ctx);
@@ -410,4 +430,167 @@ function buildPropertySnippet(name: string, schema: PropertySchema): string {
     default:
       return `${name} = \${1};`;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Switch context detection
+// ---------------------------------------------------------------------------
+
+function detectSwitchContext(
+  tokens: Token[],
+  position: Position,
+  file: FileNode,
+  switchIndex: SwitchIndex,
+): CompletionContext | null {
+  // Check if cursor is inside a string token
+  let insideString = false;
+  for (const tok of tokens) {
+    if (tok.type === "string") {
+      const start = tokenStartPos(tok);
+      const end = tokenEndPos(tok);
+      if (posLE(start, position) && posLT(position, end)) {
+        insideString = true;
+        break;
+      }
+    }
+  }
+
+  // Filter code tokens (no comments) up to cursor
+  const codeTokens = tokens.filter(
+    (t) => t.type !== "lineComment" && t.type !== "blockComment",
+  );
+  const tokensBefore = codeTokens.filter((t) => posLE(tokenStartPos(t), position));
+
+  if (insideString) {
+    // Walk backwards to find the keyword before this string
+    for (let i = tokensBefore.length - 1; i >= 0; i--) {
+      const t = tokensBefore[i];
+      if (t.type === "string") continue; // skip the string we're in
+      if (t.type === "identifier" && (t.value === "ApplySwitch" || t.value === "If")) {
+        return { type: "switchRef", switchIndex };
+      }
+      // Any other token means this is not a switch ref position
+      break;
+    }
+  }
+
+  // caseValue: cursor after "Case" keyword with no ":" between
+  // Use strict less-than to exclude tokens starting exactly at cursor (e.g. the colon)
+  const tokensStrictlyBefore = codeTokens.filter((t) => posLT(tokenStartPos(t), position));
+  let foundCase = false;
+  for (let i = tokensStrictlyBefore.length - 1; i >= 0; i--) {
+    const t = tokensStrictlyBefore[i];
+    if (t.type === "colon" || t.type === "semicolon" || t.type === "lbrace" || t.type === "rbrace") {
+      break;
+    }
+    if (t.type === "identifier" && t.value === "Case") {
+      foundCase = true;
+      break;
+    }
+  }
+
+  if (foundCase) {
+    // Find the enclosing ApplySwitch to get switchName
+    const switchName = findEnclosingApplySwitchName(file.body, position);
+    if (switchName) {
+      return { type: "caseValue", switchName, switchIndex };
+    }
+  }
+
+  return null;
+}
+
+function findEnclosingApplySwitchName(
+  nodes: (TopLevelNode | BodyNode)[],
+  position: Position,
+): string | null {
+  for (const node of nodes) {
+    if (!rangeContains(node.range, position)) continue;
+
+    if (node.type === "applySwitch") {
+      // Check if position is in one of the cases or default
+      for (const c of node.cases) {
+        if (rangeContains(c.range, position)) {
+          // Found it - extract switch name
+          if (node.switchName.type === "string") {
+            return node.switchName.value;
+          }
+          return null;
+        }
+      }
+      if (node.default_ && node.defaultRange && rangeContains(node.defaultRange, position)) {
+        if (node.switchName.type === "string") {
+          return node.switchName.value;
+        }
+        return null;
+      }
+      // Position might be in the ApplySwitch header area (between { and first case)
+      // In that case, still return the switch name
+      if (node.switchName.type === "string") {
+        return node.switchName.value;
+      }
+    }
+
+    if (node.type === "object") {
+      const result = findEnclosingApplySwitchName(node.body, position);
+      if (result) return result;
+    }
+
+    if (node.type === "if") {
+      const result = findEnclosingApplySwitchName(node.then, position);
+      if (result) return result;
+      if (node.else_) {
+        const result2 = findEnclosingApplySwitchName(node.else_, position);
+        if (result2) return result2;
+      }
+    }
+
+    if (node.type === "applySwitch") {
+      for (const c of node.cases) {
+        const result = findEnclosingApplySwitchName(c.body, position);
+        if (result) return result;
+      }
+      if (node.default_) {
+        const result = findEnclosingApplySwitchName(node.default_, position);
+        if (result) return result;
+      }
+    }
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Switch completions
+// ---------------------------------------------------------------------------
+
+function buildSwitchRefCompletions(switchIndex: SwitchIndex): CompletionItem[] {
+  const items: CompletionItem[] = [];
+  for (const [name, def] of switchIndex.definitions) {
+    items.push({
+      label: name,
+      kind: CompletionItemKind.Variable,
+      detail: `DefineSwitch (${def.entries.length} entries)`,
+    });
+  }
+  for (const name of SYSTEM_SWITCHES) {
+    items.push({
+      label: name,
+      kind: CompletionItemKind.Constant,
+      detail: "System switch",
+    });
+  }
+  return items;
+}
+
+function buildCaseValueCompletions(
+  switchName: string,
+  switchIndex: SwitchIndex,
+): CompletionItem[] {
+  const def = switchIndex.definitions.get(switchName);
+  if (!def) return [];
+  return def.entries.map((entry) => ({
+    label: String(entry.index),
+    kind: CompletionItemKind.EnumMember,
+    detail: entry.label,
+  }));
 }
