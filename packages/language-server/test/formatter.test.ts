@@ -141,6 +141,47 @@ MaxVelocity = 130.0;
     expect(result).toContain("\tMaxVelocity = 130.0;");
   });
 
+  it("should not duplicate block comment in value region", () => {
+    const input = `SoundInfo {
+    WheelSoundFile /*aaaa*/ = "Wheel.wav" /*bbbbb*/; //continued
+    JointInterval = 100.0;
+}`;
+    const result = format(input);
+    expect(result).toBe(
+      `SoundInfo {\n\tWheelSoundFile /*aaaa*/ = "Wheel.wav" /*bbbbb*/; //continued\n\tJointInterval = 100.0;\n}\n`,
+    );
+  });
+
+  it("should re-indent multi-line property with block comments", () => {
+    const input = `SoundInfo {
+    WheelSoundFile /*
+    bbbbb
+    */ = "Wheel.wav"/*
+    cccccc
+    */; //cc
+    JointInterval = 100.0;
+}`;
+    const result = format(input);
+    expect(result).toBe(
+      `SoundInfo {\n\tWheelSoundFile /*\n\tbbbbb\n\t*/ = "Wheel.wav"/*\n\tcccccc\n\t*/; //cc\n\tJointInterval = 100.0;\n}\n`,
+    );
+  });
+
+  it("should normalize spaces in multi-line property with block comments", () => {
+    const input = `SoundInfo {
+\tWheelSoundFile    /*
+\tbbbbb
+\t*/    = "Wheel.wav"/*
+\tcccccc
+\t*/    ;    //cc
+\tJointInterval = 100.0;
+}`;
+    const result = format(input);
+    expect(result).toBe(
+      `SoundInfo {\n\tWheelSoundFile /*\n\tbbbbb\n\t*/ = "Wheel.wav"/*\n\tcccccc\n\t*/; //cc\n\tJointInterval = 100.0;\n}\n`,
+    );
+  });
+
   // --- Negative values in tuple ---
 
   it("should preserve negative values in tuple", () => {

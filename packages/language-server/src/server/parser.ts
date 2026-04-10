@@ -395,6 +395,24 @@ export function parse(source: string): ParseResult {
           }
         }
       }
+
+      // Remove any remaining comments embedded within property ranges.
+      // These are preserved in the original source output by formatProperty
+      // (raw value extraction for single-line, re-indentation for multi-line).
+      for (let i = 0; i < slot.body.length; i++) {
+        if (toRemove.has(i)) continue;
+        const node = slot.body[i];
+        if (node.type !== "comment") continue;
+
+        for (const other of slot.body) {
+          if (other.type !== "property") continue;
+          if (containsPosition(other.range, node.range.start)) {
+            toRemove.add(i);
+            break;
+          }
+        }
+      }
+
       if (toRemove.size > 0) {
         const filtered = slot.body.filter((_, idx) => !toRemove.has(idx));
         slot.body.length = 0;

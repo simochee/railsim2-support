@@ -131,6 +131,12 @@
       },
       "patterns": [
         {
+          "include": "#comment-line"
+        },
+        {
+          "include": "#comment-block"
+        },
+        {
           "include": "#sym-assignable-vars"
         }
       ]
@@ -167,6 +173,12 @@
         }
       },
       "patterns": [
+        {
+          "include": "#comment-line"
+        },
+        {
+          "include": "#comment-block"
+        },
         {
           "include": "#expression"
         },
@@ -236,6 +248,12 @@
       },
       "end": "(?=;)",
       "patterns": [
+        {
+          "include": "#comment-line"
+        },
+        {
+          "include": "#comment-block"
+        },
         {
           "include": "#sym-assignment-ops"
         }

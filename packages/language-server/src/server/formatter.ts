@@ -125,10 +125,129 @@ function formatObject(node: ObjectNode, depth: number, ctx: FormatContext): stri
 
 function formatProperty(node: PropertyNode, depth: number, ctx: FormatContext): string {
   const prefix = ind(depth, ctx);
+
+  // Multi-line property (contains multi-line block comments):
+  // preserve original source structure, only re-indent
+  if (node.range.start.line !== node.range.end.line) {
+    return reindentProperty(node, depth, ctx);
+  }
+
   const inline = node.inlineComment ? ` ${node.inlineComment.value}` : "";
   const valueStr = propertyValueText(node, ctx);
   const trailing = node.trailingComment ? ` ${node.trailingComment.value}` : "";
   return `${prefix}${node.name}${inline} = ${valueStr};${trailing}\n`;
+}
+
+function reindentProperty(node: PropertyNode, depth: number, ctx: FormatContext): string {
+  const prefix = ind(depth, ctx);
+  const startLine = node.range.start.line;
+  const endLine = node.trailingComment
+    ? node.trailingComment.range.end.line
+    : node.range.end.line;
+
+  const lines = ctx.sourceLines.slice(startLine, endLine + 1);
+  if (lines.length === 0) return "";
+
+  const baseIndent = node.range.start.character;
+  let inBlock = false;
+
+  const result = lines.map((line) => {
+    const contentStart = line.search(/\S/);
+    if (contentStart < 0) return "";
+    const raw = line.slice(Math.min(baseIndent, contentStart));
+    const norm = normalizePropertyLineSpacing(raw, inBlock);
+    inBlock = norm.inBlock;
+    return prefix + norm.text;
+  });
+
+  return result.join("\n") + "\n";
+}
+
+/**
+ * Normalize whitespace in code regions of a property line,
+ * preserving block-comment content and string literals as-is.
+ */
+function normalizePropertyLineSpacing(
+  content: string,
+  enterInBlock: boolean,
+): { text: string; inBlock: boolean } {
+  let result = "";
+  let inBlock = enterInBlock;
+  let inString = false;
+  let i = 0;
+
+  while (i < content.length) {
+    // Inside string literal
+    if (inString) {
+      result += content[i];
+      if (content[i] === "\\" && i + 1 < content.length) {
+        result += content[i + 1];
+        i += 2;
+      } else {
+        if (content[i] === '"') inString = false;
+        i++;
+      }
+      continue;
+    }
+
+    // Inside block comment — preserve content
+    if (inBlock) {
+      if (content[i] === "*" && content[i + 1] === "/") {
+        result += "*/";
+        i += 2;
+        inBlock = false;
+      } else {
+        result += content[i];
+        i++;
+      }
+      continue;
+    }
+
+    // Code region: string start
+    if (content[i] === '"') {
+      inString = true;
+      result += '"';
+      i++;
+      continue;
+    }
+
+    // Code region: block comment start
+    if (content[i] === "/" && content[i + 1] === "*") {
+      result += "/*";
+      i += 2;
+      inBlock = true;
+      continue;
+    }
+
+    // Code region: line comment — ensure single space before, preserve rest
+    if (content[i] === "/" && content[i + 1] === "/") {
+      if (result.length > 0 && result[result.length - 1] !== " ") {
+        result += " ";
+      }
+      result += content.slice(i);
+      return { text: result.trimEnd(), inBlock: false };
+    }
+
+    // Code region: whitespace — collapse and context-aware
+    if (content[i] === " " || content[i] === "\t") {
+      let j = i + 1;
+      while (j < content.length && (content[j] === " " || content[j] === "\t")) j++;
+      // No space before ;
+      if (content[j] === ";") {
+        i = j;
+        continue;
+      }
+      // Single space (skip if at start)
+      if (result.length > 0) result += " ";
+      i = j;
+      continue;
+    }
+
+    result += content[i];
+    i++;
+  }
+
+  return { text: result.trimEnd(), inBlock };
 }
 
 function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
