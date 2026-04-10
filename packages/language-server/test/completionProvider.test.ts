@@ -3,7 +3,7 @@ import { findContext, getCompletions } from "../src/server/completionProvider.js
 import { parse } from "../src/server/parser.js";
 import { tokenize } from "../src/server/tokenizer.js";
 import type { Position } from "../src/shared/tokens.js";
-import { CompletionItemKind, InsertTextFormat } from "vscode-languageserver/node";
+import { CompletionItemKind, InsertTextFormat } from "vscode-languageserver";
 
 // Helper: parse source and return what findContext/getCompletions need
 function setup(source: string) {

@@ -1,5 +1,5 @@
-import type { Hover, Position } from "vscode-languageserver/node";
-import { MarkupKind } from "vscode-languageserver/node";
+import type { Hover, Position } from "vscode-languageserver";
+import { MarkupKind } from "vscode-languageserver";
 import type { FileNode, BodyNode, TopLevelNode } from "../shared/ast.js";
 import { getObjectDoc, getPropertyDoc } from "./hoverData.generated.js";
 

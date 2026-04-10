@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 
 // Mock vscode-languageserver to avoid connection errors on import
-vi.mock("vscode-languageserver/node", () => ({
+vi.mock("vscode-languageserver", () => ({
   createConnection: () => ({
     onInitialize: vi.fn(),
     onCompletion: vi.fn(),

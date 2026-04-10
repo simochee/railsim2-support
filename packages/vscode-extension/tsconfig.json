@@ -3,7 +3,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "out"
+    "outDir": "out",
+    "lib": ["ES2022", "WebWorker"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "out"],
