@@ -466,6 +466,7 @@ function detectSwitchContext(
     for (let i = tokensBefore.length - 1; i >= 0; i--) {
       const t = tokensBefore[i];
       if (t.type === "string") continue; // skip the string we're in
+      if (t.type === "lparen") continue; // skip parentheses: If ("...") == 0
       if (t.type === "identifier" && (t.value === "ApplySwitch" || t.value === "If")) {
         return { type: "switchRef", switchIndex };
       }
@@ -507,30 +508,6 @@ function findEnclosingApplySwitchName(
   for (const node of nodes) {
     if (!rangeContains(node.range, position)) continue;
 
-    if (node.type === "applySwitch") {
-      // Check if position is in one of the cases or default
-      for (const c of node.cases) {
-        if (rangeContains(c.range, position)) {
-          // Found it - extract switch name
-          if (node.switchName.type === "string") {
-            return node.switchName.value;
-          }
-          return null;
-        }
-      }
-      if (node.default_ && node.defaultRange && rangeContains(node.defaultRange, position)) {
-        if (node.switchName.type === "string") {
-          return node.switchName.value;
-        }
-        return null;
-      }
-      // Position might be in the ApplySwitch header area (between { and first case)
-      // In that case, still return the switch name
-      if (node.switchName.type === "string") {
-        return node.switchName.value;
-      }
-    }
-
     if (node.type === "object") {
       const result = findEnclosingApplySwitchName(node.body, position);
       if (result) return result;
@@ -546,13 +523,20 @@ function findEnclosingApplySwitchName(
     }
 
     if (node.type === "applySwitch") {
+      // First, recurse into cases/default to find a deeper nested ApplySwitch
       for (const c of node.cases) {
-        const result = findEnclosingApplySwitchName(c.body, position);
-        if (result) return result;
+        if (rangeContains(c.range, position)) {
+          const deeper = findEnclosingApplySwitchName(c.body, position);
+          if (deeper) return deeper;
+        }
       }
       if (node.default_) {
-        const result = findEnclosingApplySwitchName(node.default_, position);
-        if (result) return result;
+        const deeper = findEnclosingApplySwitchName(node.default_, position);
+        if (deeper) return deeper;
+      }
+      // No deeper ApplySwitch found — this is the innermost one
+      if (node.switchName.type === "string") {
+        return node.switchName.value;
       }
     }
   }

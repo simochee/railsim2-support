@@ -477,4 +477,39 @@ describe("switch completions", () => {
     const items = getCompletions(file, tokens, pos(0, 0), "Rail2.txt");
     expect(items.length).toBeGreaterThan(0);
   });
+
+  it("括弧付き If でもスイッチ名を補完する", () => {
+    const src =
+      'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If ("" == 0) {\n  }\n}';
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    const items = getCompletions(file, tokens, pos(4, 7), "Train2.txt", switchIndex);
+    expect(items.some((i) => i.label === "ライト")).toBe(true);
+  });
+
+  it("ネストした ApplySwitch で内側のスイッチ名を使う", () => {
+    const src = [
+      'DefineSwitch "外側" {',
+      '  Entry = "A";',
+      '}',
+      'DefineSwitch "内側" {',
+      '  Entry = "X";',
+      '  Entry = "Y";',
+      '}',
+      'Body {',
+      '  ApplySwitch "外側" {',
+      '    Case 0:',
+      '      ApplySwitch "内側" {',
+      '        Case :',
+      '        Default:',
+      '      }',
+      '    Default:',
+      '  }',
+      '}',
+    ].join("\n");
+    const { file, tokens, switchIndex } = setupWithSwitch(src);
+    // cursor after "Case " in inner ApplySwitch (line 11, char 13)
+    const items = getCompletions(file, tokens, pos(11, 13), "Train2.txt", switchIndex);
+    expect(items.some((i) => i.label === "0" && i.detail === "X")).toBe(true);
+    expect(items.some((i) => i.label === "1" && i.detail === "Y")).toBe(true);
+  });
 });
