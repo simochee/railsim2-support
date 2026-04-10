@@ -28,9 +28,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build language server
-        run: pnpm --filter @railsim2-support/language-server build
-
       - name: Package extension
         run: pnpm --filter railsim2-support package
 
