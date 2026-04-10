@@ -358,6 +358,32 @@ export function parse(source: string): ParseResult {
       }
     }
 
+    // Attach trailing comments to properties on the same line
+    for (const slot of slots) {
+      const toRemove = new Set<number>();
+      for (let i = 0; i < slot.body.length; i++) {
+        const node = slot.body[i];
+        if (node.type !== "comment" || node.kind !== "line") continue;
+        // Find a property on the same line (comment starts on property's end line)
+        for (const other of slot.body) {
+          if (
+            other.type === "property" &&
+            !other.trailingComment &&
+            node.range.start.line === other.range.end.line
+          ) {
+            other.trailingComment = node;
+            toRemove.add(i);
+            break;
+          }
+        }
+      }
+      if (toRemove.size > 0) {
+        const filtered = slot.body.filter((_, idx) => !toRemove.has(idx));
+        slot.body.length = 0;
+        slot.body.push(...filtered);
+      }
+    }
+
     for (const slot of slots) {
       slot.body.sort((a, b) => {
         if (a.range.start.line !== b.range.start.line)

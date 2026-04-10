@@ -150,6 +150,26 @@ DoorClosingTime = 4.0;
     expect(result).toContain("\tDoorClosingTime = 4.0;");
   });
 
+  it("should keep inline comments on the same line as properties", () => {
+    const input = `TrainInfo {
+FrontLimit = 10.3;    //    前方連結位置 Z 座標
+TailLimit = -10.3;    //    後方連結位置 Z 座標
+MaxVelocity = 130.0;    //    最高速度
+MaxAcceleration = 3.0;    //    最高加速度
+MaxDeceleration = 4.0;    //    最高減速度
+TiltSpeed = 0.1;    //    振り子反応速度
+DoorClosingTime = 1.5;    //    ドア閉め所要時間
+}`;
+    const result = format(input);
+    expect(result).toContain("\tFrontLimit      = 10.3; //    前方連結位置 Z 座標");
+    expect(result).toContain("\tTailLimit       = -10.3; //    後方連結位置 Z 座標");
+    expect(result).toContain("\tMaxVelocity     = 130.0; //    最高速度");
+    expect(result).toContain("\tMaxAcceleration = 3.0; //    最高加速度");
+    expect(result).toContain("\tMaxDeceleration = 4.0; //    最高減速度");
+    expect(result).toContain("\tTiltSpeed       = 0.1; //    振り子反応速度");
+    expect(result).toContain("\tDoorClosingTime = 1.5; //    ドア閉め所要時間");
+  });
+
   // --- Negative values in tuple ---
 
   it("should preserve negative values in tuple", () => {

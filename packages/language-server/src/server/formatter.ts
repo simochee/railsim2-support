@@ -189,7 +189,8 @@ function formatPropertyAligned(
   const prefix = ind(depth, ctx);
   const paddedName = node.name.padEnd(alignWidth);
   const valueStr = propertyValueText(node, ctx);
-  return `${prefix}${paddedName} = ${valueStr};\n`;
+  const comment = node.trailingComment ? ` ${node.trailingComment.value}` : "";
+  return `${prefix}${paddedName} = ${valueStr};${comment}\n`;
 }
 
 function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
