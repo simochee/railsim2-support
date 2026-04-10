@@ -8,15 +8,17 @@ import { getSamples } from "../lib/samples";
 
 const samples = getSamples();
 
+const REPO_ROOT = resolve(process.cwd(), "../..");
+
 const grammarPath = resolve(
-  import.meta.dirname,
-  "../../../vscode-extension/syntaxes/railsim2.tmLanguage.json",
+  REPO_ROOT,
+  "packages/vscode-extension/syntaxes/railsim2.tmLanguage.json",
 );
 const grammar = JSON.parse(readFileSync(grammarPath, "utf-8"));
 
 const langConfPath = resolve(
-  import.meta.dirname,
-  "../../../vscode-extension/language-configuration.json",
+  REPO_ROOT,
+  "packages/vscode-extension/language-configuration.json",
 );
 const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
 ---
