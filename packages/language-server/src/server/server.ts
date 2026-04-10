@@ -69,6 +69,7 @@ export function startServer(connection: Connection): void {
       textDocumentSync: TextDocumentSyncKind.Full,
       completionProvider: {
         resolveProvider: false,
+        triggerCharacters: ['"'],
       },
       hoverProvider: true,
       documentFormattingProvider: true,
