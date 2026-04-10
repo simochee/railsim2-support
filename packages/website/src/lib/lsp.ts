@@ -9,13 +9,16 @@ import {
   DidChangeTextDocumentNotification,
   CompletionRequest,
   HoverRequest,
+  InlayHintRequest,
   DocumentFormattingRequest,
   PublishDiagnosticsNotification,
   type ProtocolConnection,
   type PublishDiagnosticsParams,
   type CompletionItem as LspCompletionItem,
+  type InlayHint as LspInlayHint,
   type Diagnostic as LspDiagnostic,
   CompletionItemKind as LspCompletionItemKind,
+  InlayHintKind as LspInlayHintKind,
   DiagnosticSeverity as LspDiagnosticSeverity,
 } from "vscode-languageserver-protocol/browser";
 import type * as Monaco from "monaco-editor";
@@ -42,6 +45,7 @@ export async function startLsp(): Promise<ProtocolConnection> {
           textDocument: {
             completion: { completionItem: { snippetSupport: false } },
             hover: { contentFormat: ["plaintext", "markdown"] },
+            inlayHint: {},
             publishDiagnostics: {},
           },
         },
@@ -99,7 +103,7 @@ export function registerProviders(
 
   disposables.push(
     monaco.languages.registerCompletionItemProvider("railsim2", {
-      triggerCharacters: ["."],
+      triggerCharacters: ['"'],
       provideCompletionItems: async (model, position) => {
         try {
           const result = await conn.sendRequest(CompletionRequest.type, {
@@ -160,6 +164,40 @@ export function registerProviders(
     }),
   );
 
+  disposables.push(
+    monaco.languages.registerInlayHintsProvider("railsim2", {
+      provideInlayHints: async (model, range) => {
+        try {
+          const result = await conn.sendRequest(InlayHintRequest.type, {
+            textDocument: { uri: model.uri.toString() },
+            range: {
+              start: { line: range.startLineNumber - 1, character: range.startColumn - 1 },
+              end: { line: range.endLineNumber - 1, character: range.endColumn - 1 },
+            },
+          });
+          if (!result) return { hints: [], dispose: () => {} };
+
+          return {
+            hints: result.map((hint: LspInlayHint) => ({
+              label: typeof hint.label === "string" ? hint.label : hint.label.map((p) => p.value).join(""),
+              position: new monaco.Position(hint.position.line + 1, hint.position.character + 1),
+              kind: hint.kind === LspInlayHintKind.Parameter
+                ? monaco.languages.InlayHintKind.Parameter
+                : hint.kind === LspInlayHintKind.Type
+                  ? monaco.languages.InlayHintKind.Type
+                  : monaco.languages.InlayHintKind.Parameter,
+              paddingLeft: hint.paddingLeft,
+              paddingRight: hint.paddingRight,
+            })),
+            dispose: () => {},
+          };
+        } catch {
+          return { hints: [], dispose: () => {} };
+        }
+      },
+    }),
+  );
+
   conn.onNotification(PublishDiagnosticsNotification.type, onDiagnostics);
 
   return disposables;
@@ -175,6 +213,10 @@ function mapCompletionItemKind(
     [LspCompletionItemKind.Value]: monaco.languages.CompletionItemKind.Value,
     [LspCompletionItemKind.Snippet]: monaco.languages.CompletionItemKind.Snippet,
     [LspCompletionItemKind.Text]: monaco.languages.CompletionItemKind.Text,
+    [LspCompletionItemKind.Variable]: monaco.languages.CompletionItemKind.Variable,
+    [LspCompletionItemKind.Constant]: monaco.languages.CompletionItemKind.Constant,
+    [LspCompletionItemKind.EnumMember]: monaco.languages.CompletionItemKind.EnumMember,
+    [LspCompletionItemKind.Class]: monaco.languages.CompletionItemKind.Class,
   };
   return map[kind ?? 0] ?? monaco.languages.CompletionItemKind.Text;
 }
