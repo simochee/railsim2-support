@@ -27,6 +27,16 @@ const MIME: Record<string, string> = {
   ".ico": "image/x-icon",
 };
 
+const EXTENSION_OUT = resolve(
+  import.meta.dirname,
+  "../vscode-extension/out",
+);
+
+const ONIGASM_WASM = resolve(
+  import.meta.dirname,
+  "../../node_modules/onigasm/lib/onigasm.wasm",
+);
+
 /** Serve vendor images in dev, copy to dist/help/ on build */
 function vendorImages(): AstroIntegration {
   return {
@@ -72,6 +82,56 @@ function vendorImages(): AstroIntegration {
   };
 }
 
+function lspAssets(): AstroIntegration {
+  const assets: Record<string, { source: string; contentType: string }> = {
+    "/server.browser.js": {
+      source: resolve(EXTENSION_OUT, "server.browser.js"),
+      contentType: "application/javascript",
+    },
+    "/onigasm.wasm": {
+      source: ONIGASM_WASM,
+      contentType: "application/wasm",
+    },
+  };
+
+  return {
+    name: "lsp-assets",
+    hooks: {
+      "astro:config:setup"({ updateConfig }) {
+        updateConfig({
+          vite: {
+            plugins: [
+              {
+                name: "lsp-assets-dev",
+                configureServer(server) {
+                  server.middlewares.use((req, res, next) => {
+                    const url = req.url?.split("?")[0] ?? "";
+                    const asset = assets[url];
+                    if (!asset || !existsSync(asset.source)) return next();
+                    res.setHeader("Content-Type", asset.contentType);
+                    createReadStream(asset.source).pipe(res);
+                  });
+                },
+              },
+            ],
+          },
+        });
+      },
+      "astro:build:done"({ dir }) {
+        const dest = fileURLToPath(dir);
+        for (const [urlPath, asset] of Object.entries(assets)) {
+          if (existsSync(asset.source)) {
+            copyFileSync(
+              asset.source,
+              resolve(dest, urlPath.slice(1)),
+            );
+          }
+        }
+      },
+    },
+  };
+}
+
 export default defineConfig({
   site: "https://railsim2.simochee.net",
   build: { format: "preserve" },
@@ -79,6 +139,7 @@ export default defineConfig({
     react(),
     pagefind({ indexConfig: { rootSelector: ".mainbox" } }),
     vendorImages(),
+    lspAssets(),
     icon(),
   ],
 });
