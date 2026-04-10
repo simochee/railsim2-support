@@ -1,7 +1,9 @@
 /**
  * File System Access API wrapper for opening/saving local RailSim2 files.
- * Encoding detection and conversion are dynamically imported to keep initial bundle small.
+ * encoding-japanese is lazy-loaded on first use to keep initial page load small.
  */
+
+import type EncodingJapanese from "encoding-japanese";
 
 type Encoding = "SJIS" | "UTF8";
 
@@ -16,19 +18,38 @@ export function isFileAccessSupported(): boolean {
   return "showOpenFilePicker" in window;
 }
 
-async function getEncodingJapanese() {
+let encodingLib: typeof EncodingJapanese | null = null;
+
+async function getEncoding(): Promise<typeof EncodingJapanese> {
+  if (encodingLib) return encodingLib;
+  // encoding-japanese uses default export
   const mod = await import("encoding-japanese");
-  return mod.default;
+  encodingLib = mod.default ?? mod;
+  return encodingLib;
 }
 
-async function detectEncoding(buffer: ArrayBuffer): Promise<Encoding> {
-  const Encoding = await getEncodingJapanese();
-  const bytes = new Uint8Array(buffer);
-  const detected = Encoding.detect(bytes);
-  return detected === "SJIS" ? "SJIS" : "UTF8";
+function detectEncoding(bytes: Uint8Array): Encoding {
+  // Simple heuristic: check for Shift_JIS high bytes
+  // Shift_JIS uses 0x81-0x9F, 0xE0-0xEF as lead bytes
+  for (const b of bytes) {
+    if ((b >= 0x81 && b <= 0x9F) || (b >= 0xE0 && b <= 0xEF)) {
+      return "SJIS";
+    }
+    if (b >= 0x80 && b !== 0xEF && b !== 0xBB && b !== 0xBF) {
+      // Non-ASCII but not UTF-8 BOM
+      break;
+    }
+  }
+  // Check for UTF-8 BOM
+  if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    return "UTF8";
+  }
+  // Default: try UTF-8 decode and check for replacement chars
+  const text = new TextDecoder("utf-8").decode(bytes);
+  return text.includes("\uFFFD") ? "SJIS" : "UTF8";
 }
 
-async function decode(buffer: ArrayBuffer, encoding: Encoding): Promise<string> {
+function decode(buffer: ArrayBuffer, encoding: Encoding): string {
   if (encoding === "UTF8") {
     return new TextDecoder("utf-8").decode(buffer);
   }
@@ -39,9 +60,9 @@ async function encode(text: string, encoding: Encoding): Promise<Uint8Array> {
   if (encoding === "UTF8") {
     return new TextEncoder().encode(text);
   }
-  const Encoding = await getEncodingJapanese();
+  const Enc = await getEncoding();
   const unicodeArray = Array.from(text, (c) => c.charCodeAt(0));
-  const sjisArray = Encoding.convert(unicodeArray, { to: "SJIS", from: "UNICODE" });
+  const sjisArray = Enc.convert(unicodeArray, { to: "SJIS", from: "UNICODE" });
   return new Uint8Array(sjisArray);
 }
 
@@ -57,8 +78,9 @@ export async function openFile(): Promise<OpenedFile> {
 
   const file = await handle.getFile();
   const buffer = await file.arrayBuffer();
-  const encoding = await detectEncoding(buffer);
-  const content = await decode(buffer, encoding);
+  const bytes = new Uint8Array(buffer);
+  const encoding = detectEncoding(bytes);
+  const content = decode(buffer, encoding);
 
   return {
     content,
