@@ -18,6 +18,7 @@ import { validateSchema } from "./validator/schemaValidator.js";
 import { buildSwitchIndex } from "./switchSymbols.js";
 import { validateSwitches } from "./validator/switchValidator.js";
 import { format } from "./formatter.js";
+import { getInlayHints } from "./inlayHintProvider.js";
 import type { FileNode } from "../shared/ast.js";
 import type { SwitchIndex } from "./switchSymbols.js";
 import type { Token } from "../shared/tokens.js";
@@ -72,6 +73,7 @@ export function startServer(connection: Connection): void {
         triggerCharacters: ['"'],
       },
       hoverProvider: true,
+      inlayHintProvider: true,
       documentFormattingProvider: true,
     },
   }));
@@ -135,6 +137,13 @@ export function startServer(connection: Connection): void {
         newText: formatted,
       },
     ];
+  });
+
+  connection.languages.inlayHint.on((params) => {
+    const doc = documents.get(params.textDocument.uri);
+    if (!doc) return [];
+    const cached = getOrParse(doc);
+    return getInlayHints(cached.file, cached.switchIndex, params.range);
   });
 
   connection.onHover((params) => {
