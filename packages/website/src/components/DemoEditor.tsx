@@ -148,7 +148,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         prevModel.dispose();
       }
 
-      const uri = monaco.Uri.parse(`inmemory://demo/${opened.fileName}`);
+      const uri = monaco.Uri.parse(`inmemory://local/${opened.fileName}`);
+      const existing = monaco.editor.getModel(uri);
+      if (existing) existing.dispose();
       const model = monaco.editor.createModel(opened.content, "railsim2", uri);
       modelsRef.current.set(LOCAL_FILE_KEY, model);
 
