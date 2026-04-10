@@ -13,9 +13,15 @@ interface Sample {
 interface Props {
   samples: Sample[];
   grammar: object;
+  langConf: {
+    comments: { lineComment: string; blockComment: [string, string] };
+    brackets: [string, string][];
+    autoClosingPairs: [string, string][];
+    surroundingPairs: [string, string][];
+  };
 }
 
-export function DemoEditor({ samples, grammar }: Props) {
+export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [activeFile, setActiveFile] = useState(samples[0].fileName);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
@@ -27,6 +33,20 @@ export function DemoEditor({ samples, grammar }: Props) {
     monacoRef.current = monaco;
 
     monaco.languages.register({ id: "railsim2" });
+
+    monaco.languages.setLanguageConfiguration("railsim2", {
+      comments: {
+        lineComment: langConf.comments.lineComment,
+        blockComment: langConf.comments.blockComment,
+      },
+      brackets: langConf.brackets,
+      autoClosingPairs: langConf.autoClosingPairs.map(
+        ([open, close]: [string, string]) => ({ open, close }),
+      ),
+      surroundingPairs: langConf.surroundingPairs.map(
+        ([open, close]: [string, string]) => ({ open, close }),
+      ),
+    });
 
     for (const sample of samples) {
       const uri = monaco.Uri.parse(`inmemory://demo/${sample.fileName}`);
