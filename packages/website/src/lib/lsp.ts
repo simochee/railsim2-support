@@ -9,6 +9,7 @@ import {
   DidChangeTextDocumentNotification,
   CompletionRequest,
   HoverRequest,
+  DocumentFormattingRequest,
   PublishDiagnosticsNotification,
   type ProtocolConnection,
   type PublishDiagnosticsParams,
@@ -205,4 +206,34 @@ export function applyDiagnostics(
     endColumn: d.range.end.character + 1,
   }));
   monaco.editor.setModelMarkers(model, "railsim2-lsp", markers);
+}
+
+export async function formatDocument(
+  conn: ProtocolConnection,
+  monaco: typeof Monaco,
+  editor: Monaco.editor.ICodeEditor,
+): Promise<void> {
+  const model = editor.getModel();
+  if (!model) return;
+
+  try {
+    const edits = await conn.sendRequest(DocumentFormattingRequest.type, {
+      textDocument: { uri: model.uri.toString() },
+      options: { tabSize: 2, insertSpaces: true },
+    });
+    if (!edits || edits.length === 0) return;
+
+    const monacoEdits = edits.map((edit) => ({
+      range: new monaco.Range(
+        edit.range.start.line + 1,
+        edit.range.start.character + 1,
+        edit.range.end.line + 1,
+        edit.range.end.character + 1,
+      ),
+      text: edit.newText,
+    }));
+    editor.executeEdits("railsim2-format", monacoEdits);
+  } catch {
+    console.warn("Failed to format document");
+  }
 }

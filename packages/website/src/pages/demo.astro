@@ -58,6 +58,19 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         color: #e0e0e0;
         font-size: 14px;
       }
+      .demo-format-btn {
+        padding: 4px 12px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: #2d2d2d;
+        color: #e0e0e0;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .demo-format-btn:hover {
+        background: #3d3d3d;
+      }
       .editor-wrapper {
         height: calc(100vh - 140px);
         border: 1px solid #333;

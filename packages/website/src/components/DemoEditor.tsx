@@ -3,7 +3,7 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import { setupGrammar } from "../lib/grammar";
-import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics } from "../lib/lsp";
+import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument } from "../lib/lsp";
 
 interface Sample {
   fileName: string;
@@ -91,6 +91,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     });
   };
 
+  const handleFormat = useCallback(() => {
+    const conn = connRef.current;
+    const ed = editorRef.current;
+    const monaco = monacoRef.current;
+    if (conn && ed && monaco) {
+      formatDocument(conn, monaco, ed);
+    }
+  }, []);
+
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const fileName = e.target.value;
@@ -138,6 +147,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          className="demo-format-btn"
+          onClick={handleFormat}
+        >
+          Format
+        </button>
       </div>
       <div className="editor-wrapper">
         <Editor
