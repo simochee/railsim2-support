@@ -74,5 +74,9 @@ function vendorImages(): AstroIntegration {
 export default defineConfig({
   site: "https://railsim2.simochee.net",
   build: { format: "preserve" },
-  integrations: [pagefind(), vendorImages(), icon()],
+  integrations: [
+    pagefind({ indexConfig: { rootSelector: ".mainbox" } }),
+    vendorImages(),
+    icon(),
+  ],
 });
