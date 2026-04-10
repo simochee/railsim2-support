@@ -9,6 +9,7 @@ import {
 import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AstroIntegration } from "astro";
+import react from "@astrojs/react";
 import icon from "astro-icon";
 import pagefind from "astro-pagefind";
 
@@ -75,6 +76,7 @@ export default defineConfig({
   site: "https://railsim2.simochee.net",
   build: { format: "preserve" },
   integrations: [
+    react(),
     pagefind({ indexConfig: { rootSelector: ".mainbox" } }),
     vendorImages(),
     icon(),

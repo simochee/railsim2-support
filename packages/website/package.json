@@ -8,10 +8,26 @@
         "preview": "astro preview"
     },
     "dependencies": {
+        "@astrojs/react": "^5.0.3",
         "@iconify-json/tabler": "^1.2.33",
+        "@monaco-editor/react": "^4.7.0",
         "astro": "^5.7.0",
         "astro-icon": "^1.1.5",
         "astro-pagefind": "^1.8.6",
-        "iconv-lite": "^0.7.2"
+        "iconv-lite": "^0.7.2",
+        "jsonc-parser": "^3.3.1",
+        "monaco-editor": "^0.55.1",
+        "monaco-editor-textmate": "^4.0.0",
+        "monaco-textmate": "^3.0.1",
+        "onigasm": "^2.2.5",
+        "react": "^19.2.5",
+        "react-dom": "^19.2.5",
+        "vscode-languageserver-protocol": "^3.17.5"
+    },
+    "devDependencies": {
+        "@railsim2-support/language-server": "workspace:*",
+        "@types/react": "^19.2.14",
+        "@types/react-dom": "^19.2.3",
+        "railsim2-support": "workspace:*"
     }
 }
