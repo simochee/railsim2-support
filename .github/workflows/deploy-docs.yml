@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - "packages/website/**"
-      - "vendor/railsim2"
+      - "packages/language-server/**"
+      - "packages/vscode-extension/**"
+      - "vendor/railsim2/**"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
@@ -38,6 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
 
       - name: Build docs
         run: pnpm docs:build
