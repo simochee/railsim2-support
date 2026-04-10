@@ -82,6 +82,17 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const firstModel = modelsRef.current.get(samples[0].fileName);
     if (firstModel) ed.setModel(firstModel);
 
+    // Cmd+S / Ctrl+S で保存
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      const opened = openedFileRef.current;
+      const model = modelsRef.current.get(LOCAL_FILE_KEY);
+      if (opened && model) {
+        saveFile(opened.handle, model.getValue(), opened.encoding).catch((e) => {
+          console.warn("Failed to save file:", e);
+        });
+      }
+    });
+
     setupGrammar(monaco, ed, grammar).catch((e) => {
       console.warn("Failed to setup TextMate grammar:", e);
     });
