@@ -5,3 +5,4 @@ packages/vscode-extension/THIRD_PARTY_LICENSES
 packages/website/dist/
 packages/website/.astro/
 tsconfig.tsbuildinfo
+.turbo/
