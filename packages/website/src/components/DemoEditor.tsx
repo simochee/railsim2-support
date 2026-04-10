@@ -4,6 +4,7 @@ import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument } from "../lib/lsp";
+import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
 
 interface Sample {
   fileName: string;
@@ -21,13 +22,36 @@ interface Props {
   };
 }
 
+const FILE_ACCESS = typeof window !== "undefined" && isFileAccessSupported();
+const LOCAL_FILE_KEY = "__local__";
+
 export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [activeFile, setActiveFile] = useState(samples[0].fileName);
+  const [localFileName, setLocalFileName] = useState<string | null>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
   const connRef = useRef<ProtocolConnection | null>(null);
   const disposedRef = useRef(false);
+  const openedFileRef = useRef<OpenedFile | null>(null);
+  const versionRef = useRef(2);
+
+  const switchToModel = useCallback((key: string) => {
+    const conn = connRef.current;
+    const ed = editorRef.current;
+    const oldModel = ed?.getModel();
+    if (oldModel && conn) {
+      closeDocument(conn, oldModel.uri.toString());
+    }
+    const model = modelsRef.current.get(key);
+    if (model && ed) {
+      ed.setModel(model);
+      versionRef.current = 2;
+    }
+    if (model && conn) {
+      openDocument(conn, model.uri.toString(), "railsim2", model.getValue());
+    }
+  }, []);
 
   const handleMount: OnMount = (ed, monaco) => {
     editorRef.current = ed;
@@ -79,11 +103,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         }
       });
 
-      let version = 2;
       ed.onDidChangeModelContent(() => {
         const model = ed.getModel();
         if (model) {
-          changeDocument(conn, model.uri.toString(), version++, model.getValue());
+          changeDocument(conn, model.uri.toString(), versionRef.current++, model.getValue());
         }
       });
     }).catch((e) => {
@@ -102,28 +125,60 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const fileName = e.target.value;
-      setActiveFile(fileName);
-      const conn = connRef.current;
-      const oldModel = editorRef.current?.getModel();
-      if (oldModel && conn) {
-        closeDocument(conn, oldModel.uri.toString());
-      }
-      const model = modelsRef.current.get(fileName);
-      if (model && editorRef.current) {
-        editorRef.current.setModel(model);
-      }
-      if (model && conn) {
-        openDocument(conn, model.uri.toString(), "railsim2", model.getValue());
-      }
+      const key = e.target.value;
+      setActiveFile(key);
+      switchToModel(key);
     },
-    [],
+    [switchToModel],
   );
+
+  const handleOpen = useCallback(async () => {
+    const monaco = monacoRef.current;
+    if (!monaco) return;
+
+    try {
+      const opened = await openFile();
+      openedFileRef.current = opened;
+
+      // Dispose previous local model if exists
+      const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
+      if (prevModel) {
+        const conn = connRef.current;
+        if (conn) closeDocument(conn, prevModel.uri.toString());
+        prevModel.dispose();
+      }
+
+      const uri = monaco.Uri.parse(`inmemory://demo/${opened.fileName}`);
+      const model = monaco.editor.createModel(opened.content, "railsim2", uri);
+      modelsRef.current.set(LOCAL_FILE_KEY, model);
+
+      setLocalFileName(opened.fileName);
+      setActiveFile(LOCAL_FILE_KEY);
+      switchToModel(LOCAL_FILE_KEY);
+    } catch (e) {
+      // User cancelled the picker
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      console.warn("Failed to open file:", e);
+    }
+  }, [switchToModel]);
+
+  const handleSave = useCallback(async () => {
+    const opened = openedFileRef.current;
+    const model = modelsRef.current.get(LOCAL_FILE_KEY);
+    if (!opened || !model) return;
+
+    try {
+      await saveFile(opened.handle, model.getValue(), opened.encoding);
+    } catch (e) {
+      console.warn("Failed to save file:", e);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
       disposedRef.current = true;
       connRef.current = null;
+      openedFileRef.current = null;
       disposeLsp();
       for (const model of modelsRef.current.values()) {
         model.dispose();
@@ -131,6 +186,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       modelsRef.current.clear();
     };
   }, []);
+
+  const isLocalFile = activeFile === LOCAL_FILE_KEY;
 
   return (
     <>
@@ -146,6 +203,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               {s.fileName}
             </option>
           ))}
+          {localFileName && (
+            <option value={LOCAL_FILE_KEY}>
+              {localFileName}
+            </option>
+          )}
         </select>
         <button
           type="button"
@@ -154,6 +216,26 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         >
           Format
         </button>
+        {FILE_ACCESS && (
+          <>
+            <button
+              type="button"
+              className="demo-format-btn"
+              onClick={handleOpen}
+            >
+              Open
+            </button>
+            {isLocalFile && (
+              <button
+                type="button"
+                className="demo-format-btn"
+                onClick={handleSave}
+              >
+                Save
+              </button>
+            )}
+          </>
+        )}
       </div>
       <div className="editor-wrapper">
         <Editor
