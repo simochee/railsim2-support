@@ -24,8 +24,8 @@
     "test": "vitest run",
     "generate:grammar": "tsx scripts/generateGrammar.ts",
     "prepackage": "cp ../../THIRD_PARTY_LICENSES ./THIRD_PARTY_LICENSES",
-    "package": "pnpm build && vsce package --no-dependencies",
-    "publish": "pnpm build && vsce publish --no-dependencies"
+    "package": "turbo build && vsce package --no-dependencies",
+    "publish": "turbo build && vsce publish --no-dependencies"
   },
   "dependencies": {
     "@railsim2-support/language-server": "workspace:*",
