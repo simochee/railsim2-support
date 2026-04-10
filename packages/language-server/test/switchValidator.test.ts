@@ -60,7 +60,7 @@ Body {
     expect(diags[0].message).toContain("未定義");
   });
 
-  it("should warn for duplicate DefineSwitch", () => {
+  it("should warn for duplicate DefineSwitch on all duplicate locations", () => {
     const { file } = parse(`
 DefineSwitch "ライト" {
   Entry = "点灯";
@@ -72,8 +72,9 @@ Body { }
     `);
     const index = buildSwitchIndex(file);
     const diags = validateSwitches(file, index);
-    expect(diags.length).toBeGreaterThanOrEqual(1);
-    expect(diags.some(d => d.message.includes("ライト"))).toBe(true);
+    const dupDiags = diags.filter(d => d.message === 'スイッチ「ライト」が重複して定義されています');
+    expect(dupDiags).toHaveLength(2);
+    expect(dupDiags.every(d => d.severity === "warning")).toBe(true);
   });
 
   it("should not warn when string is used in complex expression (&&, ||)", () => {
