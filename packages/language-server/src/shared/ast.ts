@@ -21,6 +21,7 @@ export type PropertyNode = {
   values: ExprNode[];
   range: Range;
   nameRange: Range;
+  inlineComment?: CommentNode;
   trailingComment?: CommentNode;
 };
 

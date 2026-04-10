@@ -358,18 +358,36 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    // Attach trailing comments to properties on the same line
+    // Attach same-line comments to properties:
+    // - inlineComment: comment within the property range (between name and =)
+    // - trailingComment: comment after the semicolon on the same line
     for (const slot of slots) {
       const toRemove = new Set<number>();
       for (let i = 0; i < slot.body.length; i++) {
         const node = slot.body[i];
-        if (node.type !== "comment" || node.kind !== "line") continue;
-        // Find a property on the same line (comment starts on property's end line)
+        if (node.type !== "comment") continue;
+        // Skip multi-line block comments
+        if (node.kind === "block" && node.range.start.line !== node.range.end.line) continue;
+
         for (const other of slot.body) {
+          if (other.type !== "property") continue;
+
+          // Inline comment: within the property range (between name and =)
           if (
-            other.type === "property" &&
+            !other.inlineComment &&
+            containsPosition(other.range, node.range.start) &&
+            node.range.start.character > other.nameRange.end.character
+          ) {
+            other.inlineComment = node;
+            toRemove.add(i);
+            break;
+          }
+
+          // Trailing comment: after the semicolon on the same line
+          if (
             !other.trailingComment &&
-            node.range.start.line === other.range.end.line
+            node.range.start.line === other.range.end.line &&
+            node.range.start.character >= other.range.end.character
           ) {
             other.trailingComment = node;
             toRemove.add(i);

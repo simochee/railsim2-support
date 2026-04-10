@@ -66,35 +66,15 @@ describe("formatter", () => {
     expect(result).toBe("Body {\n\tCoord = (0.9, 0.0);\n}\n");
   });
 
-  // --- = alignment ---
+  // --- Multiple properties ---
 
-  it("should align = in consecutive property groups", () => {
+  it("should not align = across properties", () => {
     const input =
       'Body {\nModelFileName = "body.x";\nModelScale = 1.0;\nCoord = 0.0, 0.0, 0.0;\n}\n';
     const result = format(input);
     expect(result).toBe(
-      'Body {\n\tModelFileName = "body.x";\n\tModelScale    = 1.0;\n\tCoord         = 0.0, 0.0, 0.0;\n}\n',
+      'Body {\n\tModelFileName = "body.x";\n\tModelScale = 1.0;\n\tCoord = 0.0, 0.0, 0.0;\n}\n',
     );
-  });
-
-  it("should break alignment groups at blank lines", () => {
-    const input = "Body {\n\tA = 1;\n\n\tLongName = 2;\n}\n";
-    const result = format(input);
-    // A and LongName are in separate groups (blank line between them)
-    expect(result).toContain("\tA = 1;");
-    expect(result).toContain("\tLongName = 2;");
-    // A should NOT be padded to match LongName
-    expect(result).not.toContain("\tA        = 1;");
-  });
-
-  it("should break alignment groups at non-property nodes", () => {
-    const input = "Body {\nA = 1;\nInner { }\nB = 2;\n}\n";
-    const result = format(input);
-    expect(result).toContain("\tA = 1;");
-    expect(result).toContain("\tB = 2;");
-    // A and B should NOT be aligned to each other (separated by object)
-    // Both are single-property groups so no padding is added
-    expect(result).not.toContain("\tA  ");
   });
 
   // --- Blank line preservation ---
@@ -125,29 +105,12 @@ describe("formatter", () => {
     expect(result).toBe("Body {\n\t/* multi\nline */\n\tCoord = 1;\n}\n");
   });
 
-  it("should align = across comments within property groups", () => {
+  it("should preserve standalone comments between properties", () => {
     const input = 'Body {\nModelFileName = "a";\n// divider\nCoord = 1;\n}';
     const result = format(input);
-    // Comments don't break alignment groups
     expect(result).toContain('\tModelFileName = "a";');
     expect(result).toContain("\t// divider");
-    expect(result).toContain("\tCoord         = 1;");
-  });
-
-  it("should align = with interleaved comments like RailSim2 style", () => {
-    const input = `TrainInfo {
-FrontLimit = 10.65;
-// 前方連結位置
-TailLimit = -10.65;
-MaxVelocity = 100.0;
-MaxAcceleration = 2.1;
-DoorClosingTime = 4.0;
-}`;
-    const result = format(input);
-    expect(result).toContain("\tFrontLimit      = 10.65;");
-    expect(result).toContain("\tTailLimit       = -10.65;");
-    expect(result).toContain("\tMaxAcceleration = 2.1;");
-    expect(result).toContain("\tDoorClosingTime = 4.0;");
+    expect(result).toContain("\tCoord = 1;");
   });
 
   it("should keep inline comments on the same line as properties", () => {
@@ -155,19 +118,27 @@ DoorClosingTime = 4.0;
 FrontLimit = 10.3;    //    前方連結位置 Z 座標
 TailLimit = -10.3;    //    後方連結位置 Z 座標
 MaxVelocity = 130.0;    //    最高速度
-MaxAcceleration = 3.0;    //    最高加速度
-MaxDeceleration = 4.0;    //    最高減速度
-TiltSpeed = 0.1;    //    振り子反応速度
-DoorClosingTime = 1.5;    //    ドア閉め所要時間
 }`;
     const result = format(input);
-    expect(result).toContain("\tFrontLimit      = 10.3; //    前方連結位置 Z 座標");
-    expect(result).toContain("\tTailLimit       = -10.3; //    後方連結位置 Z 座標");
-    expect(result).toContain("\tMaxVelocity     = 130.0; //    最高速度");
-    expect(result).toContain("\tMaxAcceleration = 3.0; //    最高加速度");
-    expect(result).toContain("\tMaxDeceleration = 4.0; //    最高減速度");
-    expect(result).toContain("\tTiltSpeed       = 0.1; //    振り子反応速度");
-    expect(result).toContain("\tDoorClosingTime = 1.5; //    ドア閉め所要時間");
+    expect(result).toContain("\tFrontLimit = 10.3; //    前方連結位置 Z 座標");
+    expect(result).toContain("\tTailLimit = -10.3; //    後方連結位置 Z 座標");
+    expect(result).toContain("\tMaxVelocity = 130.0; //    最高速度");
+  });
+
+  it("should keep block comment between property name and =", () => {
+    const input = "Body {\n    Gauge     /* hello */ = 1.067;\n}";
+    const result = format(input);
+    expect(result).toBe("Body {\n\tGauge /* hello */ = 1.067;\n}\n");
+  });
+
+  it("should keep inline comment with other properties", () => {
+    const input = `Body {
+Gauge /* narrow */ = 1.067;
+MaxVelocity = 130.0;
+}`;
+    const result = format(input);
+    expect(result).toContain("\tGauge /* narrow */ = 1.067;");
+    expect(result).toContain("\tMaxVelocity = 130.0;");
   });
 
   // --- Negative values in tuple ---
@@ -231,9 +202,8 @@ ApplySwitch "_FRONT"{Case 0:Coord=0.0,0.0,0.0;Case 1:Coord=1.0,0.0,0.0;Default:C
     const result = format(input);
     expect(result).toContain("// RailSim2 plugin");
     expect(result).toContain("PluginHeader {\n");
-    // PluginType(10), PluginName(10), PluginAuthor(12), RailSimVersion(14) → align to 14
-    expect(result).toContain("\tPluginType     = Train;\n");
-    expect(result).toContain('\tPluginName     = "Test Train";\n');
+    expect(result).toContain("\tPluginType = Train;\n");
+    expect(result).toContain('\tPluginName = "Test Train";\n');
     expect(result).toContain("\tRailSimVersion = 2;\n");
     expect(result).toContain('\tObject3D "headlight" {\n');
     expect(result).toContain("\t} Else {\n");

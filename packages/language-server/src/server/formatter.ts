@@ -15,13 +15,11 @@ import type {
 export interface FormatOptions {
   indentChar: "\t" | " ";
   indentSize: number;
-  alignEquals: boolean;
 }
 
 const DEFAULT_OPTIONS: FormatOptions = {
   indentChar: "\t",
   indentSize: 1,
-  alignEquals: true,
 };
 
 export function format(source: string, options?: Partial<FormatOptions>): string {
@@ -60,7 +58,7 @@ function formatFile(file: FileNode, ctx: FormatContext): string {
 }
 
 // ---------------------------------------------------------------------------
-// Node list — blank line preservation + = alignment
+// Node list — blank line preservation
 // ---------------------------------------------------------------------------
 
 function formatNodeList(
@@ -69,72 +67,17 @@ function formatNodeList(
   ctx: FormatContext,
   parts: string[],
 ): void {
-  const groups = groupNodes(nodes, ctx.sourceLines);
   let prevEndLine = -1;
 
-  for (const group of groups) {
-    for (const node of group.nodes) {
-      if (prevEndLine >= 0) {
-        const blanks = countBlankLines(prevEndLine, node.range.start.line, ctx.sourceLines);
-        for (let b = 0; b < blanks; b++) parts.push("\n");
-      }
-
-      if (group.type === "properties" && ctx.opts.alignEquals && node.type === "property") {
-        parts.push(formatPropertyAligned(node, depth, group.maxNameLength, ctx));
-      } else {
-        parts.push(formatNode(node, depth, ctx));
-      }
-
-      prevEndLine = node.range.end.line;
-    }
-  }
-}
-
-interface NodeGroup {
-  type: "properties" | "mixed";
-  nodes: (TopLevelNode | BodyNode)[];
-  maxNameLength: number;
-}
-
-function groupNodes(
-  nodes: readonly (TopLevelNode | BodyNode)[],
-  sourceLines: string[],
-): NodeGroup[] {
-  const groups: NodeGroup[] = [];
-  let currentGroup: (PropertyNode | CommentNode)[] = [];
-
-  function flush(): void {
-    if (currentGroup.length > 0) {
-      const props = currentGroup.filter((n): n is PropertyNode => n.type === "property");
-      if (props.length > 0) {
-        const maxLen = Math.max(...props.map((p) => p.name.length));
-        groups.push({ type: "properties", nodes: [...currentGroup], maxNameLength: maxLen });
-      } else {
-        for (const n of currentGroup) {
-          groups.push({ type: "mixed", nodes: [n], maxNameLength: 0 });
-        }
-      }
-      currentGroup = [];
-    }
-  }
-
   for (const node of nodes) {
-    if (node.type === "property" || node.type === "comment") {
-      // Blank line between previous node and this one breaks the alignment group
-      if (currentGroup.length > 0) {
-        const prev = currentGroup[currentGroup.length - 1];
-        if (countBlankLines(prev.range.end.line, node.range.start.line, sourceLines) > 0) {
-          flush();
-        }
-      }
-      currentGroup.push(node);
-    } else {
-      flush();
-      groups.push({ type: "mixed", nodes: [node], maxNameLength: 0 });
+    if (prevEndLine >= 0) {
+      const blanks = countBlankLines(prevEndLine, node.range.start.line, ctx.sourceLines);
+      for (let b = 0; b < blanks; b++) parts.push("\n");
     }
+
+    parts.push(formatNode(node, depth, ctx));
+    prevEndLine = node.range.end.line;
   }
-  flush();
-  return groups;
 }
 
 function countBlankLines(
@@ -158,7 +101,7 @@ function formatNode(node: TopLevelNode | BodyNode, depth: number, ctx: FormatCon
     case "object":
       return formatObject(node, depth, ctx);
     case "property":
-      return formatPropertyAligned(node, depth, node.name.length, ctx);
+      return formatProperty(node, depth, ctx);
     case "if":
       return formatIf(node, depth, ctx);
     case "applySwitch":
@@ -180,17 +123,12 @@ function formatObject(node: ObjectNode, depth: number, ctx: FormatContext): stri
   return header + bodyParts.join("") + `${prefix}}\n`;
 }
 
-function formatPropertyAligned(
-  node: PropertyNode,
-  depth: number,
-  alignWidth: number,
-  ctx: FormatContext,
-): string {
+function formatProperty(node: PropertyNode, depth: number, ctx: FormatContext): string {
   const prefix = ind(depth, ctx);
-  const paddedName = node.name.padEnd(alignWidth);
+  const inline = node.inlineComment ? ` ${node.inlineComment.value}` : "";
   const valueStr = propertyValueText(node, ctx);
-  const comment = node.trailingComment ? ` ${node.trailingComment.value}` : "";
-  return `${prefix}${paddedName} = ${valueStr};${comment}\n`;
+  const trailing = node.trailingComment ? ` ${node.trailingComment.value}` : "";
+  return `${prefix}${node.name}${inline} = ${valueStr};${trailing}\n`;
 }
 
 function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
