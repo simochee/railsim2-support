@@ -5,7 +5,7 @@ import type { PropertySchema } from "../schema/schemaTypes.js";
 import { semanticSchema, getFileSchema } from "../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
 import type { SwitchIndex } from "./switchSymbols.js";
-import { SYSTEM_SWITCHES } from "./switchSymbols.js";
+import { SYSTEM_SWITCHES, getSwitchEntries } from "./switchSymbols.js";
 
 // ---------------------------------------------------------------------------
 // Context types
@@ -570,9 +570,9 @@ function buildCaseValueCompletions(
   switchName: string,
   switchIndex: SwitchIndex,
 ): CompletionItem[] {
-  const def = switchIndex.definitions.get(switchName);
-  if (!def) return [];
-  return def.entries.map((entry) => ({
+  const entries = getSwitchEntries(switchName, switchIndex);
+  if (!entries) return [];
+  return entries.map((entry) => ({
     label: String(entry.index),
     kind: CompletionItemKind.EnumMember,
     detail: entry.label,

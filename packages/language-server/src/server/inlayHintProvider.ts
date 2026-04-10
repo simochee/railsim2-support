@@ -1,7 +1,8 @@
 import { InlayHint, InlayHintKind } from "vscode-languageserver";
 import type { Range } from "vscode-languageserver";
 import type { FileNode, TopLevelNode, BodyNode, ExprNode } from "../shared/ast.js";
-import type { SwitchIndex, SwitchDefinition } from "./switchSymbols.js";
+import type { SwitchIndex, SwitchEntry } from "./switchSymbols.js";
+import { getSwitchEntries } from "./switchSymbols.js";
 import type { Position } from "../shared/tokens.js";
 
 const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
@@ -22,11 +23,11 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
     return true;
   }
 
-  function addHintForNumber(expr: ExprNode, def: SwitchDefinition | undefined): void {
-    if (!def) return;
+  function addHintForNumber(expr: ExprNode, entries: readonly SwitchEntry[] | undefined): void {
+    if (!entries) return;
     if (expr.type !== "number") return;
     if (!Number.isInteger(expr.value) || expr.value < 0) return;
-    const entry = def.entries[expr.value];
+    const entry = entries[expr.value];
     if (!entry) return;
     if (!posInRange(expr.range.end)) return;
     hints.push({
@@ -37,16 +38,16 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
     });
   }
 
-  function visitExpr(expr: ExprNode, switchIdx: SwitchIndex): void {
+  function visitExpr(expr: ExprNode): void {
     if (expr.type === "binary") {
       if (COMPARISON_OPS.has(expr.op) && expr.left.type === "string" && expr.right.type === "number") {
-        const def = switchIdx.definitions.get(expr.left.value);
-        addHintForNumber(expr.right, def);
+        const entries = getSwitchEntries(expr.left.value, switchIndex);
+        addHintForNumber(expr.right, entries);
       }
-      visitExpr(expr.left, switchIdx);
-      visitExpr(expr.right, switchIdx);
+      visitExpr(expr.left);
+      visitExpr(expr.right);
     } else if (expr.type === "unary") {
-      visitExpr(expr.operand, switchIdx);
+      visitExpr(expr.operand);
     }
   }
 
@@ -59,19 +60,19 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
           visit(node.body);
           break;
         case "if":
-          visitExpr(node.condition, switchIndex);
+          visitExpr(node.condition);
           visit(node.then);
           if (node.else_) visit(node.else_);
           break;
         case "applySwitch": {
-          let switchDef: SwitchDefinition | undefined;
+          let entries: readonly SwitchEntry[] | undefined;
           if (node.switchName.type === "string") {
-            switchDef = switchIndex.definitions.get(node.switchName.value);
+            entries = getSwitchEntries(node.switchName.value, switchIndex);
           }
           for (const c of node.cases) {
             if (!rangesOverlap(c.range)) continue;
             for (const val of c.values) {
-              addHintForNumber(val, switchDef);
+              addHintForNumber(val, entries);
             }
             visit(c.body);
           }

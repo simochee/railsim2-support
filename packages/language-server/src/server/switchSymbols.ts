@@ -80,6 +80,37 @@ export function buildSwitchIndex(file: FileNode): SwitchIndex {
   return { definitions, duplicates };
 }
 
+/** System switches with known discrete value labels */
+export const SYSTEM_SWITCH_ENTRIES: ReadonlyMap<string, readonly SwitchEntry[]> = new Map([
+  ["_FRONT", [{ label: "進行方向", index: 0 }, { label: "逆方向", index: 1 }]],
+  ["_CONNECT1", [{ label: "未連結", index: 0 }, { label: "連結", index: 1 }]],
+  ["_CONNECT2", [{ label: "未連結", index: 0 }, { label: "連結", index: 1 }]],
+  ["_DOOR1", [{ label: "閉", index: 0 }, { label: "開", index: 1 }]],
+  ["_DOOR2", [{ label: "閉", index: 0 }, { label: "開", index: 1 }]],
+  ["_CABINVIEW", [{ label: "通常", index: 0 }, { label: "運転台視点", index: 1 }]],
+  ["_NIGHT", [{ label: "昼", index: 0 }, { label: "夜", index: 1 }]],
+  ["_SHADOW", [{ label: "無効", index: 0 }, { label: "有効", index: 1 }]],
+  ["_ENVMAP", [{ label: "無効", index: 0 }, { label: "有効", index: 1 }]],
+  ["_SEASON", [
+    { label: "春", index: 0 }, { label: "夏", index: 1 },
+    { label: "秋", index: 2 }, { label: "冬", index: 3 },
+  ]],
+  ["_DAYOFWEEK", [
+    { label: "日", index: 0 }, { label: "月", index: 1 }, { label: "火", index: 2 },
+    { label: "水", index: 3 }, { label: "木", index: 4 }, { label: "金", index: 5 },
+    { label: "土", index: 6 },
+  ]],
+]);
+
+/**
+ * Get entries for a switch by name — checks user definitions first, then system switch entries.
+ */
+export function getSwitchEntries(name: string, switchIndex: SwitchIndex): readonly SwitchEntry[] | undefined {
+  const userDef = switchIndex.definitions.get(name);
+  if (userDef) return userDef.entries;
+  return SYSTEM_SWITCH_ENTRIES.get(name);
+}
+
 const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
 
 export function getReferencedSwitch(expr: ExprNode): string | null {

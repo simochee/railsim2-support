@@ -90,10 +90,45 @@ Body {
     expect(hints[1].label).toBe("B");
   });
 
-  it("should not show hints for system switches (no entries)", () => {
+  it("should show hints for system switches with known entries", () => {
     const hints = setupHints(`
 Body {
-  If "_FRONT" == 1 {
+  If "_FRONT" == 0 {
+  }
+}
+    `);
+    expect(hints).toHaveLength(1);
+    expect(hints[0].label).toBe("進行方向");
+  });
+
+  it("should show hints for _SEASON system switch", () => {
+    const hints = setupHints(`
+Body {
+  ApplySwitch "_SEASON" {
+    Case 2:
+    Default:
+  }
+}
+    `);
+    expect(hints).toHaveLength(1);
+    expect(hints[0].label).toBe("秋");
+  });
+
+  it("should show hints for _DAYOFWEEK (Sunday = 0)", () => {
+    const hints = setupHints(`
+Body {
+  If "_DAYOFWEEK" == 0 {
+  }
+}
+    `);
+    expect(hints).toHaveLength(1);
+    expect(hints[0].label).toBe("日");
+  });
+
+  it("should not show hints for continuous system switches", () => {
+    const hints = setupHints(`
+Body {
+  If "_VELOCITY" > 0 {
   }
 }
     `);
