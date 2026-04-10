@@ -27,6 +27,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
   const connRef = useRef<ProtocolConnection | null>(null);
+  const disposedRef = useRef(false);
 
   const handleMount: OnMount = (ed, monaco) => {
     editorRef.current = ed;
@@ -57,9 +58,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const firstModel = modelsRef.current.get(samples[0].fileName);
     if (firstModel) ed.setModel(firstModel);
 
-    setupGrammar(monaco, ed, grammar);
+    setupGrammar(monaco, ed, grammar).catch((e) => {
+      console.warn("Failed to setup TextMate grammar:", e);
+    });
 
     startLsp().then((conn) => {
+      if (disposedRef.current) return;
       connRef.current = conn;
       const currentModel = ed.getModel();
       if (currentModel) {
@@ -82,6 +86,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           changeDocument(conn, model.uri.toString(), version++, model.getValue());
         }
       });
+    }).catch((e) => {
+      console.warn("Failed to start Language Server:", e);
     });
   };
 
@@ -107,6 +113,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
   useEffect(() => {
     return () => {
+      disposedRef.current = true;
       connRef.current = null;
       disposeLsp();
       for (const model of modelsRef.current.values()) {

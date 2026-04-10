@@ -100,23 +100,27 @@ export function registerProviders(
     monaco.languages.registerCompletionItemProvider("railsim2", {
       triggerCharacters: ["."],
       provideCompletionItems: async (model, position) => {
-        const result = await conn.sendRequest(CompletionRequest.type, {
-          textDocument: { uri: model.uri.toString() },
-          position: { line: position.lineNumber - 1, character: position.column - 1 },
-        });
-        if (!result) return { suggestions: [] };
+        try {
+          const result = await conn.sendRequest(CompletionRequest.type, {
+            textDocument: { uri: model.uri.toString() },
+            position: { line: position.lineNumber - 1, character: position.column - 1 },
+          });
+          if (!result) return { suggestions: [] };
 
-        const items = Array.isArray(result) ? result : result.items;
-        return {
-          suggestions: items.map((item: LspCompletionItem) => ({
-            label: item.label,
-            kind: mapCompletionItemKind(monaco, item.kind),
-            insertText: item.insertText ?? item.label,
-            detail: item.detail,
-            documentation: item.documentation,
-            range: undefined!,
-          })),
-        };
+          const items = Array.isArray(result) ? result : result.items;
+          return {
+            suggestions: items.map((item: LspCompletionItem) => ({
+              label: item.label,
+              kind: mapCompletionItemKind(monaco, item.kind),
+              insertText: item.insertText ?? item.label,
+              detail: item.detail,
+              documentation: item.documentation,
+              range: undefined!,
+            })),
+          };
+        } catch {
+          return { suggestions: [] };
+        }
       },
     }),
   );
@@ -124,29 +128,33 @@ export function registerProviders(
   disposables.push(
     monaco.languages.registerHoverProvider("railsim2", {
       provideHover: async (model, position) => {
-        const result = await conn.sendRequest(HoverRequest.type, {
-          textDocument: { uri: model.uri.toString() },
-          position: { line: position.lineNumber - 1, character: position.column - 1 },
-        });
-        if (!result) return null;
+        try {
+          const result = await conn.sendRequest(HoverRequest.type, {
+            textDocument: { uri: model.uri.toString() },
+            position: { line: position.lineNumber - 1, character: position.column - 1 },
+          });
+          if (!result) return null;
 
-        const contents = Array.isArray(result.contents)
-          ? result.contents.map((c) => typeof c === "string" ? { value: c } : c)
-          : typeof result.contents === "string"
-            ? [{ value: result.contents }]
-            : [result.contents];
+          const contents = Array.isArray(result.contents)
+            ? result.contents.map((c) => typeof c === "string" ? { value: c } : c)
+            : typeof result.contents === "string"
+              ? [{ value: result.contents }]
+              : [result.contents];
 
-        return {
-          contents,
-          range: result.range
-            ? new monaco.Range(
-                result.range.start.line + 1,
-                result.range.start.character + 1,
-                result.range.end.line + 1,
-                result.range.end.character + 1,
-              )
-            : undefined,
-        };
+          return {
+            contents,
+            range: result.range
+              ? new monaco.Range(
+                  result.range.start.line + 1,
+                  result.range.start.character + 1,
+                  result.range.end.line + 1,
+                  result.range.end.character + 1,
+                )
+              : undefined,
+          };
+        } catch {
+          return null;
+        }
       },
     }),
   );

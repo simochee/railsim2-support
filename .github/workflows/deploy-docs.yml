@@ -8,6 +8,7 @@ on:
       - "packages/language-server/**"
       - "packages/vscode-extension/**"
       - "vendor/railsim2/**"
+      - "pnpm-lock.yaml"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
 
