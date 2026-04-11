@@ -24,6 +24,22 @@ import {
 } from "vscode-languageserver-protocol/browser";
 import type * as Monaco from "monaco-editor";
 
+// ---------------------------------------------------------------------------
+// LSP ↔ Monaco coordinate helpers (LSP is 0-based, Monaco is 1-based)
+// ---------------------------------------------------------------------------
+
+function lspToMonacoRange(
+  monaco: typeof Monaco,
+  range: { start: { line: number; character: number }; end: { line: number; character: number } },
+) {
+  return new monaco.Range(
+    range.start.line + 1,
+    range.start.character + 1,
+    range.end.line + 1,
+    range.end.character + 1,
+  );
+}
+
 let connection: ProtocolConnection | null = null;
 let worker: Worker | null = null;
 let initPromise: Promise<ProtocolConnection> | null = null;
@@ -128,12 +144,7 @@ export function registerProviders(
                 detail: item.detail,
                 documentation: item.documentation,
                 range: textEdit
-                  ? new monaco.Range(
-                      textEdit.range.start.line + 1,
-                      textEdit.range.start.character + 1,
-                      textEdit.range.end.line + 1,
-                      textEdit.range.end.character + 1,
-                    )
+                  ? lspToMonacoRange(monaco, textEdit.range)
                   : undefined!,
               };
             }),
@@ -164,12 +175,7 @@ export function registerProviders(
           return {
             contents,
             range: result.range
-              ? new monaco.Range(
-                  result.range.start.line + 1,
-                  result.range.start.character + 1,
-                  result.range.end.line + 1,
-                  result.range.end.character + 1,
-                )
+              ? lspToMonacoRange(monaco, result.range)
               : undefined,
           };
         } catch {
@@ -254,14 +260,17 @@ export function applyDiagnostics(
   model: Monaco.editor.ITextModel,
   diagnostics: LspDiagnostic[],
 ): void {
-  const markers = diagnostics.map((d) => ({
-    severity: mapDiagnosticSeverity(monaco, d.severity),
-    message: d.message,
-    startLineNumber: d.range.start.line + 1,
-    startColumn: d.range.start.character + 1,
-    endLineNumber: d.range.end.line + 1,
-    endColumn: d.range.end.character + 1,
-  }));
+  const markers = diagnostics.map((d) => {
+    const range = lspToMonacoRange(monaco, d.range);
+    return {
+      severity: mapDiagnosticSeverity(monaco, d.severity),
+      message: d.message,
+      startLineNumber: range.startLineNumber,
+      startColumn: range.startColumn,
+      endLineNumber: range.endLineNumber,
+      endColumn: range.endColumn,
+    };
+  });
   monaco.editor.setModelMarkers(model, "railsim2-lsp", markers);
 }
 
@@ -272,12 +281,7 @@ export interface FormatOptions {
 
 function toLspEdits(monaco: typeof Monaco, edits: { range: { start: { line: number; character: number }; end: { line: number; character: number } }; newText: string }[]) {
   return edits.map((edit) => ({
-    range: new monaco.Range(
-      edit.range.start.line + 1,
-      edit.range.start.character + 1,
-      edit.range.end.line + 1,
-      edit.range.end.character + 1,
-    ),
+    range: lspToMonacoRange(monaco, edit.range),
     text: edit.newText,
   }));
 }
