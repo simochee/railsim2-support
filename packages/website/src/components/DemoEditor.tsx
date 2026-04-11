@@ -221,15 +221,22 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         if (model) {
           changeDocument(conn, model.uri.toString(), versionRef.current++, model.getValue());
         }
-        // Update dirty state for all tracked files
-        const newDirty = new Set<string>();
+        // Update dirty state only for the active model
+        if (!model) return;
+        let activeKey: string | undefined;
         for (const [key, m] of modelsRef.current.entries()) {
-          const savedVer = savedVersionRef.current.get(key);
-          if (savedVer !== undefined && m.getAlternativeVersionId() !== savedVer) {
-            newDirty.add(key);
-          }
+          if (m === model) { activeKey = key; break; }
         }
-        setDirtyFiles(newDirty);
+        if (!activeKey) return;
+        const savedVer = savedVersionRef.current.get(activeKey);
+        const isDirty = savedVer !== undefined && model.getAlternativeVersionId() !== savedVer;
+        setDirtyFiles((prev) => {
+          const wasDirty = prev.has(activeKey);
+          if (isDirty === wasDirty) return prev;
+          const next = new Set(prev);
+          isDirty ? next.add(activeKey) : next.delete(activeKey);
+          return next;
+        });
       });
     }).catch((e) => {
       console.warn("Failed to start Language Server:", e);
