@@ -104,8 +104,7 @@
   outline-offset: -1px;
 }
 
-.tab:hover .tabClose,
-.tabActive .tabClose {
+.tab:hover .tabClose {
   opacity: 0.6;
 }
 
@@ -141,12 +140,10 @@
 .tabDirty .tabClose {
   display: none;
 }
-.tabDirty:hover .tabDot,
-.tabDirty.tabActive .tabDot {
+.tabDirty:hover .tabDot {
   display: none;
 }
-.tabDirty:hover .tabClose,
-.tabDirty.tabActive .tabClose {
+.tabDirty:hover .tabClose {
   display: inline-flex;
 }
 

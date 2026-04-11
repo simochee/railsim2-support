@@ -283,8 +283,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     [switchToModel],
   );
 
-  // Unconditionally closes a tab. Caller must ensure closing is safe
-  // (e.g. last-tab guard, dirty confirmation already handled).
+  // Unconditionally closes a tab. Caller must ensure dirty confirmation
+  // is already handled. Closing the last tab leaves the editor empty.
   const performCloseTab = useCallback((key: string) => {
     if (activeFile === key) {
       const idx = visibleTabs.indexOf(key);
@@ -292,6 +292,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       if (nextKey) {
         switchToModel(nextKey);
         setActiveFile(nextKey);
+      } else {
+        setActiveFile("");
+        const ed = editorRef.current;
+        if (ed) ed.setModel(null);
       }
     }
 
@@ -319,15 +323,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, [activeFile, visibleTabs, switchToModel]);
 
   const handleCloseTab = useCallback((key: string) => {
-    if (visibleTabs.length <= 1) return;
-
     if (dirtyFiles.has(key)) {
       setClosingTab(key);
       return;
     }
 
     performCloseTab(key);
-  }, [visibleTabs, dirtyFiles, performCloseTab]);
+  }, [dirtyFiles, performCloseTab]);
 
   const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = tabsScrollRef.current;
@@ -504,8 +506,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirtyFiles.size]);
 
-  const canClose = visibleTabs.length > 1;
-
   const closingTabName = closingTab === LOCAL_FILE_KEY
     ? localFileName
     : samples.find((sm) => sm.fileName === closingTab)?.displayName ?? closingTab;
@@ -564,26 +564,17 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   <span className="codicon codicon-file" />
                   {sample.displayName}
                 </span>
-                {dirtyFiles.has(key) && !canClose && (
-                  <span className={s.tabDot}>
-                    <span className="codicon codicon-circle-filled" />
-                  </span>
-                )}
-                {canClose && (
-                  <>
-                    <span className={s.tabDot}>
-                      <span className="codicon codicon-circle-filled" />
-                    </span>
-                    <button
-                      type="button"
-                      className={s.tabClose}
-                      aria-label={`Close ${sample.displayName}`}
-                      onClick={() => handleCloseTab(key)}
-                    >
-                      <span className="codicon codicon-close" />
-                    </button>
-                  </>
-                )}
+                <span className={s.tabDot}>
+                  <span className="codicon codicon-circle-filled" />
+                </span>
+                <button
+                  type="button"
+                  className={s.tabClose}
+                  aria-label={`Close ${sample.displayName}`}
+                  onClick={() => handleCloseTab(key)}
+                >
+                  <span className="codicon codicon-close" />
+                </button>
               </div>
             );
           })}
@@ -601,26 +592,17 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 <span className="codicon codicon-file" />
                 {localFileName}
               </span>
-              {dirtyFiles.has(LOCAL_FILE_KEY) && !canClose && (
-                <span className={s.tabDot}>
-                  <span className="codicon codicon-circle-filled" />
-                </span>
-              )}
-              {canClose && (
-                <>
-                  <span className={s.tabDot}>
-                    <span className="codicon codicon-circle-filled" />
-                  </span>
-                  <button
-                    type="button"
-                    className={s.tabClose}
-                    aria-label={`Close ${localFileName}`}
-                    onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
-                  >
-                    <span className="codicon codicon-close" />
-                  </button>
-                </>
-              )}
+              <span className={s.tabDot}>
+                <span className="codicon codicon-circle-filled" />
+              </span>
+              <button
+                type="button"
+                className={s.tabClose}
+                aria-label={`Close ${localFileName}`}
+                onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
+              >
+                <span className="codicon codicon-close" />
+              </button>
             </div>
           )}
         </div>
