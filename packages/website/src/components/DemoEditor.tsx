@@ -140,9 +140,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const isDirty = dirtyFiles.has(activeFile);
 
-  const currentFileName = isLocalFile
-    ? (localFileName ?? "無題")
-    : (samples.find((sm) => sm.fileName === activeFile)?.displayName ?? activeFile);
+  const currentFileName = (isLocalFile && localFileName) ? localFileName : "無題";
 
   const menuDisabledKeys: string[] = [];
   if (!FILE_ACCESS) {
