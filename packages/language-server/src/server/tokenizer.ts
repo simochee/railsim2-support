@@ -135,11 +135,9 @@ export function tokenize(source: string): Token[] {
     if (ch === '"') {
       advance(); // opening "
       while (pos < source.length && peek() !== '"') {
-        if (peek() === "\\") {
+        if (peek() === "\\" && pos + 1 < source.length && source[pos + 1] === '"') {
           advance(); // backslash
-          if (pos < source.length) {
-            advance(); // escaped char
-          }
+          advance(); // escaped quote
         } else {
           advance();
         }

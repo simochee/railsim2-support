@@ -63,7 +63,7 @@
       "patterns": [
         {
           "name": "constant.character.escape.rs2",
-          "match": "\\\\."
+          "match": "\\\\[\"\\r\\n]"
         }
       ]
     },

@@ -88,10 +88,10 @@ describe("tokenizer", () => {
       ]);
     });
 
-    it("tokenizes a string with escape sequences", () => {
-      const tokens = tokenize('"line\\nbreak"');
+    it("tokenizes a string with backslash (not an escape)", () => {
+      const tokens = tokenize('"..\\\\Aizentranza01\\\\Icon.png"');
       expect(typesAndValues(tokens)).toEqual([
-        ["string", '"line\\nbreak"'],
+        ["string", '"..\\\\Aizentranza01\\\\Icon.png"'],
         ["eof", ""],
       ]);
     });
