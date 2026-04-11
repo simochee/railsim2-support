@@ -3,7 +3,7 @@
  */
 import type { SymbolTable } from "./symbol-table.js";
 import type { ResolvedObject, ResolvedProperty, ResolvedChild } from "./symbol-table.js";
-import { schemaOverrides, additionalSchemas, fileSchemaOverrides } from "../schema-overrides.js";
+import { schemaOverrides, additionalSchemas, pluginTypeSchemaOverrides } from "../schema-overrides.js";
 
 // ── Type conversion ──────────────────────────────────────────────────
 
@@ -168,11 +168,19 @@ interface RootEntry {
   schemaKey?: string;
 }
 
-function buildFileSchemas(table: SymbolTable): Record<string, RootEntry[]> {
+/** ファイル名 (e.g. "Rail2.txt") から PluginType (e.g. "Rail") を導出する */
+function fileNameToPluginType(fileName: string): string | undefined {
+  const match = fileName.match(/^(\w+?)2\.txt$/i);
+  return match ? match[1] : undefined;
+}
+
+function buildPluginTypeSchemas(table: SymbolTable): Record<string, RootEntry[]> {
   const result: Record<string, RootEntry[]> = {};
 
   for (const sym of table.fileSymbols) {
     if (!sym.fileName) continue;
+    const pluginType = fileNameToPluginType(sym.fileName);
+    if (!pluginType) continue;
 
     const entries: RootEntry[] = [];
 
@@ -186,7 +194,7 @@ function buildFileSchemas(table: SymbolTable): Record<string, RootEntry[]> {
     // Walk the file symbol's rules to collect root objects
     collectFileRootObjects(sym.rules, entries, table);
 
-    result[sym.fileName] = entries;
+    result[pluginType] = entries;
   }
 
   return result;
@@ -350,10 +358,27 @@ export function emitSemanticSchema(table: SymbolTable): string {
   // Apply overrides
   applyOverrides(allObjects);
 
-  // Build file schemas and apply overrides
-  const fileSchemas = buildFileSchemas(table);
-  for (const [fileName, entries] of Object.entries(fileSchemaOverrides)) {
-    fileSchemas[fileName] = entries;
+  // Build plugin type schemas and apply overrides
+  const pluginTypeSchemas = buildPluginTypeSchemas(table);
+  for (const [pluginType, entries] of Object.entries(pluginTypeSchemaOverrides)) {
+    pluginTypeSchemas[pluginType] = entries;
+  }
+
+  // Build fileName → pluginType mapping from known file symbols
+  const fileNameMap: Record<string, string> = {};
+  for (const sym of table.fileSymbols) {
+    if (!sym.fileName) continue;
+    const pt = fileNameToPluginType(sym.fileName);
+    if (pt && pluginTypeSchemas[pt]) {
+      fileNameMap[sym.fileName] = pt;
+    }
+  }
+  // Also include overrides that may not have BNF symbols
+  for (const pluginType of Object.keys(pluginTypeSchemaOverrides)) {
+    const fn = `${pluginType}2.txt`;
+    if (!fileNameMap[fn]) {
+      fileNameMap[fn] = pluginType;
+    }
   }
 
   // Generate code
@@ -365,7 +390,7 @@ export function emitSemanticSchema(table: SymbolTable): string {
   lines.push(" * DO NOT EDIT — regenerate with: pnpm generate");
   lines.push(" */");
   lines.push(
-    'import type { SemanticSchema, FileSchema, RootObjectEntry } from "./schemaTypes.js";',
+    'import type { SemanticSchema, PluginTypeSchema, RootObjectEntry } from "./schemaTypes.js";',
   );
   lines.push("");
 
@@ -382,13 +407,13 @@ export function emitSemanticSchema(table: SymbolTable): string {
   lines.push("};");
   lines.push("");
 
-  // fileSchemas
-  lines.push("export const fileSchemas: FileSchema = {");
-  const fileEntries = Object.entries(fileSchemas);
-  for (let i = 0; i < fileEntries.length; i++) {
-    const [fileName, entries] = fileEntries[i];
-    const comma = i < fileEntries.length - 1 ? "," : "";
-    lines.push(`${indent(1)}"${fileName}": [`);
+  // pluginTypeSchemas
+  lines.push("export const pluginTypeSchemas: PluginTypeSchema = {");
+  const ptEntries = Object.entries(pluginTypeSchemas);
+  for (let i = 0; i < ptEntries.length; i++) {
+    const [pluginType, entries] = ptEntries[i];
+    const comma = i < ptEntries.length - 1 ? "," : "";
+    lines.push(`${indent(1)}${pluginType}: [`);
     for (let j = 0; j < entries.length; j++) {
       const entry = entries[j];
       const entryComma = j < entries.length - 1 ? "," : "";
@@ -404,9 +429,29 @@ export function emitSemanticSchema(table: SymbolTable): string {
   lines.push("};");
   lines.push("");
 
-  // getFileSchema
+  // fileNamePluginTypeMap
+  lines.push("export const fileNamePluginTypeMap: Record<string, string> = {");
+  const mapEntries = Object.entries(fileNameMap);
+  for (let i = 0; i < mapEntries.length; i++) {
+    const [fn, pt] = mapEntries[i];
+    const comma = i < mapEntries.length - 1 ? "," : "";
+    lines.push(`${indent(1)}"${fn}": "${pt}"${comma}`);
+  }
+  lines.push("};");
+  lines.push("");
+
+  // getPluginTypeSchema
+  lines.push(
+    "export function getPluginTypeSchema(pluginType: string): RootObjectEntry[] | undefined {",
+  );
+  lines.push(`${indent(1)}return pluginTypeSchemas[pluginType];`);
+  lines.push("}");
+  lines.push("");
+
+  // getFileSchema (convenience: fileName → pluginType → schema)
   lines.push("export function getFileSchema(fileName: string): RootObjectEntry[] | undefined {");
-  lines.push(`${indent(1)}return fileSchemas[fileName];`);
+  lines.push(`${indent(1)}const pluginType = fileNamePluginTypeMap[fileName];`);
+  lines.push(`${indent(1)}return pluginType ? pluginTypeSchemas[pluginType] : undefined;`);
   lines.push("}");
   lines.push("");
 

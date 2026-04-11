@@ -1,9 +1,15 @@
 import { CompletionItem, CompletionItemKind, InsertTextFormat } from "vscode-languageserver";
 import type { Token, Position } from "../shared/tokens.js";
 import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast.js";
-import type { PropertySchema } from "../schema/schemaTypes.js";
-import { semanticSchema, getFileSchema } from "../schema/semantic.generated.js";
+import type { PropertySchema, RootObjectEntry } from "../schema/schemaTypes.js";
+import {
+  semanticSchema,
+  getPluginTypeSchema,
+  getFileSchema,
+  fileNamePluginTypeMap,
+} from "../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
+import { extractPluginType } from "../schema/pluginType.js";
 import type { SwitchIndex } from "./switchSymbols.js";
 import { SYSTEM_SWITCHES, getSwitchEntries } from "./switchSymbols.js";
 
@@ -12,7 +18,7 @@ import { SYSTEM_SWITCHES, getSwitchEntries } from "./switchSymbols.js";
 // ---------------------------------------------------------------------------
 
 export type CompletionContext =
-  | { type: "root"; fileName?: string }
+  | { type: "root"; fileName?: string; pluginType?: string }
   | {
       type: "objectBody";
       objectName: string;
@@ -112,15 +118,13 @@ export function findContext(
     }
   }
 
-  // 3. Build root schemaKey map for file-context-dependent resolution
+  // 3. Build root schemaKey map for PluginType-context-dependent resolution
   const rootSchemaKeyMap = new Map<string, string>();
-  if (fileName) {
-    const rootEntries = getFileSchema(fileName);
-    if (rootEntries) {
-      for (const entry of rootEntries) {
-        if (entry.schemaKey) {
-          rootSchemaKeyMap.set(entry.name, entry.schemaKey);
-        }
+  const rootEntries = resolveRootEntries(file, fileName);
+  if (rootEntries) {
+    for (const entry of rootEntries) {
+      if (entry.schemaKey) {
+        rootSchemaKeyMap.set(entry.name, entry.schemaKey);
       }
     }
   }
@@ -144,7 +148,11 @@ export function findContext(
     };
   }
 
-  return { type: "root", fileName };
+  const rawPluginType = extractPluginType(file);
+  const pluginType = rawPluginType && getPluginTypeSchema(rawPluginType)
+    ? rawPluginType
+    : (fileName ? fileNamePluginTypeMap[fileName] : undefined);
+  return { type: "root", fileName, pluginType };
 }
 
 interface ObjectSearchResult {
@@ -257,6 +265,22 @@ function rangeContains(range: { start: Position; end: Position }, pos: Position)
   return posLE(range.start, pos) && posLE(pos, range.end);
 }
 
+/**
+ * PluginType (AST 優先) またはファイル名ヒントからルートエントリを解決する。
+ * PluginType が不正値の場合はファイル名ヒントにフォールバックする。
+ */
+function resolveRootEntries(file: FileNode, fileName?: string): RootObjectEntry[] | undefined {
+  const pluginType = extractPluginType(file);
+  if (pluginType) {
+    const schema = getPluginTypeSchema(pluginType);
+    if (schema) return schema;
+  }
+  if (fileName) {
+    return getFileSchema(fileName);
+  }
+  return undefined;
+}
+
 // ---------------------------------------------------------------------------
 // getCompletions
 // ---------------------------------------------------------------------------
@@ -273,7 +297,7 @@ export function getCompletions(
   if (ctx.type === "none") return [];
 
   if (ctx.type === "root") {
-    return buildRootCompletions(file, ctx.fileName);
+    return buildRootCompletions(file, ctx.fileName, ctx.pluginType);
   }
 
   if (ctx.type === "switchRef") {
@@ -291,9 +315,12 @@ export function getCompletions(
 // Root completions
 // ---------------------------------------------------------------------------
 
-function buildRootCompletions(file: FileNode, fileName?: string): CompletionItem[] {
-  if (!fileName) return [];
-  const rootEntries = getFileSchema(fileName);
+function buildRootCompletions(file: FileNode, fileName?: string, pluginType?: string): CompletionItem[] {
+  const rootEntries = pluginType
+    ? getPluginTypeSchema(pluginType)
+    : fileName
+      ? getFileSchema(fileName)
+      : undefined;
   if (!rootEntries) return [];
 
   // Count existing root objects

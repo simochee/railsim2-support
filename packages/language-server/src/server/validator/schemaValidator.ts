@@ -8,22 +8,26 @@ import type {
 } from "../../shared/ast.js";
 import type { Diagnostic } from "../../shared/diagnostics.js";
 import type { ObjectSchema, PropertySchema } from "../../schema/schemaTypes.js";
-import { semanticSchema, getFileSchema } from "../../schema/semantic.generated.js";
+import { semanticSchema, getPluginTypeSchema } from "../../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../../schema/schemaUtils.js";
+import { extractPluginType } from "../../schema/pluginType.js";
 
 /**
- * AST + スキーマ + ファイル名から意味レベルのエラーを検出する。
- * fileName を省略するとルート検証をスキップする（後方互換）。
+ * AST + スキーマから意味レベルのエラーを検出する。
+ * PluginHeader > PluginType の値を元にルート検証を行う。
+ * PluginType が取得できない場合はルート検証をスキップする。
  */
-export function validateSchema(file: FileNode, fileName?: string): Diagnostic[] {
+export function validateSchema(file: FileNode): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
 
-  // ルート schemaKey マップを構築 (ファイルコンテキスト依存の解決用)
+  const pluginType = extractPluginType(file);
+
+  // ルート schemaKey マップを構築 (PluginType コンテキスト依存の解決用)
   const rootSchemaKeyMap = new Map<string, string>();
-  if (fileName) {
-    validateRoot(file, fileName, diagnostics);
-    const rootEntries = getFileSchema(fileName);
+  if (pluginType) {
+    const rootEntries = getPluginTypeSchema(pluginType);
     if (rootEntries) {
+      validateRoot(file, pluginType, rootEntries, diagnostics);
       for (const entry of rootEntries) {
         if (entry.schemaKey) {
           rootSchemaKeyMap.set(entry.name, entry.schemaKey);
@@ -35,7 +39,7 @@ export function validateSchema(file: FileNode, fileName?: string): Diagnostic[] 
   // ── ボディ走査 ──
   for (const node of file.body) {
     if (node.type === "object" && rootSchemaKeyMap.has(node.name)) {
-      // ファイルコンテキスト依存の schemaKey で走査
+      // PluginType コンテキスト依存の schemaKey で走査
       const schemaKey = rootSchemaKeyMap.get(node.name)!;
       const schema = semanticSchema[schemaKey];
       if (schema) {
@@ -54,10 +58,12 @@ export function validateSchema(file: FileNode, fileName?: string): Diagnostic[] 
 // ルート検証
 // ---------------------------------------------------------------------------
 
-function validateRoot(file: FileNode, fileName: string, diagnostics: Diagnostic[]): void {
-  const rootEntries = getFileSchema(fileName);
-  if (!rootEntries) return;
-
+function validateRoot(
+  file: FileNode,
+  pluginType: string,
+  rootEntries: import("../../schema/schemaTypes.js").RootObjectEntry[],
+  diagnostics: Diagnostic[],
+): void {
   const allowedNames = new Set(rootEntries.map((e) => e.name));
   const rootCounts = new Map<string, number>();
 
@@ -65,7 +71,7 @@ function validateRoot(file: FileNode, fileName: string, diagnostics: Diagnostic[
     if (node.type !== "object") continue; // If / ApplySwitch はスキップ
     if (!allowedNames.has(node.name)) {
       diagnostics.push({
-        message: `'${node.name}' is not allowed as root object in '${fileName}'`,
+        message: `'${node.name}' is not allowed as root object for PluginType '${pluginType}'`,
         range: node.nameRange,
         severity: "error",
       });
@@ -77,14 +83,14 @@ function validateRoot(file: FileNode, fileName: string, diagnostics: Diagnostic[
     const count = rootCounts.get(entry.name) ?? 0;
     if (entry.required && count === 0) {
       diagnostics.push({
-        message: `Required root object '${entry.name}' is missing in '${fileName}'`,
+        message: `Required root object '${entry.name}' is missing for PluginType '${pluginType}'`,
         range: file.range,
         severity: "warning",
       });
     }
     if (!entry.multiple && count > 1) {
       diagnostics.push({
-        message: `Duplicate root object '${entry.name}' in '${fileName}'`,
+        message: `Duplicate root object '${entry.name}' for PluginType '${pluginType}'`,
         range: file.range,
         severity: "error",
       });

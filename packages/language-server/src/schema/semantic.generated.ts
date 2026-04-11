@@ -2,7 +2,7 @@
  * Auto-generated semantic schema.
  * DO NOT EDIT — regenerate with: pnpm generate
  */
-import type { SemanticSchema, FileSchema, RootObjectEntry } from "./schemaTypes.js";
+import type { SemanticSchema, PluginTypeSchema, RootObjectEntry } from "./schemaTypes.js";
 
 export const semanticSchema: SemanticSchema = {
   EnvInfo: {
@@ -3263,26 +3263,26 @@ export const semanticSchema: SemanticSchema = {
   }
 };
 
-export const fileSchemas: FileSchema = {
-  "Env2.txt": [
+export const pluginTypeSchemas: PluginTypeSchema = {
+  Env: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "EnvInfo", required: true, multiple: false },
     { name: "Landscape", required: false, multiple: true },
     { name: "Sun", required: false, multiple: false },
     { name: "Moon", required: false, multiple: false }
   ],
-  "Girder2.txt": [
+  Girder: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "GirderInfo", required: true, multiple: false },
     { name: "Profile", required: false, multiple: true }
   ],
-  "Line2.txt": [
+  Line: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "LineInfo", required: true, multiple: false },
     { name: "Wireframe", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true }
   ],
-  "Pier2.txt": [
+  Pier: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PierInfo", required: true, multiple: false },
     { name: "Base", required: false, multiple: false },
@@ -3291,12 +3291,12 @@ export const fileSchemas: FileSchema = {
     { name: "Profile", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true }
   ],
-  "Pole2.txt": [
+  Pole: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
     { name: "Model", required: false, multiple: true, schemaKey: "Model:Pole" }
   ],
-  "Rail2.txt": [
+  Rail: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "RailInfo", required: true, multiple: false },
     { name: "SoundInfo", required: false, multiple: false },
@@ -3304,7 +3304,7 @@ export const fileSchemas: FileSchema = {
     { name: "Wireframe", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true }
   ],
-  "Skin2.txt": [
+  Skin: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "NormalCursor", required: false, multiple: false },
     { name: "ResizeCursor1", required: false, multiple: false },
@@ -3321,7 +3321,7 @@ export const fileSchemas: FileSchema = {
     { name: "Model", required: false, multiple: false },
     { name: "Sound", required: false, multiple: false }
   ],
-  "Station2.txt": [
+  Station: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StationInfo", required: true, multiple: false },
     { name: "Platform", required: false, multiple: true },
@@ -3329,24 +3329,24 @@ export const fileSchemas: FileSchema = {
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false }
   ],
-  "Struct2.txt": [
+  Struct: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StructInfo", required: true, multiple: false },
     { name: "DefineSwitch", required: false, multiple: true },
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false }
   ],
-  "Surface2.txt": [
+  Surface: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "SurfaceInfo", required: true, multiple: false },
     { name: "PrimaryAssembly", required: false, multiple: false }
   ],
-  "Tie2.txt": [
+  Tie: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TieInfo", required: true, multiple: false },
     { name: "Profile", required: false, multiple: true }
   ],
-  "Train2.txt": [
+  Train: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TrainInfo", required: true, multiple: false },
     { name: "DefineSwitch", required: false, multiple: true },
@@ -3355,6 +3355,26 @@ export const fileSchemas: FileSchema = {
   ]
 };
 
+export const fileNamePluginTypeMap: Record<string, string> = {
+  "Env2.txt": "Env",
+  "Girder2.txt": "Girder",
+  "Line2.txt": "Line",
+  "Pier2.txt": "Pier",
+  "Pole2.txt": "Pole",
+  "Rail2.txt": "Rail",
+  "Skin2.txt": "Skin",
+  "Station2.txt": "Station",
+  "Struct2.txt": "Struct",
+  "Surface2.txt": "Surface",
+  "Tie2.txt": "Tie",
+  "Train2.txt": "Train"
+};
+
+export function getPluginTypeSchema(pluginType: string): RootObjectEntry[] | undefined {
+  return pluginTypeSchemas[pluginType];
+}
+
 export function getFileSchema(fileName: string): RootObjectEntry[] | undefined {
-  return fileSchemas[fileName];
+  const pluginType = fileNamePluginTypeMap[fileName];
+  return pluginType ? pluginTypeSchemas[pluginType] : undefined;
 }

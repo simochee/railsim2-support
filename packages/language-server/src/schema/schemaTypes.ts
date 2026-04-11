@@ -41,5 +41,8 @@ export interface RootObjectEntry {
   schemaKey?: string; // ファイルコンテキスト依存の場合の lookup key
 }
 
-/** ファイル種別ごとのトップレベル構造 */
-export type FileSchema = Record<string, RootObjectEntry[]>;
+/** PluginType ごとのトップレベル構造 */
+export type PluginTypeSchema = Record<string, RootObjectEntry[]>;
+
+/** @deprecated FileSchema は PluginTypeSchema に置き換え */
+export type FileSchema = PluginTypeSchema;

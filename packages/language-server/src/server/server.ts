@@ -50,7 +50,7 @@ export function startServer(connection: Connection): void {
     const { file, diagnostics: parseDiags } = parse(text);
     const tokens = tokenize(text);
     const keywordDiags = validateUnknownKeywords(file);
-    const schemaDiags = validateSchema(file, fileName);
+    const schemaDiags = validateSchema(file);
     const switchIndex = buildSwitchIndex(file);
     const switchDiags = validateSwitches(file, switchIndex);
 
@@ -164,10 +164,10 @@ export function startServer(connection: Connection): void {
 // Helpers (exported for tests)
 // ---------------------------------------------------------------------------
 
-export function validateTextDocument(text: string, fileName?: string): Diagnostic[] {
+export function validateTextDocument(text: string): Diagnostic[] {
   const { file, diagnostics: parseDiags } = parse(text);
   const keywordDiags = validateUnknownKeywords(file);
-  const schemaDiags = validateSchema(file, fileName);
+  const schemaDiags = validateSchema(file);
   const switchIndex = buildSwitchIndex(file);
   const switchDiags = validateSwitches(file, switchIndex);
   return [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags];

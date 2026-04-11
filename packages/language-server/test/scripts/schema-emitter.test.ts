@@ -21,27 +21,27 @@ describe("emitSemanticSchema", () => {
     expect(output).toContain("export const semanticSchema");
   });
 
-  it("contains export const fileSchemas", () => {
-    expect(output).toContain("export const fileSchemas");
+  it("contains export const pluginTypeSchemas", () => {
+    expect(output).toContain("export const pluginTypeSchemas");
   });
 
-  it("contains all 12 file types in fileSchemas", () => {
-    const expectedFiles = [
-      "Rail2.txt",
-      "Tie2.txt",
-      "Girder2.txt",
-      "Pier2.txt",
-      "Line2.txt",
-      "Pole2.txt",
-      "Train2.txt",
-      "Station2.txt",
-      "Struct2.txt",
-      "Surface2.txt",
-      "Env2.txt",
-      "Skin2.txt",
+  it("contains all 12 plugin types in pluginTypeSchemas", () => {
+    const expectedTypes = [
+      "Rail",
+      "Tie",
+      "Girder",
+      "Pier",
+      "Line",
+      "Pole",
+      "Train",
+      "Station",
+      "Struct",
+      "Surface",
+      "Env",
+      "Skin",
     ];
-    for (const file of expectedFiles) {
-      expect(output).toContain(`"${file}"`);
+    for (const pt of expectedTypes) {
+      expect(output).toContain(`${pt}: [`);
     }
   });
 
@@ -75,12 +75,12 @@ describe("emitSemanticSchema", () => {
     expect(output).toMatch(/enumValues:\s*\[/);
   });
 
-  it("PluginHeader is required and not multiple in every file schema", () => {
-    // PluginHeader should appear in file schemas as required: true, multiple: false
+  it("PluginHeader is required and not multiple in every plugin type schema", () => {
+    // PluginHeader should appear in plugin type schemas as required: true, multiple: false
     const headerMatches = output.match(
       /name:\s*"PluginHeader",\s*required:\s*true,\s*multiple:\s*false/g,
     );
-    // Should appear 12 times (once per file)
+    // Should appear 12 times (once per plugin type)
     expect(headerMatches).not.toBeNull();
     expect(headerMatches!.length).toBe(12);
   });

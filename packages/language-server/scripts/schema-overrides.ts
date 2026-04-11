@@ -426,8 +426,8 @@ export const additionalSchemas: Record<string, AdditionalSchema> = {
 // File schema overrides — ファイルごとのルートオブジェクト定義を上書き
 // ---------------------------------------------------------------------------
 
-export const fileSchemaOverrides: Record<string, FileSchemaEntry[]> = {
-  "Rail2.txt": [
+export const pluginTypeSchemaOverrides: Record<string, FileSchemaEntry[]> = {
+  Rail: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "RailInfo", required: true, multiple: false },
     { name: "SoundInfo", required: false, multiple: false },
@@ -435,17 +435,17 @@ export const fileSchemaOverrides: Record<string, FileSchemaEntry[]> = {
     { name: "Wireframe", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true },
   ],
-  "Tie2.txt": [
+  Tie: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TieInfo", required: true, multiple: false },
     { name: "Profile", required: false, multiple: true },
   ],
-  "Girder2.txt": [
+  Girder: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "GirderInfo", required: true, multiple: false },
     { name: "Profile", required: false, multiple: true },
   ],
-  "Pier2.txt": [
+  Pier: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PierInfo", required: true, multiple: false },
     { name: "Base", required: false, multiple: false },
@@ -454,25 +454,25 @@ export const fileSchemaOverrides: Record<string, FileSchemaEntry[]> = {
     { name: "Profile", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true },
   ],
-  "Line2.txt": [
+  Line: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "LineInfo", required: true, multiple: false },
     { name: "Wireframe", required: false, multiple: true },
     { name: "Interval", required: false, multiple: true },
   ],
-  "Pole2.txt": [
+  Pole: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "PoleInfo", required: true, multiple: false },
     { name: "Model", required: false, multiple: true, schemaKey: "Model:Pole" },
   ],
-  "Train2.txt": [
+  Train: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "TrainInfo", required: true, multiple: false },
     { name: "DefineSwitch", required: false, multiple: true },
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false },
   ],
-  "Station2.txt": [
+  Station: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StationInfo", required: true, multiple: false },
     { name: "Platform", required: false, multiple: true },
@@ -480,26 +480,26 @@ export const fileSchemaOverrides: Record<string, FileSchemaEntry[]> = {
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false },
   ],
-  "Struct2.txt": [
+  Struct: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "StructInfo", required: true, multiple: false },
     { name: "DefineSwitch", required: false, multiple: true },
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false },
   ],
-  "Surface2.txt": [
+  Surface: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "SurfaceInfo", required: true, multiple: false },
     { name: "PrimaryAssembly", required: false, multiple: false },
   ],
-  "Env2.txt": [
+  Env: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "EnvInfo", required: true, multiple: false },
     { name: "Landscape", required: false, multiple: true },
     { name: "Sun", required: false, multiple: false },
     { name: "Moon", required: false, multiple: false },
   ],
-  "Skin2.txt": [
+  Skin: [
     { name: "PluginHeader", required: true, multiple: false },
     { name: "NormalCursor", required: false, multiple: false },
     { name: "ResizeCursor1", required: false, multiple: false },

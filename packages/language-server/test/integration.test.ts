@@ -339,7 +339,7 @@ RailInfo {
   Gauge = "not a number";
 }
 SoundInfo {}`;
-    const diagnostics = validateTextDocument(input, "Rail2.txt");
+    const diagnostics = validateTextDocument(input);
     expect(
       diagnostics.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
     ).toBe(true);
@@ -368,15 +368,15 @@ PluginHeader {
 RailInfo { Gauge = 1.0; }
 SoundInfo {}
 TrainInfo { Gauge = 1.0; }`;
-    const diagnostics = validateTextDocument(input, "Rail2.txt");
+    const diagnostics = validateTextDocument(input);
     expect(
       diagnostics.some(
-        (d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"),
+        (d) => d.message.includes("not allowed as root object for PluginType") && d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
   });
 
-  it("should skip root validation without fileName (backward compat)", () => {
+  it("should skip root validation without PluginType", () => {
     const input = `
 RailInfo { Gauge = 1.0; }
 TrainInfo { Gauge = 1.0; }`;

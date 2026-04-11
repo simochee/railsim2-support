@@ -3,9 +3,9 @@ import { parse } from "../src/server/parser.js";
 import { validateSchema } from "../src/server/validator/schemaValidator.js";
 import type { Diagnostic } from "../src/shared/diagnostics.js";
 
-function validate(source: string, fileName?: string): Diagnostic[] {
+function validate(source: string): Diagnostic[] {
   const { file } = parse(source);
-  return validateSchema(file, fileName);
+  return validateSchema(file);
 }
 
 function msgs(diags: Diagnostic[]): string[] {
@@ -37,7 +37,7 @@ SoundInfo {
   JointInterval = 25.0;
 }
 `;
-    expect(validate(src, "Rail2.txt")).toEqual([]);
+    expect(validate(src)).toEqual([]);
   });
 
   // ================================================================
@@ -175,10 +175,10 @@ TrainInfo {
   MaxDeceleration = 3.0;
 }
 `;
-    const diags = validate(src, "Rail2.txt");
+    const diags = validate(src);
     expect(
       diags.some(
-        (d) => d.message.includes("not allowed as root object") && d.message.includes("TrainInfo"),
+        (d) => d.message.includes("not allowed as root object for PluginType") && d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
   });
@@ -193,7 +193,7 @@ PluginHeader {
   Description = "desc";
 }
 `;
-    const diags = validate(src, "Rail2.txt");
+    const diags = validate(src);
     expect(
       diags.some(
         (d) => d.message.includes("Required root object 'RailInfo'") && d.severity === "warning",
@@ -229,7 +229,7 @@ PluginHeader {
   Description = "desc";
 }
 `;
-    const diags = validate(src, "Rail2.txt");
+    const diags = validate(src);
     expect(diags.some((d) => d.message.includes("Duplicate root object 'PluginHeader'"))).toBe(
       true,
     );
@@ -293,7 +293,7 @@ Wireframe {
   // ================================================================
   // fileName 省略時はルート検証スキップ
   // ================================================================
-  it("fileName 省略時はルート検証をスキップ", () => {
+  it("PluginType 未指定時はルート検証をスキップ", () => {
     const src = `
 TrainInfo {
   FrontLimit = 10.0;
@@ -310,7 +310,7 @@ RailInfo {
   MaxCant = 6.0;
 }
 `;
-    // fileName なしだとルート検証なし → TrainInfo と RailInfo の混在OK
+    // PluginHeader がないのでルート検証なし → TrainInfo と RailInfo の混在OK
     const diags = validate(src);
     const rootErrors = diags.filter(
       (d) => d.message.includes("root object") || d.message.includes("Required root"),
@@ -377,7 +377,7 @@ If (1) {
   Profile {}
 }
 `;
-    const diags = validate(src, "Rail2.txt");
+    const diags = validate(src);
     // If の中の Profile はルート検証対象外
     const rootErrors = diags.filter((d) => d.message.includes("root object"));
     expect(rootErrors).toHaveLength(0);
@@ -623,7 +623,7 @@ PrimaryAssembly {
   }
 }
 `;
-    const diags = validate(src, "Train2.txt");
+    const diags = validate(src);
     const errors = diags.filter((d) => d.severity === "error");
     expect(errors).toEqual([]);
   });
@@ -648,8 +648,8 @@ RailInfo {
   Gauge = 1.0;
 }
 `;
-    const diags = validate(src, "Train2.txt");
-    const rootErrors = diags.filter((d) => d.message.includes("not allowed as root object"));
+    const diags = validate(src);
+    const rootErrors = diags.filter((d) => d.message.includes("not allowed as root object for PluginType"));
     expect(rootErrors.length).toBeGreaterThan(0);
   });
 

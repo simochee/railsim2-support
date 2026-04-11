@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { semanticSchema, fileSchemas, getFileSchema } from "../src/schema/semantic.generated.js";
+import { semanticSchema, pluginTypeSchemas, getPluginTypeSchema, getFileSchema } from "../src/schema/semantic.generated.js";
 
 describe("semanticSchema", () => {
   it("全ルートオブジェクトが定義されている", () => {
-    for (const entries of Object.values(fileSchemas)) {
+    for (const entries of Object.values(pluginTypeSchemas)) {
       for (const entry of entries) {
         expect(
           semanticSchema[entry.name],
@@ -85,31 +85,31 @@ describe("semanticSchema", () => {
   });
 });
 
-describe("fileSchemas", () => {
-  const expectedFiles = [
-    "Rail2.txt",
-    "Tie2.txt",
-    "Girder2.txt",
-    "Pier2.txt",
-    "Line2.txt",
-    "Pole2.txt",
-    "Train2.txt",
-    "Station2.txt",
-    "Struct2.txt",
-    "Surface2.txt",
-    "Env2.txt",
-    "Skin2.txt",
+describe("pluginTypeSchemas", () => {
+  const expectedPluginTypes = [
+    "Rail",
+    "Tie",
+    "Girder",
+    "Pier",
+    "Line",
+    "Pole",
+    "Train",
+    "Station",
+    "Struct",
+    "Surface",
+    "Env",
+    "Skin",
   ];
 
-  it("12ファイル分の定義が存在する", () => {
-    for (const f of expectedFiles) {
-      expect(fileSchemas[f], `${f} should be defined`).toBeDefined();
+  it("12プラグインタイプ分の定義が存在する", () => {
+    for (const pt of expectedPluginTypes) {
+      expect(pluginTypeSchemas[pt], `${pt} should be defined`).toBeDefined();
     }
-    expect(Object.keys(fileSchemas)).toHaveLength(expectedFiles.length);
+    expect(Object.keys(pluginTypeSchemas)).toHaveLength(expectedPluginTypes.length);
   });
 
-  it("Rail2.txt のルートオブジェクトが正しい", () => {
-    const rail = fileSchemas["Rail2.txt"];
+  it("Rail のルートオブジェクトが正しい", () => {
+    const rail = pluginTypeSchemas["Rail"];
     const names = rail.map((e) => e.name);
     expect(names).toContain("PluginHeader");
     expect(names).toContain("RailInfo");
@@ -120,8 +120,8 @@ describe("fileSchemas", () => {
     expect(ph.multiple).toBe(false);
   });
 
-  it("Train2.txt に PrimaryAssembly が含まれる", () => {
-    const train = fileSchemas["Train2.txt"];
+  it("Train に PrimaryAssembly が含まれる", () => {
+    const train = pluginTypeSchemas["Train"];
     const names = train.map((e) => e.name);
     expect(names).toContain("PrimaryAssembly");
     expect(names).toContain("TrainInfo");
@@ -129,12 +129,23 @@ describe("fileSchemas", () => {
   });
 });
 
-describe("getFileSchema", () => {
-  it("全12ファイルで正しい結果を返す", () => {
-    const files = Object.keys(fileSchemas);
-    for (const f of files) {
-      expect(getFileSchema(f)).toBe(fileSchemas[f]);
+describe("getPluginTypeSchema", () => {
+  it("全12プラグインタイプで正しい結果を返す", () => {
+    const types = Object.keys(pluginTypeSchemas);
+    for (const pt of types) {
+      expect(getPluginTypeSchema(pt)).toBe(pluginTypeSchemas[pt]);
     }
+  });
+
+  it("未知のプラグインタイプで undefined を返す", () => {
+    expect(getPluginTypeSchema("Unknown")).toBeUndefined();
+  });
+});
+
+describe("getFileSchema (後方互換)", () => {
+  it("ファイル名からPluginType経由でスキーマを取得できる", () => {
+    expect(getFileSchema("Rail2.txt")).toBe(pluginTypeSchemas["Rail"]);
+    expect(getFileSchema("Train2.txt")).toBe(pluginTypeSchemas["Train"]);
   });
 
   it("未知のファイル名で undefined を返す", () => {

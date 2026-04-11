@@ -228,6 +228,25 @@ describe("getCompletions", () => {
     expect(items).toHaveLength(0);
   });
 
+  it("不正な PluginType + 有効なファイル名 → ファイル名ヒントにフォールバック", () => {
+    const src = "PluginHeader {\n  PluginType = InvalidType;\n}\n";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(3, 0), "Rail2.txt");
+    const labels = items.map((i) => i.label);
+    expect(labels).toContain("RailInfo");
+    expect(labels).toContain("SoundInfo");
+  });
+
+  it("有効な PluginType → ファイル名を無視して PluginType でルート補完", () => {
+    const src = "PluginHeader {\n  PluginType = Train;\n}\n";
+    const { file, tokens } = setup(src);
+    // ファイル名は Rail2.txt だが PluginType = Train なので Train のスキーマを使う
+    const items = getCompletions(file, tokens, pos(3, 0), "Rail2.txt");
+    const labels = items.map((i) => i.label);
+    expect(labels).toContain("TrainInfo");
+    expect(labels).not.toContain("RailInfo");
+  });
+
   it("RailInfo body → properties", () => {
     const src = "RailInfo {\n  \n}";
     const { file, tokens } = setup(src);
