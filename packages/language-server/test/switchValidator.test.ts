@@ -41,7 +41,7 @@ Body {
     const diags = validateSwitches(file, index);
     expect(diags).toHaveLength(1);
     expect(diags[0].severity).toBe("warning");
-    expect(diags[0].message).toContain("未定義");
+    expect(diags[0].message).toContain("undefined switch");
   });
 
   it("should warn for undefined switches in ApplySwitch", () => {
@@ -57,7 +57,7 @@ Body {
     const diags = validateSwitches(file, index);
     expect(diags).toHaveLength(1);
     expect(diags[0].severity).toBe("warning");
-    expect(diags[0].message).toContain("未定義");
+    expect(diags[0].message).toContain("undefined switch");
   });
 
   it("should warn for duplicate DefineSwitch on all duplicate locations", () => {
@@ -72,7 +72,7 @@ Body { }
     `);
     const index = buildSwitchIndex(file);
     const diags = validateSwitches(file, index);
-    const dupDiags = diags.filter(d => d.message === 'スイッチ「ライト」が重複して定義されています');
+    const dupDiags = diags.filter(d => d.message === "Duplicate switch definition 'ライト'");
     expect(dupDiags).toHaveLength(2);
     expect(dupDiags.every(d => d.severity === "warning")).toBe(true);
   });

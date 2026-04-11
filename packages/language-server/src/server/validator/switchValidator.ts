@@ -10,7 +10,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
   for (const [name, defs] of switchIndex.duplicates) {
     for (const def of defs) {
       diagnostics.push({
-        message: `スイッチ「${name}」が重複して定義されています`,
+        message: `Duplicate switch definition '${name}'`,
         range: def.switchNameRange,
         severity: "warning",
       });
@@ -34,7 +34,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
       : expr.range;
 
     diagnostics.push({
-      message: `未定義のスイッチ「${name}」が参照されています`,
+      message: `Reference to undefined switch '${name}'`,
       range,
       severity: "warning",
     });
