@@ -29,12 +29,18 @@ const SAMPLE_PATHS: Record<string, string> = {
 
 export interface Sample {
   fileName: string;
+  displayName: string;
   content: string;
 }
 
 export function getSamples(): Sample[] {
-  return Object.entries(SAMPLE_PATHS).map(([fileName, relativePath]) => ({
-    fileName,
-    content: readShiftJIS(resolve(RAILSIM2_ROOT, relativePath)),
-  }));
+  return Object.entries(SAMPLE_PATHS).map(([fileName, relativePath]) => {
+    const parts = relativePath.split("/");
+    const pluginName = parts[1];
+    return {
+      fileName,
+      displayName: `${pluginName}/${fileName}`,
+      content: readShiftJIS(resolve(RAILSIM2_ROOT, relativePath)),
+    };
+  });
 }

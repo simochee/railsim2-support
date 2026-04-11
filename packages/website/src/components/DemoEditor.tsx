@@ -30,6 +30,7 @@ import s from "./DemoEditor.module.css";
 
 interface Sample {
   fileName: string;
+  displayName: string;
   content: string;
 }
 
@@ -388,7 +389,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                       <Item key="samples">サンプル</Item>
                       <Menu onAction={handleMenuAction}>
                         {unopenedSamples.map((sample) => (
-                          <Item key={sample.fileName}>{sample.fileName}</Item>
+                          <Item key={sample.fileName}>{sample.displayName}</Item>
                         ))}
                       </Menu>
                     </SubmenuTrigger>
@@ -424,13 +425,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(key); }}
                 >
                   <span className="codicon codicon-file" />
-                  {sample.fileName}
+                  {sample.displayName}
                 </span>
                 {canClose && (
                   <button
                     type="button"
                     className={s.tabClose}
-                    aria-label={`Close ${sample.fileName}`}
+                    aria-label={`Close ${sample.displayName}`}
                     onClick={() => handleCloseTab(key)}
                   >
                     <span className="codicon codicon-close" />
