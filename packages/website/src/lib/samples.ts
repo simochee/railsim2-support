@@ -1,16 +1,5 @@
-import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import iconv from "iconv-lite";
-
-const REPO_ROOT = resolve(process.cwd(), "../..");
-const RAILSIM2_ROOT = resolve(
-  REPO_ROOT,
-  "vendor/railsim2/Distribution/jp/RailSim2",
-);
-
-function readShiftJIS(filePath: string): string {
-  return iconv.decode(readFileSync(filePath), "shift_jis");
-}
+import { RAILSIM2_ROOT, readShiftJIS } from "./build-utils.js";
 
 const SAMPLE_PATHS: Record<string, string> = {
   "Rail2.txt": "Rail/Default_JR_Narrow/Rail2.txt",

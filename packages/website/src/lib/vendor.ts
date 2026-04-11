@@ -8,20 +8,11 @@
  * Licensed under LGPL v2.1 — see vendor/railsim2/Distribution/jp/RailSim2/COPYING.txt
  */
 
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
-import iconv from "iconv-lite";
+import { RAILSIM2_ROOT, readShiftJIS } from "./build-utils.js";
 
-const REPO_ROOT = resolve(process.cwd(), "../..");
-const RAILSIM2_ROOT = resolve(
-  REPO_ROOT,
-  "vendor/railsim2/Distribution/jp/RailSim2",
-);
 const HELP_SRC = resolve(RAILSIM2_ROOT, "Help");
-
-function readShiftJIS(filePath: string): string {
-  return iconv.decode(readFileSync(filePath), "shift_jis");
-}
 
 function extractTitle(html: string): string {
   const match = html.match(/<title>(.*?)<\/title>/i);
