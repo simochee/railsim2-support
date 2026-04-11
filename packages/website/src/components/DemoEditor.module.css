@@ -303,6 +303,7 @@
 .menuSubTrigger {
   composes: menuItem;
   justify-content: space-between;
+  padding-right: 12px;
 }
 
 .menuSubTrigger[data-state="open"] {
