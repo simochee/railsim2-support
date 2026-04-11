@@ -10,6 +10,7 @@ import {
   Dialog,
   DialogTrigger,
   Divider,
+  Flex,
   Heading,
   Item,
   Menu,
@@ -18,6 +19,7 @@ import {
   Provider,
   Section,
   SubmenuTrigger,
+  Switch,
   Tooltip,
   TooltipTrigger,
 } from "@adobe/react-spectrum";
@@ -51,17 +53,22 @@ const DEFAULT_SAMPLE = "Train2.txt";
 interface EditorSettings {
   insertSpaces: boolean;
   tabSize: number;
+  fullWidth: boolean;
 }
 
 function loadSettings(): EditorSettings {
-  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4 };
+  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4, fullWidth: false };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return defaults;
     const parsed = JSON.parse(raw);
     if (typeof parsed.insertSpaces !== "boolean") return defaults;
     if (typeof parsed.tabSize !== "number" || !VALID_TAB_SIZES.includes(parsed.tabSize)) return defaults;
-    return { insertSpaces: parsed.insertSpaces, tabSize: parsed.tabSize };
+    return {
+      insertSpaces: parsed.insertSpaces,
+      tabSize: parsed.tabSize,
+      fullWidth: typeof parsed.fullWidth === "boolean" ? parsed.fullWidth : defaults.fullWidth,
+    };
   } catch {
     return defaults;
   }
@@ -89,6 +96,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [localFileName, setLocalFileName] = useState<string | null>(null);
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
+  const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -206,11 +214,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
-  const updateSettings = useCallback((newInsertSpaces: boolean, newTabSize: number) => {
+  const updateSettings = useCallback((patch: Partial<EditorSettings>) => {
+    const newInsertSpaces = patch.insertSpaces ?? insertSpaces;
+    const newTabSize = patch.tabSize ?? tabSize;
+    const newFullWidth = patch.fullWidth ?? fullWidth;
     setInsertSpaces(newInsertSpaces);
     setTabSize(newTabSize);
-    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize };
-    formatOptionsRef.current = settings;
+    setFullWidth(newFullWidth);
+    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize, fullWidth: newFullWidth };
+    formatOptionsRef.current = { insertSpaces: newInsertSpaces, tabSize: newTabSize };
     saveSettings(settings);
     const ed = editorRef.current;
     if (ed) {
@@ -219,7 +231,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     for (const model of modelsRef.current.values()) {
       model.updateOptions({ insertSpaces: newInsertSpaces, tabSize: newTabSize });
     }
-  }, []);
+  }, [insertSpaces, tabSize, fullWidth]);
 
   const handleTabClick = useCallback(
     (key: string) => {
@@ -330,30 +342,33 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, []);
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
-  const indentLabel = insertSpaces ? `Spaces: ${tabSize}` : `Tab Size: ${tabSize}`;
+  const indentLabel = insertSpaces ? `スペース: ${tabSize}` : `タブサイズ: ${tabSize}`;
   const canClose = visibleTabs.length > 1;
 
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
+      <div className={fullWidth ? s.fullWidth : undefined}>
       <div className={s.header}>
         <DialogTrigger type="popover" placement="bottom start">
           <ActionButton>{indentLabel}</ActionButton>
           <Dialog>
-            <Heading>Indentation</Heading>
+            <Heading>インデント</Heading>
             <Divider />
             <Content>
               <Picker
-                label="Indent"
+                label="インデント"
+                labelPosition="side"
                 selectedKey={insertSpaces ? "spaces" : "tab"}
-                onSelectionChange={(key) => updateSettings(key === "spaces", tabSize)}
+                onSelectionChange={(key) => updateSettings({ insertSpaces: key === "spaces" })}
               >
-                <Item key="tab">Tab</Item>
-                <Item key="spaces">Spaces</Item>
+                <Item key="tab">タブ</Item>
+                <Item key="spaces">スペース</Item>
               </Picker>
               <Picker
-                label="Size"
+                label="サイズ"
+                labelPosition="side"
                 selectedKey={String(tabSize)}
-                onSelectionChange={(key) => updateSettings(insertSpaces, Number(key))}
+                onSelectionChange={(key) => updateSettings({ tabSize: Number(key) })}
               >
                 <Item key="1">1</Item>
                 <Item key="2">2</Item>
@@ -365,7 +380,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         </DialogTrigger>
         <ActionButton onPress={handleFormat}>
           <span className="codicon codicon-list-flat" />
-          Format
+          フォーマット
         </ActionButton>
       </div>
       <div className={s.tabsWrapper}>
@@ -454,29 +469,66 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         <div className={s.tabsActions}>
           {FILE_ACCESS && isLocalFile && (
             <TooltipTrigger placement="bottom">
-              <ActionButton isQuiet onPress={handleSave} aria-label="Save">
+              <ActionButton isQuiet onPress={handleSave} aria-label="保存">
                 <span className="codicon codicon-save" />
               </ActionButton>
-              <Tooltip>Save</Tooltip>
+              <Tooltip>保存</Tooltip>
             </TooltipTrigger>
           )}
           <TooltipTrigger placement="bottom">
-            <ActionButton isQuiet onPress={handleFormat} aria-label="Format">
+            <ActionButton isQuiet onPress={handleFormat} aria-label="フォーマット">
               <span className="codicon codicon-list-flat" />
             </ActionButton>
-            <Tooltip>Format</Tooltip>
+            <Tooltip>フォーマット</Tooltip>
           </TooltipTrigger>
           <DialogTrigger isDismissable>
             <TooltipTrigger placement="bottom">
-              <ActionButton isQuiet aria-label="Settings">
+              <ActionButton isQuiet aria-label="エディター設定">
                 <span className="codicon codicon-settings-gear" />
               </ActionButton>
-              <Tooltip>Settings</Tooltip>
+              <Tooltip>エディター設定</Tooltip>
             </TooltipTrigger>
-            <Dialog>
-              <Heading>Settings</Heading>
+            <Dialog size="S">
+              <Heading>設定</Heading>
               <Divider />
-              <Content>Coming soon.</Content>
+              <Content>
+                <Flex direction="column" gap="size-200">
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <span>インデント</span>
+                    <Picker
+                      aria-label="インデント"
+                      selectedKey={insertSpaces ? "spaces" : "tab"}
+                      onSelectionChange={(key) => updateSettings({ insertSpaces: key === "spaces" })}
+                      width="size-1700"
+                    >
+                      <Item key="tab">タブ</Item>
+                      <Item key="spaces">スペース</Item>
+                    </Picker>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <span>インデントサイズ</span>
+                    <Picker
+                      aria-label="インデントサイズ"
+                      selectedKey={String(tabSize)}
+                      onSelectionChange={(key) => updateSettings({ tabSize: Number(key) })}
+                      width="size-1700"
+                    >
+                      <Item key="1">1</Item>
+                      <Item key="2">2</Item>
+                      <Item key="4">4</Item>
+                      <Item key="8">8</Item>
+                    </Picker>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <span>横幅を広げる</span>
+                    <Switch
+                      aria-label="横幅を広げる"
+                      isSelected={fullWidth}
+                      onChange={(value) => updateSettings({ fullWidth: value })}
+                    />
+                  </Flex>
+                </Flex>
+              </Content>
             </Dialog>
           </DialogTrigger>
         </div>
@@ -493,6 +545,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             detectIndentation: false,
           }}
         />
+      </div>
       </div>
     </Provider>
   );

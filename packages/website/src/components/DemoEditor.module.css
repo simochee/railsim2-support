@@ -1,4 +1,10 @@
 /* ── Layout ────────────────────────────────────────────── */
+.fullWidth {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  overflow-x: clip;
+}
+
 .header {
   display: flex;
   align-items: center;
