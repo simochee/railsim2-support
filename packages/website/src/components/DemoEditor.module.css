@@ -13,7 +13,7 @@
   --vsc-input-fg: #cccccc;
   --vsc-input-border: #3c3c3c;
   --vsc-menu-bg: #252526;
-  --vsc-menu-hover: #04395e;
+  --vsc-menu-hover: #2a2d2e;
   --vsc-menu-separator: #454545;
   --vsc-tab-inactive: #969696;
   --vsc-tab-active: #ffffff;
@@ -245,9 +245,10 @@
   background: var(--vsc-menu-bg);
   border: 1px solid var(--vsc-menu-separator);
   border-radius: 6px;
-  padding: 4px 0;
+  padding: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   z-index: 200;
+  overflow: hidden;
   animation: menuFadeIn 0.1s ease-out;
 }
 
@@ -266,7 +267,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
+  padding: 6px 8px;
   font-family: var(--vsc-font);
   font-size: 13px;
   color: var(--vsc-fg);
@@ -274,6 +275,7 @@
   outline: none;
   user-select: none;
   border: none;
+  border-radius: 4px;
   background: transparent;
   width: 100%;
   text-align: left;
@@ -281,7 +283,6 @@
 
 .menuItem[data-highlighted] {
   background: var(--vsc-menu-hover);
-  color: #ffffff;
 }
 
 .menuItem :global(.codicon) {
@@ -308,7 +309,7 @@
 .menuSeparator {
   height: 1px;
   background: var(--vsc-menu-separator);
-  margin: 4px 0;
+  margin: 4px;
 }
 
 /* ── Editor ───────────────────────────────────────────── */
