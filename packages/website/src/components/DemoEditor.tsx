@@ -369,47 +369,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, []);
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
-  const indentLabel = insertSpaces ? `スペース: ${tabSize}` : `タブサイズ: ${tabSize}`;
   const canClose = visibleTabs.length > 1;
 
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
       <div className={fullWidth ? s.fullWidth : undefined}>
-      <div className={s.header}>
-        <DialogTrigger type="popover" placement="bottom start">
-          <ActionButton>{indentLabel}</ActionButton>
-          <Dialog>
-            <Heading>インデント</Heading>
-            <Divider />
-            <Content>
-              <Picker
-                label="インデント"
-                labelPosition="side"
-                selectedKey={insertSpaces ? "spaces" : "tab"}
-                onSelectionChange={(key) => updateSettings({ insertSpaces: key === "spaces" })}
-              >
-                <Item key="tab">タブ</Item>
-                <Item key="spaces">スペース</Item>
-              </Picker>
-              <Picker
-                label="サイズ"
-                labelPosition="side"
-                selectedKey={String(tabSize)}
-                onSelectionChange={(key) => updateSettings({ tabSize: Number(key) })}
-              >
-                <Item key="1">1</Item>
-                <Item key="2">2</Item>
-                <Item key="4">4</Item>
-                <Item key="8">8</Item>
-              </Picker>
-            </Content>
-          </Dialog>
-        </DialogTrigger>
-        <ActionButton onPress={handleFormat}>
-          <span className="codicon codicon-list-flat" />
-          フォーマット
-        </ActionButton>
-      </div>
       <div className={s.tabsWrapper}>
         {hasAddActions && (
           <div className={s.addBtnArea}>

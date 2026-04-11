@@ -5,13 +5,6 @@
   overflow-x: clip;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 0;
-}
-
 /* ── Tab Bar (custom, using Spectrum v3 tokens) ───────── */
 .tabsWrapper {
   display: flex;
