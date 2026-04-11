@@ -14,6 +14,7 @@ import {
   Flex,
   Heading,
   Item,
+  Keyboard,
   Menu,
   MenuTrigger,
   Picker,
@@ -21,6 +22,7 @@ import {
   Section,
   SubmenuTrigger,
   Switch,
+  Text,
   Tooltip,
   TooltipTrigger,
 } from "@adobe/react-spectrum";
@@ -47,6 +49,10 @@ interface Props {
 }
 
 const FILE_ACCESS = typeof window !== "undefined" && isFileAccessSupported();
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+const MOD = IS_MAC ? "⌘" : "Ctrl+";
+const SHIFT = IS_MAC ? "⇧" : "Shift+";
+const ALT = IS_MAC ? "⌥" : "Alt+";
 const LOCAL_FILE_KEY = "__local__";
 const SETTINGS_KEY = "railsim2-demo-settings";
 const VALID_TAB_SIZES = [1, 2, 4, 8];
@@ -118,6 +124,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     insertSpaces: initialSettings.insertSpaces,
   });
   const formatOnSaveRef = useRef(initialSettings.formatOnSave);
+  const handleOpenRef = useRef<() => void>(() => {});
+  const handleSaveAsRef = useRef<() => void>(() => {});
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const isDirty = dirtyFiles.has(activeFile);
@@ -182,27 +190,48 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
       const opened = openedFileRef.current;
-      const model = modelsRef.current.get(LOCAL_FILE_KEY);
-      if (!opened || !model) return;
-
-      const doSave = () => {
-        saveFile(opened.handle, model.getValue(), opened.encoding).then(() => {
-          savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
-          setDirtyFiles((prev) => {
-            const next = new Set(prev);
-            next.delete(LOCAL_FILE_KEY);
-            return next;
+      const localModel = modelsRef.current.get(LOCAL_FILE_KEY);
+      if (opened && localModel) {
+        const doSave = () => {
+          saveFile(opened.handle, localModel.getValue(), opened.encoding).then(() => {
+            savedVersionRef.current.set(LOCAL_FILE_KEY, localModel.getAlternativeVersionId());
+            setDirtyFiles((prev) => {
+              const next = new Set(prev);
+              next.delete(LOCAL_FILE_KEY);
+              return next;
+            });
+          }).catch((e) => {
+            console.warn("Failed to save file:", e);
           });
-        }).catch((e) => {
-          console.warn("Failed to save file:", e);
-        });
-      };
+        };
 
+        const conn = connRef.current;
+        if (formatOnSaveRef.current && conn) {
+          formatDocument(conn, monaco, ed, formatOptionsRef.current).then(doSave);
+        } else {
+          doSave();
+        }
+        return;
+      }
+      if (FILE_ACCESS) handleSaveAsRef.current();
+    });
+
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyS, () => {
+      if (FILE_ACCESS) handleSaveAsRef.current();
+    });
+
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
+      if (FILE_ACCESS) handleOpenRef.current();
+    });
+
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma, () => {
+      setShowSettings(true);
+    });
+
+    ed.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
       const conn = connRef.current;
-      if (formatOnSaveRef.current && conn) {
-        formatDocument(conn, monaco, ed, formatOptionsRef.current).then(doSave);
-      } else {
-        doSave();
+      if (conn) {
+        formatDocument(conn, monaco, ed, formatOptionsRef.current);
       }
     });
 
@@ -458,6 +487,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [activeFile, localFileName, replaceLocalModel, switchToModel]);
 
+  handleOpenRef.current = handleOpen;
+  handleSaveAsRef.current = handleSaveAs;
+
   const handleMenuAction = useCallback((key: React.Key) => {
     const keyStr = String(key);
     switch (keyStr) {
@@ -523,14 +555,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                     ))}
                   </Menu>
                 </SubmenuTrigger>
-                <Item key="open-local">ファイルを開く...</Item>
+                <Item key="open-local" textValue="ファイルを開く..."><Text>ファイルを開く...</Text><Keyboard>{`${MOD}O`}</Keyboard></Item>
               </Section>
               <Section>
-                <Item key="save">上書き保存</Item>
-                <Item key="save-as">名前を付けて保存...</Item>
+                <Item key="save" textValue="上書き保存"><Text>上書き保存</Text><Keyboard>{`${MOD}S`}</Keyboard></Item>
+                <Item key="save-as" textValue="名前を付けて保存..."><Text>名前を付けて保存...</Text><Keyboard>{`${SHIFT}${MOD}S`}</Keyboard></Item>
               </Section>
               <Section>
-                <Item key="settings">設定...</Item>
+                <Item key="settings" textValue="設定..."><Text>設定...</Text><Keyboard>{`${MOD},`}</Keyboard></Item>
               </Section>
             </Menu>
           </MenuTrigger>
@@ -545,7 +577,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             <ActionButton isQuiet onPress={handleFormat} aria-label="フォーマット">
               <span className="codicon codicon-sparkle" />
             </ActionButton>
-            <Tooltip>フォーマット</Tooltip>
+            <Tooltip>{`フォーマット (${SHIFT}${ALT}F)`}</Tooltip>
           </TooltipTrigger>
         </div>
       </div>
