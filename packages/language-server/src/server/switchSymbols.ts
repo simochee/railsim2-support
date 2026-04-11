@@ -1,5 +1,6 @@
 import type { Range } from "../shared/tokens.js";
-import type { FileNode, ExprNode, TopLevelNode, BodyNode } from "../shared/ast.js";
+import type { FileNode, ExprNode } from "../shared/ast.js";
+import { walkNodes } from "../shared/astWalker.js";
 
 export interface SwitchEntry {
   label: string;
@@ -31,52 +32,43 @@ export function buildSwitchIndex(file: FileNode): SwitchIndex {
   const definitions = new Map<string, SwitchDefinition>();
   const duplicates = new Map<string, SwitchDefinition[]>();
 
-  function visit(nodes: (TopLevelNode | BodyNode)[]): void {
-    for (const node of nodes) {
-      if (node.type === "object" && node.name === "DefineSwitch") {
-        const nameArg = node.args[0];
-        if (!nameArg || nameArg.type !== "string") continue;
+  walkNodes(file.body, {
+    object(node) {
+      if (node.name !== "DefineSwitch") return;
 
-        const entries: SwitchEntry[] = [];
-        for (const child of node.body) {
-          if (child.type === "property" && child.name === "Entry") {
-            const val = child.values[0];
-            if (val && val.type === "string") {
-              entries.push({ label: val.value, index: entries.length });
-            }
+      const nameArg = node.args[0];
+      if (!nameArg || nameArg.type !== "string") return;
+
+      const entries: SwitchEntry[] = [];
+      for (const child of node.body) {
+        if (child.type === "property" && child.name === "Entry") {
+          const val = child.values[0];
+          if (val && val.type === "string") {
+            entries.push({ label: val.value, index: entries.length });
           }
         }
-
-        const def: SwitchDefinition = {
-          name: nameArg.value,
-          entries,
-          switchNameRange: nameArg.range,
-          range: node.range,
-        };
-
-        if (definitions.has(nameArg.value)) {
-          const existing = duplicates.get(nameArg.value);
-          if (existing) {
-            existing.push(def);
-          } else {
-            duplicates.set(nameArg.value, [definitions.get(nameArg.value)!, def]);
-          }
-        } else {
-          definitions.set(nameArg.value, def);
-        }
-      } else if (node.type === "object") {
-        visit(node.body);
-      } else if (node.type === "if") {
-        visit(node.then);
-        if (node.else_) visit(node.else_);
-      } else if (node.type === "applySwitch") {
-        for (const c of node.cases) visit(c.body);
-        if (node.default_) visit(node.default_);
       }
-    }
-  }
 
-  visit(file.body);
+      const def: SwitchDefinition = {
+        name: nameArg.value,
+        entries,
+        switchNameRange: nameArg.range,
+        range: node.range,
+      };
+
+      if (definitions.has(nameArg.value)) {
+        const existing = duplicates.get(nameArg.value);
+        if (existing) {
+          existing.push(def);
+        } else {
+          duplicates.set(nameArg.value, [definitions.get(nameArg.value)!, def]);
+        }
+      } else {
+        definitions.set(nameArg.value, def);
+      }
+    },
+  });
+
   return { definitions, duplicates };
 }
 
