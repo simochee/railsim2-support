@@ -7,7 +7,7 @@ import type {
   TopLevelNode,
 } from "../../shared/ast.js";
 import type { Diagnostic } from "../../shared/diagnostics.js";
-import type { ObjectSchema, PropertySchema } from "../../schema/schemaTypes.js";
+import type { ObjectSchema, PropertySchema, PropertyType } from "../../schema/schemaTypes.js";
 import { semanticSchema, getPluginTypeSchema } from "../../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../../schema/schemaUtils.js";
 import { extractPluginType } from "../../schema/pluginType.js";
@@ -304,7 +304,7 @@ function getExpectedArity(schema: PropertySchema): number | null {
 
 function checkValueType(
   value: ExprNode,
-  type: string,
+  type: PropertyType,
   propName: string,
   objectName: string,
   schema: PropertySchema,
