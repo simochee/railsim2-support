@@ -26,15 +26,37 @@ import type { Diagnostic } from "../shared/diagnostics.js";
 import type { Range } from "../shared/tokens.js";
 
 // ---------------------------------------------------------------------------
-// Parse cache — ドキュメントごとにパース結果を保持
+// Shared analysis pipeline
 // ---------------------------------------------------------------------------
 
-interface ParseCache {
-  version: number;
+interface AnalysisResult {
   file: FileNode;
   tokens: Token[];
   diagnostics: Diagnostic[];
   switchIndex: SwitchIndex;
+}
+
+function analyzeText(text: string): AnalysisResult {
+  const { file, diagnostics: parseDiags } = parse(text);
+  const tokens = tokenize(text);
+  const keywordDiags = validateUnknownKeywords(file);
+  const schemaDiags = validateSchema(file);
+  const switchIndex = buildSwitchIndex(file);
+  const switchDiags = validateSwitches(file, switchIndex);
+  return {
+    file,
+    tokens,
+    diagnostics: [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags],
+    switchIndex,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Parse cache — ドキュメントごとにパース結果を保持
+// ---------------------------------------------------------------------------
+
+interface ParseCache extends AnalysisResult {
+  version: number;
 }
 
 export function startServer(connection: Connection): void {
@@ -45,21 +67,9 @@ export function startServer(connection: Connection): void {
     const cached = parseCache.get(doc.uri);
     if (cached && cached.version === doc.version) return cached;
 
-    const text = doc.getText();
-    const fileName = Utils.basename(URI.parse(doc.uri));
-    const { file, diagnostics: parseDiags } = parse(text);
-    const tokens = tokenize(text);
-    const keywordDiags = validateUnknownKeywords(file);
-    const schemaDiags = validateSchema(file);
-    const switchIndex = buildSwitchIndex(file);
-    const switchDiags = validateSwitches(file, switchIndex);
-
     const entry: ParseCache = {
       version: doc.version,
-      file,
-      tokens,
-      diagnostics: [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags],
-      switchIndex,
+      ...analyzeText(doc.getText()),
     };
     parseCache.set(doc.uri, entry);
     return entry;
@@ -78,26 +88,24 @@ export function startServer(connection: Connection): void {
     },
   }));
 
-  documents.onDidOpen((event) => {
-    const cached = getOrParse(event.document);
-    const lspDiags: LspDiagnostic[] = cached.diagnostics.map((d) => ({
+  function publishDiagnostics(uri: string, diagnostics: Diagnostic[]): void {
+    const lspDiags: LspDiagnostic[] = diagnostics.map((d) => ({
       range: toLspRange(d.range),
       severity: toLspSeverity(d.severity),
       source: "railsim2",
       message: d.message,
     }));
-    connection.sendDiagnostics({ uri: event.document.uri, diagnostics: lspDiags });
+    connection.sendDiagnostics({ uri, diagnostics: lspDiags });
+  }
+
+  documents.onDidOpen((event) => {
+    const cached = getOrParse(event.document);
+    publishDiagnostics(event.document.uri, cached.diagnostics);
   });
 
   documents.onDidChangeContent((change) => {
     const cached = getOrParse(change.document);
-    const lspDiags: LspDiagnostic[] = cached.diagnostics.map((d) => ({
-      range: toLspRange(d.range),
-      severity: toLspSeverity(d.severity),
-      source: "railsim2",
-      message: d.message,
-    }));
-    connection.sendDiagnostics({ uri: change.document.uri, diagnostics: lspDiags });
+    publishDiagnostics(change.document.uri, cached.diagnostics);
   });
 
   connection.onCompletion((params) => {
@@ -162,12 +170,7 @@ export function startServer(connection: Connection): void {
 // ---------------------------------------------------------------------------
 
 export function validateTextDocument(text: string): Diagnostic[] {
-  const { file, diagnostics: parseDiags } = parse(text);
-  const keywordDiags = validateUnknownKeywords(file);
-  const schemaDiags = validateSchema(file);
-  const switchIndex = buildSwitchIndex(file);
-  const switchDiags = validateSwitches(file, switchIndex);
-  return [...parseDiags, ...keywordDiags, ...schemaDiags, ...switchDiags];
+  return analyzeText(text).diagnostics;
 }
 
 export function toLspRange(range: Range) {
