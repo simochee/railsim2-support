@@ -107,6 +107,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const disposedRef = useRef(false);
   const openedFileRef = useRef<OpenedFile | null>(null);
   const versionRef = useRef(2);
+  const savedVersionRef = useRef<Map<string, number>>(new Map());
+  const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
   const formatOptionsRef = useRef<FormatOptions>({
     tabSize: initialSettings.tabSize,
     insertSpaces: initialSettings.insertSpaces,
@@ -169,6 +171,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       const model = monaco.editor.createModel(sample.content, "railsim2", uri);
       model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
       modelsRef.current.set(sample.fileName, model);
+      savedVersionRef.current.set(sample.fileName, model.getAlternativeVersionId());
     }
 
     const defaultModel = modelsRef.current.get(defaultFile);
@@ -179,7 +182,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       const opened = openedFileRef.current;
       const model = modelsRef.current.get(LOCAL_FILE_KEY);
       if (opened && model) {
-        saveFile(opened.handle, model.getValue(), opened.encoding).catch((e) => {
+        saveFile(opened.handle, model.getValue(), opened.encoding).then(() => {
+          savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
+          setDirtyFiles((prev) => {
+            const next = new Set(prev);
+            next.delete(LOCAL_FILE_KEY);
+            return next;
+          });
+        }).catch((e) => {
           console.warn("Failed to save file:", e);
         });
       }
@@ -211,6 +221,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         if (model) {
           changeDocument(conn, model.uri.toString(), versionRef.current++, model.getValue());
         }
+        // Update dirty state for all tracked files
+        const newDirty = new Set<string>();
+        for (const [key, m] of modelsRef.current.entries()) {
+          const savedVer = savedVersionRef.current.get(key);
+          if (savedVer !== undefined && m.getAlternativeVersionId() !== savedVer) {
+            newDirty.add(key);
+          }
+        }
+        setDirtyFiles(newDirty);
       });
     }).catch((e) => {
       console.warn("Failed to start Language Server:", e);
@@ -282,6 +301,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     } else {
       setOpenTabs((prev) => prev.filter((t) => t !== key));
     }
+
+    setDirtyFiles((prev) => {
+      if (!prev.has(key)) return prev;
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+    savedVersionRef.current.delete(key);
   }, [activeFile, localFileName, openTabs, switchToModel]);
 
   const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -335,6 +362,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       const model = monaco.editor.createModel(opened.content, "railsim2", uri);
       model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
       modelsRef.current.set(LOCAL_FILE_KEY, model);
+      savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
 
       setLocalFileName(opened.fileName);
       setActiveFile(LOCAL_FILE_KEY);
@@ -351,6 +379,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     if (!opened || !model) return;
     try {
       await saveFile(opened.handle, model.getValue(), opened.encoding);
+      savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
+      setDirtyFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(LOCAL_FILE_KEY);
+        return next;
+      });
     } catch (e) {
       console.warn("Failed to save file:", e);
     }
@@ -369,6 +403,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const newModel = monaco.editor.createModel(content, "railsim2", uri);
     newModel.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
     modelsRef.current.set(LOCAL_FILE_KEY, newModel);
+    savedVersionRef.current.set(LOCAL_FILE_KEY, newModel.getAlternativeVersionId());
   }, []);
 
   const handleSaveAs = useCallback(async () => {
@@ -392,6 +427,16 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       setLocalFileName(saved.fileName);
       setActiveFile(LOCAL_FILE_KEY);
       switchToModel(LOCAL_FILE_KEY);
+
+      const newLocalModel = modelsRef.current.get(LOCAL_FILE_KEY);
+      if (newLocalModel) {
+        savedVersionRef.current.set(LOCAL_FILE_KEY, newLocalModel.getAlternativeVersionId());
+      }
+      setDirtyFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(LOCAL_FILE_KEY);
+        return next;
+      });
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       console.warn("Failed to save file:", e);
