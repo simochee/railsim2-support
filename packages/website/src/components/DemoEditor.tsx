@@ -232,10 +232,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       if (FILE_ACCESS) handleOpenRef.current();
     });
 
-    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyN, () => {
-      handleNewRef.current();
-    });
-
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma, () => {
       setShowSettings(true);
     });
@@ -524,7 +520,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [activeFile, localFileName, outputEncoding, replaceLocalModel, switchToModel]);
 
-  handleNewRef.current = handleNew;
   handleOpenRef.current = handleOpen;
   handleSaveAsRef.current = handleSaveAs;
 
@@ -588,7 +583,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             </ActionButton>
             <Menu onAction={handleMenuAction} disabledKeys={menuDisabledKeys}>
               <Section>
-                <Item key="new" textValue="新規作成"><Text>新規作成</Text><Keyboard>{`${MOD}N`}</Keyboard></Item>
+                <Item key="new" textValue="新規作成">新規作成</Item>
               </Section>
               <Section>
                 <SubmenuTrigger>
