@@ -58,15 +58,20 @@ const SETTINGS_KEY = "railsim2-demo-settings";
 const VALID_TAB_SIZES = [1, 2, 4, 8];
 const DEFAULT_SAMPLE = "Train2.txt";
 
+type OutputEncoding = "SJIS" | "UTF8";
+
 interface EditorSettings {
   insertSpaces: boolean;
   tabSize: number;
   fullWidth: boolean;
   formatOnSave: boolean;
+  outputEncoding: OutputEncoding;
 }
 
+const VALID_ENCODINGS: OutputEncoding[] = ["SJIS", "UTF8"];
+
 function loadSettings(): EditorSettings {
-  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4, fullWidth: false, formatOnSave: false };
+  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4, fullWidth: false, formatOnSave: false, outputEncoding: "SJIS" };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return defaults;
@@ -78,6 +83,7 @@ function loadSettings(): EditorSettings {
       tabSize: parsed.tabSize,
       fullWidth: typeof parsed.fullWidth === "boolean" ? parsed.fullWidth : defaults.fullWidth,
       formatOnSave: typeof parsed.formatOnSave === "boolean" ? parsed.formatOnSave : defaults.formatOnSave,
+      outputEncoding: VALID_ENCODINGS.includes(parsed.outputEncoding) ? parsed.outputEncoding : defaults.outputEncoding,
     };
   } catch {
     return defaults;
@@ -109,6 +115,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
   const [formatOnSave, setFormatOnSave] = useState(initialSettings.formatOnSave);
+  const [outputEncoding, setOutputEncoding] = useState<OutputEncoding>(initialSettings.outputEncoding);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -124,6 +131,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     insertSpaces: initialSettings.insertSpaces,
   });
   const formatOnSaveRef = useRef(initialSettings.formatOnSave);
+  const outputEncodingRef = useRef<OutputEncoding>(initialSettings.outputEncoding);
   const handleOpenRef = useRef<() => void>(() => {});
   const handleSaveAsRef = useRef<() => void>(() => {});
 
@@ -193,7 +201,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       const localModel = modelsRef.current.get(LOCAL_FILE_KEY);
       if (opened && localModel) {
         const doSave = () => {
-          saveFile(opened.handle, localModel.getValue(), opened.encoding).then(() => {
+          saveFile(opened.handle, localModel.getValue(), outputEncodingRef.current).then(() => {
             savedVersionRef.current.set(LOCAL_FILE_KEY, localModel.getAlternativeVersionId());
             setDirtyFiles((prev) => {
               const next = new Set(prev);
@@ -303,13 +311,16 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const newTabSize = patch.tabSize ?? tabSize;
     const newFullWidth = patch.fullWidth ?? fullWidth;
     const newFormatOnSave = patch.formatOnSave ?? formatOnSave;
+    const newOutputEncoding = patch.outputEncoding ?? outputEncoding;
     setInsertSpaces(newInsertSpaces);
     setTabSize(newTabSize);
     setFullWidth(newFullWidth);
     setFormatOnSave(newFormatOnSave);
-    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize, fullWidth: newFullWidth, formatOnSave: newFormatOnSave };
+    setOutputEncoding(newOutputEncoding);
+    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize, fullWidth: newFullWidth, formatOnSave: newFormatOnSave, outputEncoding: newOutputEncoding };
     formatOptionsRef.current = { insertSpaces: newInsertSpaces, tabSize: newTabSize };
     formatOnSaveRef.current = newFormatOnSave;
+    outputEncodingRef.current = newOutputEncoding;
     saveSettings(settings);
     const ed = editorRef.current;
     if (ed) {
@@ -318,7 +329,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     for (const model of modelsRef.current.values()) {
       model.updateOptions({ insertSpaces: newInsertSpaces, tabSize: newTabSize });
     }
-  }, [insertSpaces, tabSize, fullWidth, formatOnSave]);
+  }, [insertSpaces, tabSize, fullWidth, formatOnSave, outputEncoding]);
 
   const withDirtyCheck = useCallback((action: () => void) => {
     if (dirtyFiles.has(activeFile)) {
@@ -370,6 +381,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     if (!monaco) return;
 
     openedFileRef.current = opened;
+    updateSettings({ outputEncoding: opened.encoding });
 
     const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
     if (prevModel) {
@@ -389,7 +401,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     setLocalFileName(opened.fileName);
     setActiveFile(LOCAL_FILE_KEY);
     switchToModel(LOCAL_FILE_KEY);
-  }, [switchToModel]);
+  }, [switchToModel, updateSettings]);
 
   const handleOpen = useCallback(async () => {
     let opened: OpenedFile;
@@ -422,7 +434,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           await formatDocument(conn, monaco, ed, formatOptionsRef.current);
         }
       }
-      await saveFile(opened.handle, model.getValue(), opened.encoding);
+      await saveFile(opened.handle, model.getValue(), outputEncoding);
       savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
       setDirtyFiles((prev) => {
         const next = new Set(prev);
@@ -432,7 +444,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     } catch (e) {
       console.warn("Failed to save file:", e);
     }
-  }, [formatOnSave]);
+  }, [formatOnSave, outputEncoding]);
 
   const replaceLocalModel = useCallback((monaco: typeof import("monaco-editor"), fileName: string, content: string) => {
     const prevLocal = modelsRef.current.get(LOCAL_FILE_KEY);
@@ -461,13 +473,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const suggestedName = activeFile !== LOCAL_FILE_KEY
       ? activeFile
       : (localFileName ?? "Plugin.txt");
-    const encoding = openedFileRef.current?.encoding ?? "SJIS";
-
     try {
-      const saved = await saveFileAs(content, encoding, suggestedName);
+      const saved = await saveFileAs(content, outputEncoding, suggestedName);
 
       replaceLocalModel(monaco, saved.fileName, content);
-      openedFileRef.current = { content, fileName: saved.fileName, handle: saved.handle, encoding };
+      openedFileRef.current = { content, fileName: saved.fileName, handle: saved.handle, encoding: outputEncoding };
       setLocalFileName(saved.fileName);
       setActiveFile(LOCAL_FILE_KEY);
       switchToModel(LOCAL_FILE_KEY);
@@ -485,7 +495,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       console.warn("Failed to save file:", e);
     }
-  }, [activeFile, localFileName, replaceLocalModel, switchToModel]);
+  }, [activeFile, localFileName, outputEncoding, replaceLocalModel, switchToModel]);
 
   handleOpenRef.current = handleOpen;
   handleSaveAsRef.current = handleSaveAs;
@@ -641,6 +651,18 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                     <Item key="2">2</Item>
                     <Item key="4">4</Item>
                     <Item key="8">8</Item>
+                  </Picker>
+                </Flex>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <span>エンコーディング</span>
+                  <Picker
+                    aria-label="エンコーディング"
+                    selectedKey={outputEncoding}
+                    onSelectionChange={(key) => updateSettings({ outputEncoding: key as OutputEncoding })}
+                    width="size-1700"
+                  >
+                    <Item key="SJIS">Shift_JIS</Item>
+                    <Item key="UTF8">UTF-8</Item>
                   </Picker>
                 </Flex>
                 <Flex justifyContent="space-between" alignItems="center">
