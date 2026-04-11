@@ -94,14 +94,12 @@ function resolveDefaultSample(samples: Sample[]): string {
 export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [initialSettings] = useState(loadSettings);
   const defaultFile = resolveDefaultSample(samples);
-  const [openTabs, setOpenTabs] = useState<string[]>([defaultFile]);
   const [activeFile, setActiveFile] = useState(defaultFile);
   const [localFileName, setLocalFileName] = useState<string | null>(null);
+  const [showSwitchConfirm, setShowSwitchConfirm] = useState(false);
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
-  const tabsScrollRef = useRef<HTMLDivElement | null>(null);
-  const dragState = useRef<{ isDragging: boolean; didDrag: boolean; startX: number; scrollLeft: number }>({ isDragging: false, didDrag: false, startX: 0, scrollLeft: 0 });
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -111,19 +109,18 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const versionRef = useRef(2);
   const savedVersionRef = useRef<Map<string, number>>(new Map());
   const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
-  const [closingTab, setClosingTab] = useState<string | null>(null);
+  const pendingActionRef = useRef<(() => void) | null>(null);
   const formatOptionsRef = useRef<FormatOptions>({
     tabSize: initialSettings.tabSize,
     insertSpaces: initialSettings.insertSpaces,
   });
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
+  const isDirty = dirtyFiles.has(activeFile);
 
-  const visibleTabs: string[] = localFileName
-    ? [...openTabs, LOCAL_FILE_KEY]
-    : openTabs;
-
-  const unopenedSamples = samples.filter((sm) => !openTabs.includes(sm.fileName));
+  const currentFileName = isLocalFile
+    ? localFileName
+    : (samples.find((sm) => sm.fileName === activeFile)?.fileName ?? activeFile);
 
   const menuDisabledKeys: string[] = [];
   if (!FILE_ACCESS) {
@@ -131,7 +128,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   } else {
     if (!isLocalFile) menuDisabledKeys.push("save");
   }
-  if (unopenedSamples.length === 0) menuDisabledKeys.push("samples");
 
   const switchToModel = useCallback((key: string) => {
     const conn = connRef.current;
@@ -274,124 +270,73 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [insertSpaces, tabSize, fullWidth]);
 
-  const handleTabClick = useCallback(
-    (key: string) => {
-      if (dragState.current.didDrag) return;
-      setActiveFile(key);
-      switchToModel(key);
-    },
-    [switchToModel],
-  );
-
-  // Unconditionally closes a tab. Caller must ensure dirty confirmation
-  // is already handled. Closing the last tab leaves the editor empty.
-  const performCloseTab = useCallback((key: string) => {
-    if (activeFile === key) {
-      const idx = visibleTabs.indexOf(key);
-      const nextKey = visibleTabs[idx + 1] ?? visibleTabs[idx - 1];
-      if (nextKey) {
-        switchToModel(nextKey);
-        setActiveFile(nextKey);
-      } else {
-        setActiveFile("");
-        const ed = editorRef.current;
-        if (ed) ed.setModel(null);
-      }
-    }
-
-    if (key === LOCAL_FILE_KEY) {
-      const conn = connRef.current;
-      const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
-      if (prevModel) {
-        if (conn) closeDocument(conn, prevModel.uri.toString());
-        prevModel.dispose();
-        modelsRef.current.delete(LOCAL_FILE_KEY);
-      }
-      openedFileRef.current = null;
-      setLocalFileName(null);
-    } else {
-      setOpenTabs((prev) => prev.filter((t) => t !== key));
-    }
-
-    setDirtyFiles((prev) => {
-      if (!prev.has(key)) return prev;
-      const next = new Set(prev);
-      next.delete(key);
-      return next;
-    });
-    savedVersionRef.current.delete(key);
-  }, [activeFile, visibleTabs, switchToModel]);
-
-  const handleCloseTab = useCallback((key: string) => {
-    if (dirtyFiles.has(key)) {
-      setClosingTab(key);
+  const withDirtyCheck = useCallback((action: () => void) => {
+    if (dirtyFiles.has(activeFile)) {
+      pendingActionRef.current = action;
+      setShowSwitchConfirm(true);
       return;
     }
+    action();
+  }, [activeFile, dirtyFiles]);
 
-    performCloseTab(key);
-  }, [dirtyFiles, performCloseTab]);
-
-  const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const el = tabsScrollRef.current;
-    if (!el) return;
-    dragState.current = { isDragging: true, didDrag: false, startX: e.pageX, scrollLeft: el.scrollLeft };
-    el.classList.add(s.tabsDragging);
+  const handleConfirmSwitch = useCallback(() => {
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    setShowSwitchConfirm(false);
+    action?.();
   }, []);
 
-  const handleTabsMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!dragState.current.isDragging) return;
-    const el = tabsScrollRef.current;
-    if (!el) return;
-    const dx = e.pageX - dragState.current.startX;
-    if (Math.abs(dx) > 3) {
-      dragState.current.didDrag = true;
-    }
-    e.preventDefault();
-    el.scrollLeft = dragState.current.scrollLeft - dx;
-  }, []);
+  const handleSwitchToSample = useCallback((fileName: string) => {
+    if (fileName === activeFile) return;
+    withDirtyCheck(() => {
+      setActiveFile(fileName);
+      switchToModel(fileName);
+    });
+  }, [activeFile, switchToModel, withDirtyCheck]);
 
-  const handleTabsMouseUp = useCallback(() => {
-    dragState.current.isDragging = false;
-    tabsScrollRef.current?.classList.remove(s.tabsDragging);
-  }, []);
-
-  const handleAddSample = useCallback((fileName: string) => {
-    setOpenTabs((prev) => prev.includes(fileName) ? prev : [...prev, fileName]);
-    setActiveFile(fileName);
-    switchToModel(fileName);
-  }, [switchToModel]);
-
-  const handleOpen = useCallback(async () => {
+  const applyOpenedFile = useCallback((opened: OpenedFile) => {
     const monaco = monacoRef.current;
     if (!monaco) return;
 
+    openedFileRef.current = opened;
+
+    const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
+    if (prevModel) {
+      const conn = connRef.current;
+      if (conn) closeDocument(conn, prevModel.uri.toString());
+      prevModel.dispose();
+    }
+
+    const uri = monaco.Uri.file(`/local/${opened.fileName}`);
+    const existing = monaco.editor.getModel(uri);
+    if (existing) existing.dispose();
+    const model = monaco.editor.createModel(opened.content, "railsim2", uri);
+    model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
+    modelsRef.current.set(LOCAL_FILE_KEY, model);
+    savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
+
+    setLocalFileName(opened.fileName);
+    setActiveFile(LOCAL_FILE_KEY);
+    switchToModel(LOCAL_FILE_KEY);
+  }, [switchToModel]);
+
+  const handleOpen = useCallback(async () => {
+    let opened: OpenedFile;
     try {
-      const opened = await openFile();
-      openedFileRef.current = opened;
-
-      const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
-      if (prevModel) {
-        const conn = connRef.current;
-        if (conn) closeDocument(conn, prevModel.uri.toString());
-        prevModel.dispose();
-      }
-
-      const uri = monaco.Uri.file(`/local/${opened.fileName}`);
-      const existing = monaco.editor.getModel(uri);
-      if (existing) existing.dispose();
-      const model = monaco.editor.createModel(opened.content, "railsim2", uri);
-      model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
-      modelsRef.current.set(LOCAL_FILE_KEY, model);
-      savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
-
-      setLocalFileName(opened.fileName);
-      setActiveFile(LOCAL_FILE_KEY);
-      switchToModel(LOCAL_FILE_KEY);
+      opened = await openFile();
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       console.warn("Failed to open file:", e);
+      return;
     }
-  }, [switchToModel]);
+
+    if (dirtyFiles.has(activeFile)) {
+      pendingActionRef.current = () => applyOpenedFile(opened);
+      setShowSwitchConfirm(true);
+    } else {
+      applyOpenedFile(opened);
+    }
+  }, [activeFile, dirtyFiles, applyOpenedFile]);
 
   const handleSave = useCallback(async () => {
     const opened = openedFileRef.current;
@@ -478,9 +423,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       case "samples":
         return;
       default:
-        handleAddSample(keyStr);
+        handleSwitchToSample(keyStr);
     }
-  }, [handleAddSample, handleOpen, handleSave, handleSaveAs]);
+  }, [handleSwitchToSample, handleOpen, handleSave, handleSaveAs]);
 
   useEffect(() => {
     return () => {
@@ -506,15 +451,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirtyFiles.size]);
 
-  const closingTabName = closingTab === LOCAL_FILE_KEY
-    ? localFileName
-    : samples.find((sm) => sm.fileName === closingTab)?.displayName ?? closingTab;
-
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
       <div className={`${s.root}${fullWidth ? ` ${s.fullWidth}` : ""}`}>
-      <div className={s.tabsWrapper}>
-        <div className={s.addBtnArea}>
+      <div className={s.toolbar}>
+        <div className={s.toolbarStart}>
           <MenuTrigger>
             <ActionButton isQuiet aria-label="ファイルメニュー">
               <span className="codicon codicon-menu" />
@@ -524,7 +465,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 <SubmenuTrigger>
                   <Item key="samples">サンプルを開く</Item>
                   <Menu onAction={handleMenuAction}>
-                    {unopenedSamples.map((sample) => (
+                    {samples.map((sample) => (
                       <Item key={sample.fileName}>{sample.displayName}</Item>
                     ))}
                   </Menu>
@@ -537,76 +478,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               </Section>
             </Menu>
           </MenuTrigger>
+          <span className={s.fileName}>
+            <span className="codicon codicon-file" />
+            {currentFileName}
+            {isDirty && <span className={s.dirtyDot}><span className="codicon codicon-circle-filled" /></span>}
+          </span>
         </div>
-        <div
-          ref={tabsScrollRef}
-          className={s.tabsScroll}
-          role="tablist"
-          onMouseDown={handleTabsMouseDown}
-          onMouseMove={handleTabsMouseMove}
-          onMouseUp={handleTabsMouseUp}
-          onMouseLeave={handleTabsMouseUp}
-        >
-          {openTabs.map((key) => {
-            const sample = samples.find((sm) => sm.fileName === key);
-            if (!sample) return null;
-            return (
-              <div key={key} className={`${s.tab}${activeFile === key ? ` ${s.tabActive}` : ""}${dirtyFiles.has(key) ? ` ${s.tabDirty}` : ""}`}>
-                <span
-                  role="tab"
-                  tabIndex={0}
-                  aria-selected={activeFile === key}
-                  aria-label={dirtyFiles.has(key) ? `${sample.displayName} (未保存の変更あり)` : sample.displayName}
-                  className={s.tabLabel}
-                  onClick={() => handleTabClick(key)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(key); }}
-                >
-                  <span className="codicon codicon-file" />
-                  {sample.displayName}
-                </span>
-                <span className={s.tabDot}>
-                  <span className="codicon codicon-circle-filled" />
-                </span>
-                <button
-                  type="button"
-                  className={s.tabClose}
-                  aria-label={`Close ${sample.displayName}`}
-                  onClick={() => handleCloseTab(key)}
-                >
-                  <span className="codicon codicon-close" />
-                </button>
-              </div>
-            );
-          })}
-          {localFileName && (
-            <div className={`${s.tab}${isLocalFile ? ` ${s.tabActive}` : ""}${dirtyFiles.has(LOCAL_FILE_KEY) ? ` ${s.tabDirty}` : ""}`}>
-              <span
-                role="tab"
-                tabIndex={0}
-                aria-selected={isLocalFile}
-                aria-label={dirtyFiles.has(LOCAL_FILE_KEY) ? `${localFileName} (未保存の変更あり)` : localFileName ?? undefined}
-                className={s.tabLabel}
-                onClick={() => handleTabClick(LOCAL_FILE_KEY)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(LOCAL_FILE_KEY); }}
-              >
-                <span className="codicon codicon-file" />
-                {localFileName}
-              </span>
-              <span className={s.tabDot}>
-                <span className="codicon codicon-circle-filled" />
-              </span>
-              <button
-                type="button"
-                className={s.tabClose}
-                aria-label={`Close ${localFileName}`}
-                onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
-              >
-                <span className="codicon codicon-close" />
-              </button>
-            </div>
-          )}
-        </div>
-        <div className={s.tabsActions}>
+        <div className={s.toolbarEnd}>
           {FILE_ACCESS && isLocalFile && (
             <TooltipTrigger placement="bottom">
               <ActionButton isQuiet onPress={handleSave} aria-label="保存">
@@ -687,17 +565,17 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         />
       </div>
       </div>
-      <DialogContainer onDismiss={() => setClosingTab(null)}>
-        {closingTab && (
+      <DialogContainer onDismiss={() => setShowSwitchConfirm(false)}>
+        {showSwitchConfirm && (
           <AlertDialog
             title="未保存の変更"
             variant="destructive"
-            primaryActionLabel="保存せずに閉じる"
+            primaryActionLabel="保存せずに開く"
             cancelLabel="キャンセル"
-            onPrimaryAction={() => performCloseTab(closingTab)}
-            onCancel={() => setClosingTab(null)}
+            onPrimaryAction={handleConfirmSwitch}
+            onCancel={() => { pendingActionRef.current = null; }}
           >
-            {`「${closingTabName}」の変更はまだ保存されていません。保存せずに閉じますか？`}
+            {`「${currentFileName}」の変更はまだ保存されていません。保存せずに別のファイルを開きますか？`}
           </AlertDialog>
         )}
       </DialogContainer>

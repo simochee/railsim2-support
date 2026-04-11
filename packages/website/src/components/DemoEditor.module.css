@@ -11,162 +11,60 @@
   overflow-x: clip;
 }
 
-/* ── Tab Bar (custom, using Spectrum v3 tokens) ───────── */
-.tabsWrapper {
+/* ── Toolbar ──────────────────────────────────────────── */
+.toolbar {
   display: flex;
-  align-items: stretch;
-  border-bottom: 1px solid var(--spectrum-global-color-gray-300);
-  background: var(--spectrum-global-color-gray-75);
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
 }
 
-.tabsScroll {
+.toolbarStart {
   display: flex;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex: 1;
-  cursor: grab;
+  align-items: center;
   min-width: 0;
 }
 
-.tabsScroll::-webkit-scrollbar {
-  display: none;
-}
-
-.tabsDragging {
-  cursor: grabbing;
-  user-select: none;
-}
-
-.tab {
-  display: inline-flex;
+.toolbarEnd {
+  display: flex;
   align-items: center;
-  background: transparent;
-  color: var(--spectrum-global-color-gray-600);
-  white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  transition: color 0.1s, background 0.1s;
+  gap: 4px;
   flex-shrink: 0;
+  padding: 0 4px;
 }
 
-.tab:hover {
-  color: var(--spectrum-global-color-gray-800);
-  background: var(--spectrum-global-color-gray-100);
-}
-
-.tabActive {
-  color: var(--spectrum-global-color-gray-900);
-  background: var(--spectrum-global-color-gray-50);
-  border-bottom-color: var(--spectrum-global-color-blue-500);
-}
-
-.tabLabel {
+/* ── File Name ────────────────────────────────────────── */
+.fileName {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
   font-family: var(--spectrum-alias-body-text-font-family);
   font-size: var(--spectrum-alias-font-size-default);
-  cursor: pointer;
-  outline: none;
+  color: var(--spectrum-global-color-gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
-.tabLabel:focus-visible {
-  outline: 2px solid var(--spectrum-alias-focus-ring-color);
-  outline-offset: -2px;
-  border-radius: var(--spectrum-alias-border-radius-regular);
-}
-
-.tab :global(.codicon-file) {
+.fileName :global(.codicon-file) {
   font-size: 14px;
   opacity: 0.7;
-}
-
-.tabClose {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-right: 4px;
-  padding: 0;
-  border: none;
-  border-radius: var(--spectrum-alias-border-radius-regular);
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.1s, background 0.1s;
-}
-
-.tabClose:focus-visible {
-  opacity: 1;
-  outline: 2px solid var(--spectrum-alias-focus-ring-color);
-  outline-offset: -1px;
-}
-
-.tab:hover .tabClose {
-  opacity: 0.6;
-}
-
-.tabClose:hover {
-  opacity: 1 !important;
-  background: var(--spectrum-global-color-gray-200);
-}
-
-.tabClose :global(.codicon) {
-  font-size: 12px;
+  flex-shrink: 0;
 }
 
 /* ── Dirty indicator ─────────────────────────────────── */
-.tabDot {
+.dirtyDot {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  margin-right: 4px;
   color: inherit;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
-.tabDot :global(.codicon) {
+.dirtyDot :global(.codicon) {
   font-size: 8px;
-}
-
-/* dirty tab: show dot by default, close button on hover/active.
-   Note: .tabClose opacity is controlled separately (see above).
-   These rules only toggle display; the close button remains
-   subject to the opacity transitions defined on .tabClose. */
-.tabDirty .tabClose {
-  display: none;
-}
-.tabDirty:hover .tabDot {
-  display: none;
-}
-.tabDirty:hover .tabClose {
-  display: inline-flex;
-}
-
-/* clean tab: dot always hidden */
-.tab:not(.tabDirty) .tabDot {
-  display: none;
-}
-
-/* ── File Menu Button ────────────────────────────────── */
-.addBtnArea {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* ── Tab Bar Actions (right side) ────────────────────── */
-.tabsActions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-  margin-left: auto;
-  padding: 0 4px;
 }
 
 /* ── Editor ───────────────────────────────────────────── */
@@ -174,7 +72,5 @@
   flex: 1 1 0;
   min-height: 0;
   position: relative;
-  border: 1px solid var(--spectrum-global-color-gray-300);
-  border-top: none;
   overflow: hidden;
 }
