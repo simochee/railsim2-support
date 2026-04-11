@@ -530,6 +530,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   role="tab"
                   tabIndex={0}
                   aria-selected={activeFile === key}
+                  aria-label={dirtyFiles.has(key) ? `${sample.displayName} (未保存の変更あり)` : sample.displayName}
                   className={s.tabLabel}
                   onClick={() => handleTabClick(key)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(key); }}
@@ -537,6 +538,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   <span className="codicon codicon-file" />
                   {sample.displayName}
                 </span>
+                {dirtyFiles.has(key) && !canClose && (
+                  <span className={s.tabDot}>
+                    <span className="codicon codicon-circle-filled" />
+                  </span>
+                )}
                 {canClose && (
                   <>
                     <span className={s.tabDot}>
@@ -561,6 +567,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 role="tab"
                 tabIndex={0}
                 aria-selected={isLocalFile}
+                aria-label={dirtyFiles.has(LOCAL_FILE_KEY) ? `${localFileName} (未保存の変更あり)` : localFileName ?? undefined}
                 className={s.tabLabel}
                 onClick={() => handleTabClick(LOCAL_FILE_KEY)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(LOCAL_FILE_KEY); }}
@@ -568,6 +575,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 <span className="codicon codicon-file" />
                 {localFileName}
               </span>
+              {dirtyFiles.has(LOCAL_FILE_KEY) && !canClose && (
+                <span className={s.tabDot}>
+                  <span className="codicon codicon-circle-filled" />
+                </span>
+              )}
               {canClose && (
                 <>
                   <span className={s.tabDot}>

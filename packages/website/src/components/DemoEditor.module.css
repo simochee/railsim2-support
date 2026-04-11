@@ -134,10 +134,10 @@
   font-size: 8px;
 }
 
-/* dirty tab: show dot by default, close button on hover */
-.tabDirty .tabDot {
-  display: inline-flex;
-}
+/* dirty tab: show dot by default, close button on hover/active.
+   Note: .tabClose opacity is controlled separately (see above).
+   These rules only toggle display; the close button remains
+   subject to the opacity transitions defined on .tabClose. */
 .tabDirty .tabClose {
   display: none;
 }
