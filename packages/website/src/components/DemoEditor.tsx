@@ -287,7 +287,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           options={{
             minimap: { enabled: true },
             fontSize: 14,
-            scrollBeyondLastLine: false,
+            scrollBeyondLastLine: true,
             automaticLayout: true,
           }}
         />
