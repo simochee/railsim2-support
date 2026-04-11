@@ -112,6 +112,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const savedVersionRef = useRef<Map<string, number>>(new Map());
   const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
   const [closingTab, setClosingTab] = useState<string | null>(null);
+  const handleCloseTabRef = useRef<(key: string) => void>(() => {});
+  const activeFileRef = useRef(activeFile);
+  activeFileRef.current = activeFile;
   const formatOptionsRef = useRef<FormatOptions>({
     tabSize: initialSettings.tabSize,
     insertSpaces: initialSettings.insertSpaces,
@@ -196,6 +199,11 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           console.warn("Failed to save file:", e);
         });
       }
+    });
+
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyW, () => {
+      const key = activeFileRef.current;
+      if (key) handleCloseTabRef.current(key);
     });
 
     setupGrammar(monaco, ed, grammar).catch((e) => {
@@ -330,6 +338,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
     performCloseTab(key);
   }, [dirtyFiles, performCloseTab]);
+  handleCloseTabRef.current = handleCloseTab;
 
   const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = tabsScrollRef.current;
