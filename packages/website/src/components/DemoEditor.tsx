@@ -25,7 +25,7 @@ import {
 } from "@adobe/react-spectrum";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
-import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
+import { isFileAccessSupported, openFile, saveFile, saveFileAs, type OpenedFile } from "../lib/file-access";
 import s from "./DemoEditor.module.css";
 
 interface Sample {
@@ -112,12 +112,21 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     insertSpaces: initialSettings.insertSpaces,
   });
 
+  const isLocalFile = activeFile === LOCAL_FILE_KEY;
+
   const visibleTabs: string[] = localFileName
     ? [...openTabs, LOCAL_FILE_KEY]
     : openTabs;
 
   const unopenedSamples = samples.filter((sm) => !openTabs.includes(sm.fileName));
-  const hasAddActions = unopenedSamples.length > 0 || FILE_ACCESS;
+
+  const menuDisabledKeys: string[] = [];
+  if (!FILE_ACCESS) {
+    menuDisabledKeys.push("open-local", "save", "save-as");
+  } else {
+    if (!isLocalFile) menuDisabledKeys.push("save");
+  }
+  if (unopenedSamples.length === 0) menuDisabledKeys.push("samples");
 
   const switchToModel = useCallback((key: string) => {
     const conn = connRef.current;
@@ -336,15 +345,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [switchToModel]);
 
-  const handleMenuAction = useCallback((key: React.Key) => {
-    const keyStr = String(key);
-    if (keyStr === "open-local") {
-      handleOpen();
-      return;
-    }
-    handleAddSample(keyStr);
-  }, [handleAddSample, handleOpen]);
-
   const handleSave = useCallback(async () => {
     const opened = openedFileRef.current;
     const model = modelsRef.current.get(LOCAL_FILE_KEY);
@@ -355,6 +355,67 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       console.warn("Failed to save file:", e);
     }
   }, []);
+
+  const replaceLocalModel = useCallback((monaco: typeof import("monaco-editor"), fileName: string, content: string) => {
+    const prevLocal = modelsRef.current.get(LOCAL_FILE_KEY);
+    if (prevLocal) {
+      const conn = connRef.current;
+      if (conn) closeDocument(conn, prevLocal.uri.toString());
+      prevLocal.dispose();
+    }
+    const uri = monaco.Uri.file(`/local/${fileName}`);
+    const existing = monaco.editor.getModel(uri);
+    if (existing) existing.dispose();
+    const newModel = monaco.editor.createModel(content, "railsim2", uri);
+    newModel.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
+    modelsRef.current.set(LOCAL_FILE_KEY, newModel);
+  }, []);
+
+  const handleSaveAs = useCallback(async () => {
+    const monaco = monacoRef.current;
+    if (!monaco) return;
+
+    const model = modelsRef.current.get(activeFile);
+    if (!model) return;
+
+    const content = model.getValue();
+    const suggestedName = activeFile !== LOCAL_FILE_KEY
+      ? activeFile
+      : (localFileName ?? "Plugin.txt");
+    const encoding = openedFileRef.current?.encoding ?? "SJIS";
+
+    try {
+      const saved = await saveFileAs(content, encoding, suggestedName);
+
+      replaceLocalModel(monaco, saved.fileName, content);
+      openedFileRef.current = { content, fileName: saved.fileName, handle: saved.handle, encoding };
+      setLocalFileName(saved.fileName);
+      setActiveFile(LOCAL_FILE_KEY);
+      switchToModel(LOCAL_FILE_KEY);
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+      console.warn("Failed to save file:", e);
+    }
+  }, [activeFile, localFileName, replaceLocalModel, switchToModel]);
+
+  const handleMenuAction = useCallback((key: React.Key) => {
+    const keyStr = String(key);
+    switch (keyStr) {
+      case "open-local":
+        handleOpen();
+        return;
+      case "save":
+        handleSave();
+        return;
+      case "save-as":
+        handleSaveAs();
+        return;
+      case "samples":
+        return;
+      default:
+        handleAddSample(keyStr);
+    }
+  }, [handleAddSample, handleOpen, handleSave, handleSaveAs]);
 
   useEffect(() => {
     return () => {
@@ -369,39 +430,36 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     };
   }, []);
 
-  const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const canClose = visibleTabs.length > 1;
 
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
       <div className={`${s.root}${fullWidth ? ` ${s.fullWidth}` : ""}`}>
       <div className={s.tabsWrapper}>
-        {hasAddActions && (
-          <div className={s.addBtnArea}>
-            <MenuTrigger>
-              <ActionButton isQuiet aria-label="Open file">
-                <span className="codicon codicon-add" />
-              </ActionButton>
-              <Menu onAction={handleMenuAction}>
-                <Section title="ファイルを開く">
-                  {unopenedSamples.length > 0 ? (
-                    <SubmenuTrigger>
-                      <Item key="samples">サンプル</Item>
-                      <Menu onAction={handleMenuAction}>
-                        {unopenedSamples.map((sample) => (
-                          <Item key={sample.fileName}>{sample.displayName}</Item>
-                        ))}
-                      </Menu>
-                    </SubmenuTrigger>
-                  ) : null}
-                  {FILE_ACCESS ? (
-                    <Item key="open-local">ローカルファイルを開く...</Item>
-                  ) : null}
-                </Section>
-              </Menu>
-            </MenuTrigger>
-          </div>
-        )}
+        <div className={s.addBtnArea}>
+          <MenuTrigger>
+            <ActionButton isQuiet aria-label="ファイルメニュー">
+              <span className="codicon codicon-menu" />
+            </ActionButton>
+            <Menu onAction={handleMenuAction} disabledKeys={menuDisabledKeys}>
+              <Section>
+                <SubmenuTrigger>
+                  <Item key="samples">サンプルを開く</Item>
+                  <Menu onAction={handleMenuAction}>
+                    {unopenedSamples.map((sample) => (
+                      <Item key={sample.fileName}>{sample.displayName}</Item>
+                    ))}
+                  </Menu>
+                </SubmenuTrigger>
+                <Item key="open-local">デバイスから開く...</Item>
+              </Section>
+              <Section>
+                <Item key="save">上書き保存</Item>
+                <Item key="save-as">名前を付けて保存...</Item>
+              </Section>
+            </Menu>
+          </MenuTrigger>
+        </div>
         <div
           ref={tabsScrollRef}
           className={s.tabsScroll}

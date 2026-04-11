@@ -15,7 +15,7 @@ export interface OpenedFile {
 }
 
 export function isFileAccessSupported(): boolean {
-  return "showOpenFilePicker" in window;
+  return "showOpenFilePicker" in window && "showSaveFilePicker" in window;
 }
 
 let encodingLib: typeof EncodingJapanese | null = null;
@@ -99,4 +99,30 @@ export async function saveFile(
   const writable = await handle.createWritable();
   await writable.write(data);
   await writable.close();
+}
+
+export interface SavedAsFile {
+  handle: FileSystemFileHandle;
+  fileName: string;
+}
+
+export async function saveFileAs(
+  content: string,
+  encoding: Encoding,
+  suggestedName?: string,
+): Promise<SavedAsFile> {
+  const handle = await window.showSaveFilePicker({
+    suggestedName,
+    types: [
+      {
+        description: "RailSim2 Plugin Files",
+        accept: { "text/plain": [".txt"] },
+      },
+    ],
+  });
+  const data = await encode(content, encoding);
+  const writable = await handle.createWritable();
+  await writable.write(data);
+  await writable.close();
+  return { handle, fileName: handle.name };
 }
