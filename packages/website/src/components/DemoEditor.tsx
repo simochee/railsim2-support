@@ -3,7 +3,7 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import "@vscode/codicons/dist/codicon.css";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Button, Dialog, DialogTrigger, Header, Menu, MenuItem, MenuTrigger, Popover, Section, Separator, SubmenuTrigger } from "react-aria-components";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
@@ -72,9 +72,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [localFileName, setLocalFileName] = useState<string | null>(null);
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
-  const [showIndentPopover, setShowIndentPopover] = useState(false);
-  const indentBtnRef = useRef<HTMLButtonElement>(null);
-  const indentPopoverRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -91,7 +88,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     ? [...openTabs, LOCAL_FILE_KEY]
     : openTabs;
 
-  const unopenedSamples = samples.filter((s) => !openTabs.includes(s.fileName));
+  const unopenedSamples = samples.filter((sm) => !openTabs.includes(sm.fileName));
   const hasAddActions = unopenedSamples.length > 0 || FILE_ACCESS;
 
   const switchToModel = useCallback((key: string) => {
@@ -293,32 +290,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
-  // Close indent popover on click-outside or Escape
-  useEffect(() => {
-    if (!showIndentPopover) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (
-        indentPopoverRef.current && !indentPopoverRef.current.contains(target) &&
-        indentBtnRef.current && !indentBtnRef.current.contains(target)
-      ) {
-        setShowIndentPopover(false);
-      }
-    };
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setShowIndentPopover(false);
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [showIndentPopover]);
-
   useEffect(() => {
     return () => {
       disposedRef.current = true;
@@ -339,16 +310,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   return (
     <>
       <div className={s.header}>
-        <span className={s.indentWrapper}>
-          <button
-            ref={indentBtnRef}
-            className={s.btn}
-            onClick={() => setShowIndentPopover((v) => !v)}
-          >
-            {indentLabel}
-          </button>
-          {showIndentPopover && (
-            <div className={s.indentPopover} ref={indentPopoverRef}>
+        <DialogTrigger>
+          <Button className={s.btn}>{indentLabel}</Button>
+          <Popover className={s.indentPopover} placement="bottom start" offset={4}>
+            <Dialog className={s.indentDialog} aria-label="Indentation settings">
               <div className={s.indentRow}>
                 <label htmlFor="indent-type">Indent:</label>
                 <select
@@ -375,69 +340,70 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   <option value={8}>8</option>
                 </select>
               </div>
-            </div>
-          )}
-        </span>
-        <button className={s.btn} onClick={handleFormat}>
+            </Dialog>
+          </Popover>
+        </DialogTrigger>
+        <Button className={s.btn} onPress={handleFormat}>
           <span className="codicon codicon-list-flat" />
           Format
-        </button>
+        </Button>
         {FILE_ACCESS && isLocalFile && (
-          <button className={s.btn} onClick={handleSave}>
+          <Button className={s.btn} onPress={handleSave}>
             <span className="codicon codicon-save" />
             Save
-          </button>
+          </Button>
         )}
       </div>
       <div className={s.tabsWrapper}>
         {hasAddActions && (
           <div className={s.addBtnArea}>
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button className={s.addBtn} aria-label="Open file">
-                  <span className="codicon codicon-add" />
-                </button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content className={s.menuContent} sideOffset={2} align="start">
-                  <DropdownMenu.Label className={s.menuLabel}>ファイルを開く</DropdownMenu.Label>
+            <MenuTrigger>
+              <Button className={s.addBtn} aria-label="Open file">
+                <span className="codicon codicon-add" />
+              </Button>
+              <Popover className={s.menuPopover} placement="bottom start" offset={2}>
+                <Menu className={s.menu} aria-label="ファイルを開く">
+                  <Section>
+                    <Header className={s.menuLabel}>ファイルを開く</Header>
                   {unopenedSamples.length > 0 && (
-                    <DropdownMenu.Sub>
-                      <DropdownMenu.SubTrigger className={s.menuSubTrigger}>
-                        <span className={s.menuSubTriggerIcon}>
+                    <SubmenuTrigger>
+                      <MenuItem className={s.menuItem} id="samples">
+                        <span className={s.menuItemContent}>
                           <span className="codicon codicon-symbol-snippet" />
                           <span>サンプル</span>
                         </span>
                         <span className={`codicon codicon-chevron-right ${s.menuArrow}`} />
-                      </DropdownMenu.SubTrigger>
-                      <DropdownMenu.Portal>
-                        <DropdownMenu.SubContent className={s.menuContent} sideOffset={2} alignOffset={-4}>
+                      </MenuItem>
+                      <Popover className={s.menuPopover} offset={2}>
+                        <Menu className={s.menu}>
                           {unopenedSamples.map((sample) => (
-                            <DropdownMenu.Item
+                            <MenuItem
                               key={sample.fileName}
+                              id={sample.fileName}
                               className={s.menuItem}
-                              onSelect={() => handleAddSample(sample.fileName)}
+                              onAction={() => handleAddSample(sample.fileName)}
                             >
                               <span className="codicon codicon-file" />
                               <span>{sample.fileName}</span>
-                            </DropdownMenu.Item>
+                            </MenuItem>
                           ))}
-                        </DropdownMenu.SubContent>
-                      </DropdownMenu.Portal>
-                    </DropdownMenu.Sub>
+                        </Menu>
+                      </Popover>
+                    </SubmenuTrigger>
                   )}
                   {unopenedSamples.length > 0 && FILE_ACCESS && (
-                    <DropdownMenu.Separator className={s.menuSeparator} />
+                    <Separator className={s.menuSeparator} />
                   )}
                   {FILE_ACCESS && (
-                    <DropdownMenu.Item className={s.menuItem} onSelect={handleOpen}>
+                    <MenuItem className={s.menuItem} id="open-local" onAction={handleOpen}>
                       <span className="codicon codicon-folder-opened" />
                       <span>ローカルファイルを開く...</span>
-                    </DropdownMenu.Item>
+                    </MenuItem>
                   )}
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
+                  </Section>
+                </Menu>
+              </Popover>
+            </MenuTrigger>
           </div>
         )}
         <div className={s.tabsScroll} role="tablist">

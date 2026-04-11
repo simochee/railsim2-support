@@ -43,41 +43,32 @@
   transition: background 0.15s;
 }
 
-.btn:hover {
+.btn[data-hovered] {
   background: var(--vsc-btn-hover);
 }
 
-.btn:focus-visible {
+.btn[data-focus-visible] {
   outline: 1px solid var(--vsc-focus);
   outline-offset: 1px;
 }
 
-.separator {
-  width: 1px;
-  height: 20px;
-  background: var(--vsc-border);
-  flex-shrink: 0;
-}
-
-/* ── Indent Popover ───────────────────────────────────── */
-.indentWrapper {
-  position: relative;
-}
-
+/* ── Indent Dialog ────────────────────────────────────── */
 .indentPopover {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 100;
   background: var(--vsc-menu-bg);
   border: 1px solid var(--vsc-menu-separator);
   border-radius: 6px;
   padding: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  outline: none;
+}
+
+.indentDialog {
   display: flex;
   flex-direction: column;
   gap: 8px;
   min-width: 200px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  outline: none;
 }
 
 .indentRow {
@@ -205,7 +196,7 @@
   font-size: 12px;
 }
 
-/* ── Add Button (+ / ...) ────────────────────────────── */
+/* ── Add Button (+) ──────────────────────────────────── */
 .addBtnArea {
   display: inline-flex;
   align-items: center;
@@ -225,12 +216,12 @@
   transition: color 0.1s, background 0.1s;
 }
 
-.addBtn:hover {
+.addBtn[data-hovered] {
   color: var(--vsc-fg);
   background: var(--vsc-tab-bg-hover);
 }
 
-.addBtn:focus-visible {
+.addBtn[data-focus-visible] {
   outline: 1px solid var(--vsc-focus);
   outline-offset: -1px;
 }
@@ -239,8 +230,8 @@
   font-size: 14px;
 }
 
-/* ── Radix Dropdown Menu ──────────────────────────────── */
-.menuContent {
+/* ── Menu (react-aria) ────────────────────────────────── */
+.menuPopover {
   min-width: 160px;
   background: var(--vsc-menu-bg);
   border: 1px solid var(--vsc-menu-separator);
@@ -249,6 +240,10 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
   z-index: 200;
   overflow: hidden;
+  outline: none;
+}
+
+.menuPopover[data-entering] {
   animation: menuFadeIn 0.1s ease-out;
 }
 
@@ -263,6 +258,10 @@
   }
 }
 
+.menu {
+  outline: none;
+}
+
 .menuItem {
   display: flex;
   align-items: center;
@@ -274,14 +273,19 @@
   cursor: pointer;
   outline: none;
   user-select: none;
-  border: none;
   border-radius: 4px;
-  background: transparent;
-  width: 100%;
-  text-align: left;
 }
 
-.menuItem[data-highlighted] {
+.menuItem[data-focused] {
+  background: var(--vsc-menu-hover);
+}
+
+.menuItem[data-has-submenu] {
+  justify-content: space-between;
+  padding-right: 12px;
+}
+
+.menuItem[data-open] {
   background: var(--vsc-menu-hover);
 }
 
@@ -300,17 +304,7 @@
   letter-spacing: 0.02em;
 }
 
-.menuSubTrigger {
-  composes: menuItem;
-  justify-content: space-between;
-  padding-right: 12px;
-}
-
-.menuSubTrigger[data-state="open"] {
-  background: var(--vsc-menu-hover);
-}
-
-.menuSubTriggerIcon {
+.menuItemContent {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -320,7 +314,6 @@
   font-size: 14px !important;
   opacity: 0.6 !important;
   flex-shrink: 0;
-  margin-left: 16px;
 }
 
 .menuSeparator {
