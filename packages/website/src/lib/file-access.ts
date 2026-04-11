@@ -90,15 +90,26 @@ export async function openFile(): Promise<OpenedFile> {
   };
 }
 
-export async function saveFile(
+async function writeToHandle(
   handle: FileSystemFileHandle,
   content: string,
   encoding: Encoding,
 ): Promise<void> {
   const data = await encode(content, encoding);
   const writable = await handle.createWritable();
-  await writable.write(data);
-  await writable.close();
+  try {
+    await writable.write(data);
+  } finally {
+    await writable.close();
+  }
+}
+
+export async function saveFile(
+  handle: FileSystemFileHandle,
+  content: string,
+  encoding: Encoding,
+): Promise<void> {
+  await writeToHandle(handle, content, encoding);
 }
 
 export interface SavedAsFile {
@@ -120,9 +131,6 @@ export async function saveFileAs(
       },
     ],
   });
-  const data = await encode(content, encoding);
-  const writable = await handle.createWritable();
-  await writable.write(data);
-  await writable.close();
+  await writeToHandle(handle, content, encoding);
   return { handle, fileName: handle.name };
 }
