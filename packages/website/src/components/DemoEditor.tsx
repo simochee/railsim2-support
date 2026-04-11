@@ -26,12 +26,45 @@ interface Props {
 
 const FILE_ACCESS = typeof window !== "undefined" && isFileAccessSupported();
 const LOCAL_FILE_KEY = "__local__";
+const SETTINGS_KEY = "railsim2-demo-settings";
+const VALID_TAB_SIZES = [1, 2, 4, 8];
+
+interface EditorSettings {
+  insertSpaces: boolean;
+  tabSize: number;
+}
+
+function loadSettings(): EditorSettings {
+  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4 };
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return defaults;
+    const parsed = JSON.parse(raw);
+    if (typeof parsed.insertSpaces !== "boolean") return defaults;
+    if (typeof parsed.tabSize !== "number" || !VALID_TAB_SIZES.includes(parsed.tabSize)) return defaults;
+    return { insertSpaces: parsed.insertSpaces, tabSize: parsed.tabSize };
+  } catch {
+    return defaults;
+  }
+}
+
+function saveSettings(settings: EditorSettings): void {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Ignore storage errors (private browsing, quota exceeded, etc.)
+  }
+}
 
 export function DemoEditor({ samples, grammar, langConf }: Props) {
+  const [initialSettings] = useState(loadSettings);
   const [activeFile, setActiveFile] = useState(samples[0].fileName);
   const [localFileName, setLocalFileName] = useState<string | null>(null);
-  const [insertSpaces, setInsertSpaces] = useState(false);
-  const [tabSize, setTabSize] = useState(1);
+  const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
+  const [tabSize, setTabSize] = useState(initialSettings.tabSize);
+  const [showIndentPopover, setShowIndentPopover] = useState(false);
+  const indentBtnRef = useRef<HTMLSpanElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -39,7 +72,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const disposedRef = useRef(false);
   const openedFileRef = useRef<OpenedFile | null>(null);
   const versionRef = useRef(2);
-  const formatOptionsRef = useRef<FormatOptions>({ tabSize: 1, insertSpaces: false });
+  const formatOptionsRef = useRef<FormatOptions>({
+    tabSize: initialSettings.tabSize,
+    insertSpaces: initialSettings.insertSpaces,
+  });
 
   const switchToModel = useCallback((key: string) => {
     const conn = connRef.current;
@@ -81,11 +117,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     for (const sample of samples) {
       const uri = monaco.Uri.parse(`inmemory://demo/${sample.fileName}`);
       const model = monaco.editor.createModel(sample.content, "railsim2", uri);
+      model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
       modelsRef.current.set(sample.fileName, model);
     }
 
     const firstModel = modelsRef.current.get(samples[0].fileName);
     if (firstModel) ed.setModel(firstModel);
+    ed.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
 
     // Cmd+S / Ctrl+S で保存
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
@@ -139,39 +177,62 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
+  const updateSettings = useCallback((newInsertSpaces: boolean, newTabSize: number) => {
+    setInsertSpaces(newInsertSpaces);
+    setTabSize(newTabSize);
+    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize };
+    formatOptionsRef.current = settings;
+    saveSettings(settings);
+    // Apply to Monaco editor and all models
+    const ed = editorRef.current;
+    if (ed) {
+      ed.updateOptions({ insertSpaces: newInsertSpaces, tabSize: newTabSize });
+    }
+    for (const model of modelsRef.current.values()) {
+      model.updateOptions({ insertSpaces: newInsertSpaces, tabSize: newTabSize });
+    }
+  }, []);
+
   const handleInsertSpacesChange = useCallback(
     (e: Event | React.FormEvent<HTMLElement>) => {
       const target = e.target as HTMLElement & { value: string };
       const spaces = target.value === "spaces";
-      setInsertSpaces(spaces);
-      setTabSize(spaces ? 2 : 1);
-      formatOptionsRef.current = {
-        insertSpaces: spaces,
-        tabSize: spaces ? 2 : 1,
-      };
+      updateSettings(spaces, tabSize);
     },
-    [],
+    [tabSize, updateSettings],
   );
 
   const handleTabSizeChange = useCallback(
     (e: Event | React.FormEvent<HTMLElement>) => {
       const target = e.target as HTMLElement & { value: string };
       const size = Number(target.value);
-      setTabSize(size);
-      formatOptionsRef.current = { ...formatOptionsRef.current, tabSize: size };
+      updateSettings(insertSpaces, size);
     },
-    [],
+    [insertSpaces, updateSettings],
   );
 
-  const handleFileChange = useCallback(
-    (e: Event | React.FormEvent<HTMLElement>) => {
-      const target = e.target as HTMLElement & { value: string };
-      const key = target.value;
+  const handleTabClick = useCallback(
+    (key: string) => {
       setActiveFile(key);
       switchToModel(key);
     },
     [switchToModel],
   );
+
+  const handleCloseLocalTab = useCallback(() => {
+    const conn = connRef.current;
+    const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
+    if (prevModel) {
+      if (conn) closeDocument(conn, prevModel.uri.toString());
+      prevModel.dispose();
+      modelsRef.current.delete(LOCAL_FILE_KEY);
+    }
+    openedFileRef.current = null;
+    setLocalFileName(null);
+    const firstKey = samples[0].fileName;
+    setActiveFile(firstKey);
+    switchToModel(firstKey);
+  }, [samples, switchToModel]);
 
   const handleOpen = useCallback(async () => {
     const monaco = monacoRef.current;
@@ -193,6 +254,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       const existing = monaco.editor.getModel(uri);
       if (existing) existing.dispose();
       const model = monaco.editor.createModel(opened.content, "railsim2", uri);
+      model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
       modelsRef.current.set(LOCAL_FILE_KEY, model);
 
       setLocalFileName(opened.fileName);
@@ -217,6 +279,32 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
+  // Close popover on click-outside or Escape
+  useEffect(() => {
+    if (!showIndentPopover) return;
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        popoverRef.current && !popoverRef.current.contains(target) &&
+        indentBtnRef.current && !indentBtnRef.current.contains(target)
+      ) {
+        setShowIndentPopover(false);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowIndentPopover(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [showIndentPopover]);
+
   useEffect(() => {
     return () => {
       disposedRef.current = true;
@@ -231,35 +319,39 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, []);
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
+  const indentLabel = insertSpaces ? `Spaces: ${tabSize}` : `Tab Size: ${tabSize}`;
 
   return (
     <>
       <div className="demo-header">
-        <label htmlFor="file-select">File:</label>
-        <VSCodeDropdown id="file-select" value={activeFile} onChange={handleFileChange}>
-          {samples.map((s) => (
-            <VSCodeOption key={s.fileName} value={s.fileName}>
-              {s.fileName}
-            </VSCodeOption>
-          ))}
-          {localFileName && (
-            <VSCodeOption value={LOCAL_FILE_KEY}>
-              {localFileName}
-            </VSCodeOption>
+        <span className="indent-btn-wrapper" ref={indentBtnRef}>
+          <VSCodeButton
+            appearance="secondary"
+            onClick={() => setShowIndentPopover((v) => !v)}
+          >
+            {indentLabel}
+          </VSCodeButton>
+          {showIndentPopover && (
+            <div className="indent-popover" ref={popoverRef}>
+              <div className="indent-popover-row">
+                <label>Indent:</label>
+                <VSCodeDropdown value={insertSpaces ? "spaces" : "tab"} onChange={handleInsertSpacesChange}>
+                  <VSCodeOption value="tab">Tab</VSCodeOption>
+                  <VSCodeOption value="spaces">Spaces</VSCodeOption>
+                </VSCodeDropdown>
+              </div>
+              <div className="indent-popover-row">
+                <label>Size:</label>
+                <VSCodeDropdown value={String(tabSize)} onChange={handleTabSizeChange}>
+                  <VSCodeOption value="1">1</VSCodeOption>
+                  <VSCodeOption value="2">2</VSCodeOption>
+                  <VSCodeOption value="4">4</VSCodeOption>
+                  <VSCodeOption value="8">8</VSCodeOption>
+                </VSCodeDropdown>
+              </div>
+            </div>
           )}
-        </VSCodeDropdown>
-        <span className="demo-separator" />
-        <VSCodeDropdown value={insertSpaces ? "spaces" : "tab"} onChange={handleInsertSpacesChange}>
-          <VSCodeOption value="tab">Tab</VSCodeOption>
-          <VSCodeOption value="spaces">Spaces</VSCodeOption>
-        </VSCodeDropdown>
-        {insertSpaces && (
-          <VSCodeDropdown value={String(tabSize)} onChange={handleTabSizeChange}>
-            <VSCodeOption value="2">2</VSCodeOption>
-            <VSCodeOption value="4">4</VSCodeOption>
-            <VSCodeOption value="8">8</VSCodeOption>
-          </VSCodeDropdown>
-        )}
+        </span>
         <VSCodeButton appearance="secondary" onClick={handleFormat}>
           <span className="codicon codicon-list-flat" slot="start" />
           Format
@@ -280,6 +372,46 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           </>
         )}
       </div>
+      <div className="demo-tabs" role="tablist">
+        {samples.map((s) => (
+          <div key={s.fileName} className={`demo-tab${activeFile === s.fileName ? " demo-tab-active" : ""}`}>
+            <span
+              role="tab"
+              tabIndex={0}
+              aria-selected={activeFile === s.fileName}
+              className="demo-tab-label"
+              onClick={() => handleTabClick(s.fileName)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(s.fileName); }}
+            >
+              <span className="codicon codicon-file" />
+              {s.fileName}
+            </span>
+          </div>
+        ))}
+        {localFileName && (
+          <div className={`demo-tab${isLocalFile ? " demo-tab-active" : ""}`}>
+            <span
+              role="tab"
+              tabIndex={0}
+              aria-selected={isLocalFile}
+              className="demo-tab-label"
+              onClick={() => handleTabClick(LOCAL_FILE_KEY)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(LOCAL_FILE_KEY); }}
+            >
+              <span className="codicon codicon-file" />
+              {localFileName}
+            </span>
+            <button
+              type="button"
+              className="demo-tab-close"
+              aria-label={`Close ${localFileName}`}
+              onClick={handleCloseLocalTab}
+            >
+              <span className="codicon codicon-close" />
+            </button>
+          </div>
+        )}
+      </div>
       <div className="editor-wrapper">
         <Editor
           theme="vs-dark"
@@ -287,8 +419,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           options={{
             minimap: { enabled: true },
             fontSize: 14,
-            scrollBeyondLastLine: true,
+            scrollBeyondLastLine: false,
             automaticLayout: true,
+            detectIndentation: false,
           }}
         />
       </div>

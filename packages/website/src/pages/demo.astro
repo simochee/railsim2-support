@@ -70,7 +70,7 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         display: flex;
         align-items: center;
         gap: 8px;
-        margin-bottom: 12px;
+        margin-bottom: 0;
       }
       .demo-header label {
         font-size: 13px;
@@ -82,10 +82,117 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         background: var(--vscode-panel-border);
         flex-shrink: 0;
       }
+      /* Indent settings popover */
+      .indent-btn-wrapper {
+        position: relative;
+      }
+      .indent-popover {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 100;
+        background: var(--vscode-dropdown-listBackground);
+        border: 1px solid var(--vscode-dropdown-border);
+        border-radius: 4px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 200px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .indent-popover-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .indent-popover-row label {
+        font-size: 13px;
+        color: var(--vscode-foreground);
+        min-width: 50px;
+      }
+      /* File tab bar */
+      .demo-tabs {
+        display: flex;
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--vscode-panel-border) transparent;
+        border-bottom: 1px solid var(--vscode-panel-border);
+        background: #252526;
+        margin-top: 8px;
+      }
+      .demo-tab {
+        display: inline-flex;
+        align-items: center;
+        background: transparent;
+        color: #969696;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition: color 0.1s, background 0.1s;
+      }
+      .demo-tab:hover {
+        color: var(--vscode-foreground);
+        background: #2d2d2d;
+      }
+      .demo-tab-active {
+        color: #ffffff;
+        background: var(--vscode-editor-background);
+        border-bottom-color: var(--vscode-focusBorder);
+      }
+      .demo-tab-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        font-family: var(--vscode-font-family);
+        font-size: 13px;
+        cursor: pointer;
+        outline: none;
+      }
+      .demo-tab-label:focus-visible {
+        outline: 1px solid var(--vscode-focusBorder);
+        outline-offset: -1px;
+      }
+      .demo-tab .codicon-file {
+        font-size: 14px;
+        opacity: 0.7;
+      }
+      .demo-tab-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+        padding: 0;
+        border: none;
+        border-radius: 3px;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.1s, background 0.1s;
+      }
+      .demo-tab-close:focus-visible {
+        opacity: 1;
+        outline: 1px solid var(--vscode-focusBorder);
+      }
+      .demo-tab:hover .demo-tab-close,
+      .demo-tab-active .demo-tab-close {
+        opacity: 0.6;
+      }
+      .demo-tab-close:hover {
+        opacity: 1 !important;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .demo-tab-close .codicon {
+        font-size: 12px;
+      }
       .editor-wrapper {
-        height: calc(100vh - 140px);
+        height: calc(100vh - 180px);
         border: 1px solid var(--vscode-panel-border);
-        border-radius: 2px;
+        border-top: none;
+        border-radius: 0 0 2px 2px;
         overflow: hidden;
       }
     </style>
