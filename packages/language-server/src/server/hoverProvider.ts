@@ -1,6 +1,7 @@
 import type { Hover, Position } from "vscode-languageserver";
 import { MarkupKind } from "vscode-languageserver";
 import type { FileNode, BodyNode, TopLevelNode } from "../shared/ast.js";
+import { containsPosition } from "../shared/rangeUtils.js";
 import { getObjectDoc, getPropertyDoc } from "./hoverData.generated.js";
 
 /**
@@ -55,13 +56,6 @@ export function getHover(file: FileNode, position: Position): Hover | null {
 type HoverTarget =
   | { kind: "objectName"; name: string }
   | { kind: "propertyName"; name: string; parentObject: string | null };
-
-function containsPosition(range: { start: Position; end: Position }, pos: Position): boolean {
-  if (pos.line < range.start.line || pos.line > range.end.line) return false;
-  if (pos.line === range.start.line && pos.character < range.start.character) return false;
-  if (pos.line === range.end.line && pos.character >= range.end.character) return false;
-  return true;
-}
 
 function findNodeAt(
   nodes: (TopLevelNode | BodyNode)[],

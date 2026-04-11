@@ -12,6 +12,7 @@ import type {
   ExprNode,
 } from "../shared/ast.js";
 import type { Diagnostic, ParseResult } from "../shared/diagnostics.js";
+import { containsPosition } from "../shared/rangeUtils.js";
 import { tokenize } from "./tokenizer.js";
 
 // ---------------------------------------------------------------------------
@@ -280,13 +281,6 @@ export function parse(source: string): ParseResult {
   interface BodySlot {
     body: (TopLevelNode | BodyNode)[];
     range: Range;
-  }
-
-  function containsPosition(range: Range, p: Position): boolean {
-    if (p.line < range.start.line || p.line > range.end.line) return false;
-    if (p.line === range.start.line && p.character < range.start.character) return false;
-    if (p.line === range.end.line && p.character >= range.end.character) return false;
-    return true;
   }
 
   function rangeSize(range: Range): number {
