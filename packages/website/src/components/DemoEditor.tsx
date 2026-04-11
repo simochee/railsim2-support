@@ -29,6 +29,7 @@ import {
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, formatModel, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, saveFileAs, type OpenedFile } from "../lib/file-access";
+import { suggestFileName } from "../lib/plugin-type";
 import s from "./DemoEditor.module.css";
 
 interface Sample {
@@ -132,6 +133,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   });
   const formatOnSaveRef = useRef(initialSettings.formatOnSave);
   const outputEncodingRef = useRef<OutputEncoding>(initialSettings.outputEncoding);
+  const handleNewRef = useRef<() => void>(() => {});
   const handleOpenRef = useRef<() => void>(() => {});
   const handleSaveAsRef = useRef<() => void>(() => {});
 
@@ -139,8 +141,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const isDirty = dirtyFiles.has(activeFile);
 
   const currentFileName = isLocalFile
-    ? localFileName
-    : (samples.find((sm) => sm.fileName === activeFile)?.fileName ?? activeFile);
+    ? (localFileName ?? "無題")
+    : (samples.find((sm) => sm.fileName === activeFile)?.displayName ?? activeFile);
 
   const menuDisabledKeys: string[] = [];
   if (!FILE_ACCESS) {
@@ -230,6 +232,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, () => {
       if (FILE_ACCESS) handleOpenRef.current();
+    });
+
+    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyN, () => {
+      handleNewRef.current();
     });
 
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma, () => {
@@ -401,6 +407,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     setLocalFileName(opened.fileName);
     setActiveFile(LOCAL_FILE_KEY);
     switchToModel(LOCAL_FILE_KEY);
+    setDirtyFiles((prev) => {
+      if (!prev.has(LOCAL_FILE_KEY)) return prev;
+      const next = new Set(prev);
+      next.delete(LOCAL_FILE_KEY);
+      return next;
+    });
   }, [switchToModel, updateSettings]);
 
   const handleOpen = useCallback(async () => {
@@ -462,6 +474,25 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     savedVersionRef.current.set(LOCAL_FILE_KEY, newModel.getAlternativeVersionId());
   }, []);
 
+  const handleNew = useCallback(() => {
+    withDirtyCheck(() => {
+      const monaco = monacoRef.current;
+      if (!monaco) return;
+
+      replaceLocalModel(monaco, "untitled", "");
+      openedFileRef.current = null;
+      setLocalFileName(null);
+      setActiveFile(LOCAL_FILE_KEY);
+      switchToModel(LOCAL_FILE_KEY);
+      setDirtyFiles((prev) => {
+        if (!prev.has(LOCAL_FILE_KEY)) return prev;
+        const next = new Set(prev);
+        next.delete(LOCAL_FILE_KEY);
+        return next;
+      });
+    });
+  }, [withDirtyCheck, replaceLocalModel, switchToModel]);
+
   const handleSaveAs = useCallback(async () => {
     const monaco = monacoRef.current;
     if (!monaco) return;
@@ -470,9 +501,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     if (!model) return;
 
     const content = model.getValue();
-    const suggestedName = activeFile !== LOCAL_FILE_KEY
-      ? activeFile
-      : (localFileName ?? "Plugin.txt");
+    const suggestedName = suggestFileName(activeFile, isLocalFile, localFileName, content);
     try {
       const saved = await saveFileAs(content, outputEncoding, suggestedName);
 
@@ -497,12 +526,16 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [activeFile, localFileName, outputEncoding, replaceLocalModel, switchToModel]);
 
+  handleNewRef.current = handleNew;
   handleOpenRef.current = handleOpen;
   handleSaveAsRef.current = handleSaveAs;
 
   const handleMenuAction = useCallback((key: React.Key) => {
     const keyStr = String(key);
     switch (keyStr) {
+      case "new":
+        handleNew();
+        return;
       case "open-local":
         handleOpen();
         return;
@@ -520,7 +553,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       default:
         handleSwitchToSample(keyStr);
     }
-  }, [handleSwitchToSample, handleOpen, handleSave, handleSaveAs]);
+  }, [handleNew, handleSwitchToSample, handleOpen, handleSave, handleSaveAs]);
 
   useEffect(() => {
     return () => {
@@ -556,6 +589,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               <span className="codicon codicon-menu" />
             </ActionButton>
             <Menu onAction={handleMenuAction} disabledKeys={menuDisabledKeys}>
+              <Section>
+                <Item key="new" textValue="新規作成"><Text>新規作成</Text><Keyboard>{`${MOD}N`}</Keyboard></Item>
+              </Section>
               <Section>
                 <SubmenuTrigger>
                   <Item key="samples">サンプルを開く</Item>
@@ -611,12 +647,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           <AlertDialog
             title="未保存の変更"
             variant="destructive"
-            primaryActionLabel="保存せずに開く"
+            primaryActionLabel="保存せずに続行"
             cancelLabel="キャンセル"
             onPrimaryAction={handleConfirmSwitch}
             onCancel={() => { pendingActionRef.current = null; }}
           >
-            {`「${currentFileName}」の変更はまだ保存されていません。保存せずに別のファイルを開きますか？`}
+            {`「${currentFileName}」の変更はまだ保存されていません。保存せずに続行しますか？`}
           </AlertDialog>
         )}
       </DialogContainer>
