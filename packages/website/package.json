@@ -8,6 +8,7 @@
         "preview": "astro preview"
     },
     "dependencies": {
+        "@adobe/react-spectrum": "^3.46.2",
         "@astrojs/react": "^5.0.3",
         "@iconify-json/tabler": "^1.2.33",
         "@monaco-editor/react": "^4.7.0",
@@ -23,7 +24,6 @@
         "monaco-textmate": "^3.0.1",
         "onigasm": "^2.2.5",
         "react": "^19.2.5",
-        "react-aria-components": "^1.16.0",
         "react-dom": "^19.2.5",
         "vscode-languageserver-protocol": "^3.17.5"
     },

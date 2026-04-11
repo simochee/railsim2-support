@@ -1,26 +1,4 @@
-/* ── VS Code Theme Variables ────────────────────────────── */
-:root {
-  --vsc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --vsc-fg: #cccccc;
-  --vsc-bg: #1e1e1e;
-  --vsc-bg-dark: #252526;
-  --vsc-border: #2b2b2b;
-  --vsc-focus: #007fd4;
-  --vsc-btn-bg: #3a3d41;
-  --vsc-btn-fg: #ffffff;
-  --vsc-btn-hover: #45494e;
-  --vsc-input-bg: #3c3c3c;
-  --vsc-input-fg: #cccccc;
-  --vsc-input-border: #3c3c3c;
-  --vsc-menu-bg: #252526;
-  --vsc-menu-hover: #2a2d2e;
-  --vsc-menu-separator: #454545;
-  --vsc-tab-inactive: #969696;
-  --vsc-tab-active: #ffffff;
-  --vsc-tab-bg-hover: #2d2d2d;
-}
-
-/* ── Toolbar ──────────────────────────────────────────── */
+/* ── Layout ────────────────────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
@@ -28,83 +6,12 @@
   margin-bottom: 0;
 }
 
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border: 1px solid var(--vsc-border);
-  border-radius: 4px;
-  background: var(--vsc-btn-bg);
-  color: var(--vsc-btn-fg);
-  font-family: var(--vsc-font);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.btn[data-hovered] {
-  background: var(--vsc-btn-hover);
-}
-
-.btn[data-focus-visible] {
-  outline: 1px solid var(--vsc-focus);
-  outline-offset: 1px;
-}
-
-/* ── Indent Dialog ────────────────────────────────────── */
-.indentPopover {
-  background: var(--vsc-menu-bg);
-  border: 1px solid var(--vsc-menu-separator);
-  border-radius: 6px;
-  padding: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  z-index: 100;
-  outline: none;
-}
-
-.indentDialog {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 200px;
-  outline: none;
-}
-
-.indentRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.indentRow label {
-  font-size: 13px;
-  color: var(--vsc-fg);
-  min-width: 50px;
-}
-
-.select {
-  padding: 3px 8px;
-  border: 1px solid var(--vsc-input-border);
-  border-radius: 4px;
-  background: var(--vsc-input-bg);
-  color: var(--vsc-input-fg);
-  font-family: var(--vsc-font);
-  font-size: 13px;
-  outline: none;
-  flex: 1;
-}
-
-.select:focus-visible {
-  border-color: var(--vsc-focus);
-}
-
-/* ── Tab Bar ──────────────────────────────────────────── */
+/* ── Tab Bar (custom, using Spectrum v3 tokens) ───────── */
 .tabsWrapper {
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid var(--vsc-border);
-  background: var(--vsc-bg-dark);
+  border-bottom: 1px solid var(--spectrum-global-color-gray-300);
+  background: var(--spectrum-global-color-gray-75);
   margin-top: 8px;
 }
 
@@ -112,7 +19,7 @@
   display: flex;
   overflow-x: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--vsc-border) transparent;
+  scrollbar-color: var(--spectrum-global-color-gray-400) transparent;
   flex: 1;
   min-width: 0;
 }
@@ -121,7 +28,7 @@
   display: inline-flex;
   align-items: center;
   background: transparent;
-  color: var(--vsc-tab-inactive);
+  color: var(--spectrum-global-color-gray-600);
   white-space: nowrap;
   border-bottom: 2px solid transparent;
   transition: color 0.1s, background 0.1s;
@@ -129,14 +36,14 @@
 }
 
 .tab:hover {
-  color: var(--vsc-fg);
-  background: var(--vsc-tab-bg-hover);
+  color: var(--spectrum-global-color-gray-800);
+  background: var(--spectrum-global-color-gray-100);
 }
 
 .tabActive {
-  color: var(--vsc-tab-active);
-  background: var(--vsc-bg);
-  border-bottom-color: var(--vsc-focus);
+  color: var(--spectrum-global-color-gray-900);
+  background: var(--spectrum-global-color-gray-50);
+  border-bottom-color: var(--spectrum-global-color-blue-500);
 }
 
 .tabLabel {
@@ -144,15 +51,16 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  font-family: var(--vsc-font);
-  font-size: 13px;
+  font-family: var(--spectrum-alias-body-text-font-family);
+  font-size: var(--spectrum-alias-font-size-default);
   cursor: pointer;
   outline: none;
 }
 
 .tabLabel:focus-visible {
-  outline: 1px solid var(--vsc-focus);
-  outline-offset: -1px;
+  outline: 2px solid var(--spectrum-alias-focus-ring-color);
+  outline-offset: -2px;
+  border-radius: var(--spectrum-alias-border-radius-regular);
 }
 
 .tab :global(.codicon-file) {
@@ -164,12 +72,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
-  margin-right: 6px;
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
   padding: 0;
   border: none;
-  border-radius: 3px;
+  border-radius: var(--spectrum-alias-border-radius-regular);
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -179,7 +87,8 @@
 
 .tabClose:focus-visible {
   opacity: 1;
-  outline: 1px solid var(--vsc-focus);
+  outline: 2px solid var(--spectrum-alias-focus-ring-color);
+  outline-offset: -1px;
 }
 
 .tab:hover .tabClose,
@@ -189,7 +98,7 @@
 
 .tabClose:hover {
   opacity: 1 !important;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--spectrum-global-color-gray-200);
 }
 
 .tabClose :global(.codicon) {
@@ -203,130 +112,11 @@
   flex-shrink: 0;
 }
 
-.addBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 100%;
-  border: none;
-  background: transparent;
-  color: var(--vsc-tab-inactive);
-  cursor: pointer;
-  transition: color 0.1s, background 0.1s;
-}
-
-.addBtn[data-hovered] {
-  color: var(--vsc-fg);
-  background: var(--vsc-tab-bg-hover);
-}
-
-.addBtn[data-focus-visible] {
-  outline: 1px solid var(--vsc-focus);
-  outline-offset: -1px;
-}
-
-.addBtn :global(.codicon) {
-  font-size: 14px;
-}
-
-/* ── Menu (react-aria) ────────────────────────────────── */
-.menuPopover {
-  min-width: 160px;
-  background: var(--vsc-menu-bg);
-  border: 1px solid var(--vsc-menu-separator);
-  border-radius: 6px;
-  padding: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  z-index: 200;
-  overflow: hidden;
-  outline: none;
-}
-
-.menuPopover[data-entering] {
-  animation: menuFadeIn 0.1s ease-out;
-}
-
-@keyframes menuFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.menu {
-  outline: none;
-}
-
-.menuItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
-  font-family: var(--vsc-font);
-  font-size: 13px;
-  color: var(--vsc-fg);
-  cursor: pointer;
-  outline: none;
-  user-select: none;
-  border-radius: 4px;
-}
-
-.menuItem[data-focused] {
-  background: var(--vsc-menu-hover);
-}
-
-.menuItem[data-has-submenu] {
-  justify-content: space-between;
-  padding-right: 12px;
-}
-
-.menuItem[data-open] {
-  background: var(--vsc-menu-hover);
-}
-
-.menuItem :global(.codicon) {
-  font-size: 14px;
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
-.menuLabel {
-  padding: 6px 8px;
-  font-family: var(--vsc-font);
-  font-size: 12px;
-  color: #858585;
-  user-select: none;
-  letter-spacing: 0.02em;
-}
-
-.menuItemContent {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.menuArrow {
-  font-size: 14px !important;
-  opacity: 0.6 !important;
-  flex-shrink: 0;
-}
-
-.menuSeparator {
-  height: 1px;
-  background: var(--vsc-menu-separator);
-  margin: 4px;
-}
-
 /* ── Editor ───────────────────────────────────────────── */
 .editorWrapper {
   height: calc(100vh - 180px);
-  border: 1px solid var(--vsc-border);
+  border: 1px solid var(--spectrum-global-color-gray-300);
   border-top: none;
-  border-radius: 0 0 2px 2px;
+  border-radius: 0 0 var(--spectrum-alias-border-radius-regular) var(--spectrum-alias-border-radius-regular);
   overflow: hidden;
 }

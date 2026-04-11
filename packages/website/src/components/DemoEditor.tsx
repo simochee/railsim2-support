@@ -3,7 +3,22 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import "@vscode/codicons/dist/codicon.css";
-import { Button, Dialog, DialogTrigger, Header, Menu, MenuItem, MenuTrigger, Popover, Section, Separator, SubmenuTrigger } from "react-aria-components";
+import {
+  ActionButton,
+  Content,
+  defaultTheme,
+  Dialog,
+  DialogTrigger,
+  Divider,
+  Heading,
+  Item,
+  Menu,
+  MenuTrigger,
+  Picker,
+  Provider,
+  Section,
+  SubmenuTrigger,
+} from "@adobe/react-spectrum";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
@@ -279,6 +294,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, [switchToModel]);
 
+  const handleMenuAction = useCallback((key: React.Key) => {
+    const keyStr = String(key);
+    if (keyStr === "open-local") {
+      handleOpen();
+      return;
+    }
+    handleAddSample(keyStr);
+  }, [handleAddSample, handleOpen]);
+
   const handleSave = useCallback(async () => {
     const opened = openedFileRef.current;
     const model = modelsRef.current.get(LOCAL_FILE_KEY);
@@ -308,101 +332,70 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const canClose = visibleTabs.length > 1;
 
   return (
-    <>
+    <Provider theme={defaultTheme} colorScheme="dark">
       <div className={s.header}>
-        <DialogTrigger>
-          <Button className={s.btn}>{indentLabel}</Button>
-          <Popover className={s.indentPopover} placement="bottom start" offset={4}>
-            <Dialog className={s.indentDialog} aria-label="Indentation settings">
-              <div className={s.indentRow}>
-                <label htmlFor="indent-type">Indent:</label>
-                <select
-                  id="indent-type"
-                  className={s.select}
-                  value={insertSpaces ? "spaces" : "tab"}
-                  onChange={(e) => updateSettings(e.target.value === "spaces", tabSize)}
-                >
-                  <option value="tab">Tab</option>
-                  <option value="spaces">Spaces</option>
-                </select>
-              </div>
-              <div className={s.indentRow}>
-                <label htmlFor="indent-size">Size:</label>
-                <select
-                  id="indent-size"
-                  className={s.select}
-                  value={tabSize}
-                  onChange={(e) => updateSettings(insertSpaces, Number(e.target.value))}
-                >
-                  <option value={1}>1</option>
-                  <option value={2}>2</option>
-                  <option value={4}>4</option>
-                  <option value={8}>8</option>
-                </select>
-              </div>
-            </Dialog>
-          </Popover>
+        <DialogTrigger type="popover" placement="bottom start">
+          <ActionButton>{indentLabel}</ActionButton>
+          <Dialog>
+            <Heading>Indentation</Heading>
+            <Divider />
+            <Content>
+              <Picker
+                label="Indent"
+                selectedKey={insertSpaces ? "spaces" : "tab"}
+                onSelectionChange={(key) => updateSettings(key === "spaces", tabSize)}
+              >
+                <Item key="tab">Tab</Item>
+                <Item key="spaces">Spaces</Item>
+              </Picker>
+              <Picker
+                label="Size"
+                selectedKey={String(tabSize)}
+                onSelectionChange={(key) => updateSettings(insertSpaces, Number(key))}
+              >
+                <Item key="1">1</Item>
+                <Item key="2">2</Item>
+                <Item key="4">4</Item>
+                <Item key="8">8</Item>
+              </Picker>
+            </Content>
+          </Dialog>
         </DialogTrigger>
-        <Button className={s.btn} onPress={handleFormat}>
+        <ActionButton onPress={handleFormat}>
           <span className="codicon codicon-list-flat" />
           Format
-        </Button>
+        </ActionButton>
         {FILE_ACCESS && isLocalFile && (
-          <Button className={s.btn} onPress={handleSave}>
+          <ActionButton onPress={handleSave}>
             <span className="codicon codicon-save" />
             Save
-          </Button>
+          </ActionButton>
         )}
       </div>
       <div className={s.tabsWrapper}>
         {hasAddActions && (
           <div className={s.addBtnArea}>
             <MenuTrigger>
-              <Button className={s.addBtn} aria-label="Open file">
+              <ActionButton isQuiet aria-label="Open file">
                 <span className="codicon codicon-add" />
-              </Button>
-              <Popover className={s.menuPopover} placement="bottom start" offset={2}>
-                <Menu className={s.menu} aria-label="ファイルを開く">
-                  <Section>
-                    <Header className={s.menuLabel}>ファイルを開く</Header>
-                  {unopenedSamples.length > 0 && (
+              </ActionButton>
+              <Menu onAction={handleMenuAction}>
+                <Section title="ファイルを開く">
+                  {unopenedSamples.length > 0 ? (
                     <SubmenuTrigger>
-                      <MenuItem className={s.menuItem} id="samples">
-                        <span className={s.menuItemContent}>
-                          <span className="codicon codicon-symbol-snippet" />
-                          <span>サンプル</span>
-                        </span>
-                        <span className={`codicon codicon-chevron-right ${s.menuArrow}`} />
-                      </MenuItem>
-                      <Popover className={s.menuPopover} offset={2}>
-                        <Menu className={s.menu}>
-                          {unopenedSamples.map((sample) => (
-                            <MenuItem
-                              key={sample.fileName}
-                              id={sample.fileName}
-                              className={s.menuItem}
-                              onAction={() => handleAddSample(sample.fileName)}
-                            >
-                              <span className="codicon codicon-file" />
-                              <span>{sample.fileName}</span>
-                            </MenuItem>
-                          ))}
-                        </Menu>
-                      </Popover>
+                      <Item key="samples">サンプル</Item>
+                      <Menu onAction={handleMenuAction}>
+                        {unopenedSamples.map((sample) => (
+                          <Item key={sample.fileName}>{sample.fileName}</Item>
+                        ))}
+                      </Menu>
                     </SubmenuTrigger>
-                  )}
-                  {unopenedSamples.length > 0 && FILE_ACCESS && (
-                    <Separator className={s.menuSeparator} />
-                  )}
-                  {FILE_ACCESS && (
-                    <MenuItem className={s.menuItem} id="open-local" onAction={handleOpen}>
-                      <span className="codicon codicon-folder-opened" />
-                      <span>ローカルファイルを開く...</span>
-                    </MenuItem>
-                  )}
-                  </Section>
-                </Menu>
-              </Popover>
+                  ) : null}
+                  {FILE_ACCESS ? (
+                    <Item key="open-local">ローカルファイルを開く...</Item>
+                  ) : null}
+                </Section>
+              </Menu>
             </MenuTrigger>
           </div>
         )}
@@ -476,6 +469,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           }}
         />
       </div>
-    </>
+    </Provider>
   );
 }
