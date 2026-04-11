@@ -10,7 +10,6 @@ import {
   defaultTheme,
   Dialog,
   DialogContainer,
-  DialogTrigger,
   Divider,
   Flex,
   Heading,
@@ -99,6 +98,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [activeFile, setActiveFile] = useState(defaultFile);
   const [localFileName, setLocalFileName] = useState<string | null>(null);
   const [showSwitchConfirm, setShowSwitchConfirm] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
@@ -470,6 +470,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       case "save-as":
         handleSaveAs();
         return;
+      case "settings":
+        setShowSettings(true);
+        return;
       case "samples":
         return;
       default:
@@ -526,6 +529,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 <Item key="save">上書き保存</Item>
                 <Item key="save-as">名前を付けて保存...</Item>
               </Section>
+              <Section>
+                <Item key="settings">設定...</Item>
+              </Section>
             </Menu>
           </MenuTrigger>
           <span className={s.fileName}>
@@ -535,78 +541,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           </span>
         </div>
         <div className={s.toolbarEnd}>
-          {FILE_ACCESS && isLocalFile && (
-            <TooltipTrigger placement="bottom">
-              <ActionButton isQuiet onPress={handleSave} aria-label="保存">
-                <span className="codicon codicon-save" />
-              </ActionButton>
-              <Tooltip>保存</Tooltip>
-            </TooltipTrigger>
-          )}
           <TooltipTrigger placement="bottom">
             <ActionButton isQuiet onPress={handleFormat} aria-label="フォーマット">
-              <span className="codicon codicon-list-flat" />
+              <span className="codicon codicon-sparkle" />
             </ActionButton>
             <Tooltip>フォーマット</Tooltip>
           </TooltipTrigger>
-          <DialogTrigger isDismissable>
-            <TooltipTrigger placement="bottom">
-              <ActionButton isQuiet aria-label="エディター設定">
-                <span className="codicon codicon-settings-gear" />
-              </ActionButton>
-              <Tooltip>エディター設定</Tooltip>
-            </TooltipTrigger>
-            <Dialog size="S">
-              <Heading>設定</Heading>
-              <Divider />
-              <Content>
-                <Flex direction="column" gap="size-200">
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <span>インデント</span>
-                    <Picker
-                      aria-label="インデント"
-                      selectedKey={insertSpaces ? "spaces" : "tab"}
-                      onSelectionChange={(key) => updateSettings({ insertSpaces: key === "spaces" })}
-                      width="size-1700"
-                    >
-                      <Item key="tab">タブ</Item>
-                      <Item key="spaces">スペース</Item>
-                    </Picker>
-                  </Flex>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <span>インデントサイズ</span>
-                    <Picker
-                      aria-label="インデントサイズ"
-                      selectedKey={String(tabSize)}
-                      onSelectionChange={(key) => updateSettings({ tabSize: Number(key) })}
-                      width="size-1700"
-                    >
-                      <Item key="1">1</Item>
-                      <Item key="2">2</Item>
-                      <Item key="4">4</Item>
-                      <Item key="8">8</Item>
-                    </Picker>
-                  </Flex>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <span>保存時にフォーマット</span>
-                    <Switch
-                      aria-label="保存時にフォーマット"
-                      isSelected={formatOnSave}
-                      onChange={(value) => updateSettings({ formatOnSave: value })}
-                    />
-                  </Flex>
-                  <Flex justifyContent="space-between" alignItems="center">
-                    <span>横幅を広げる</span>
-                    <Switch
-                      aria-label="横幅を広げる"
-                      isSelected={fullWidth}
-                      onChange={(value) => updateSettings({ fullWidth: value })}
-                    />
-                  </Flex>
-                </Flex>
-              </Content>
-            </Dialog>
-          </DialogTrigger>
         </div>
       </div>
       <div className={s.editorWrapper}>
@@ -635,6 +575,60 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           >
             {`「${currentFileName}」の変更はまだ保存されていません。保存せずに別のファイルを開きますか？`}
           </AlertDialog>
+        )}
+      </DialogContainer>
+      <DialogContainer type="modal" isDismissable onDismiss={() => setShowSettings(false)}>
+        {showSettings && (
+          <Dialog size="S">
+            <Heading>設定</Heading>
+            <Divider />
+            <Content>
+              <Flex direction="column" gap="size-200">
+                <Flex justifyContent="space-between" alignItems="center">
+                  <span>インデント</span>
+                  <Picker
+                    aria-label="インデント"
+                    selectedKey={insertSpaces ? "spaces" : "tab"}
+                    onSelectionChange={(key) => updateSettings({ insertSpaces: key === "spaces" })}
+                    width="size-1700"
+                  >
+                    <Item key="tab">タブ</Item>
+                    <Item key="spaces">スペース</Item>
+                  </Picker>
+                </Flex>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <span>インデントサイズ</span>
+                  <Picker
+                    aria-label="インデントサイズ"
+                    selectedKey={String(tabSize)}
+                    onSelectionChange={(key) => updateSettings({ tabSize: Number(key) })}
+                    width="size-1700"
+                  >
+                    <Item key="1">1</Item>
+                    <Item key="2">2</Item>
+                    <Item key="4">4</Item>
+                    <Item key="8">8</Item>
+                  </Picker>
+                </Flex>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <span>保存時にフォーマット</span>
+                  <Switch
+                    aria-label="保存時にフォーマット"
+                    isSelected={formatOnSave}
+                    onChange={(value) => updateSettings({ formatOnSave: value })}
+                  />
+                </Flex>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <span>横幅を広げる</span>
+                  <Switch
+                    aria-label="横幅を広げる"
+                    isSelected={fullWidth}
+                    onChange={(value) => updateSettings({ fullWidth: value })}
+                  />
+                </Flex>
+              </Flex>
+            </Content>
+          </Dialog>
         )}
       </DialogContainer>
     </Provider>
