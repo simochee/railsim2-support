@@ -104,7 +104,7 @@ export function registerProviders(
 
   disposables.push(
     monaco.languages.registerCompletionItemProvider("railsim2", {
-      triggerCharacters: ['"'],
+      triggerCharacters: ['"', "="],
       provideCompletionItems: async (model, position) => {
         try {
           const result = await conn.sendRequest(CompletionRequest.type, {

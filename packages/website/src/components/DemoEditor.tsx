@@ -559,6 +559,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             scrollBeyondLastLine: false,
             automaticLayout: true,
             detectIndentation: false,
+            quickSuggestions: { other: "on", comments: "off", strings: "on" },
           }}
         />
       </div>
