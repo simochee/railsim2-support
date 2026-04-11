@@ -26,7 +26,7 @@ import {
   TooltipTrigger,
 } from "@adobe/react-spectrum";
 import { setupGrammar } from "../lib/grammar";
-import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
+import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, formatModel, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, saveFileAs, type OpenedFile } from "../lib/file-access";
 import s from "./DemoEditor.module.css";
 
@@ -57,10 +57,11 @@ interface EditorSettings {
   insertSpaces: boolean;
   tabSize: number;
   fullWidth: boolean;
+  formatOnSave: boolean;
 }
 
 function loadSettings(): EditorSettings {
-  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4, fullWidth: false };
+  const defaults: EditorSettings = { insertSpaces: false, tabSize: 4, fullWidth: false, formatOnSave: false };
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return defaults;
@@ -71,6 +72,7 @@ function loadSettings(): EditorSettings {
       insertSpaces: parsed.insertSpaces,
       tabSize: parsed.tabSize,
       fullWidth: typeof parsed.fullWidth === "boolean" ? parsed.fullWidth : defaults.fullWidth,
+      formatOnSave: typeof parsed.formatOnSave === "boolean" ? parsed.formatOnSave : defaults.formatOnSave,
     };
   } catch {
     return defaults;
@@ -100,6 +102,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
+  const [formatOnSave, setFormatOnSave] = useState(initialSettings.formatOnSave);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -114,6 +117,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     tabSize: initialSettings.tabSize,
     insertSpaces: initialSettings.insertSpaces,
   });
+  const formatOnSaveRef = useRef(initialSettings.formatOnSave);
 
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const isDirty = dirtyFiles.has(activeFile);
@@ -173,14 +177,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       savedVersionRef.current.set(sample.fileName, model.getAlternativeVersionId());
     }
 
-    const defaultModel = modelsRef.current.get(defaultFile);
-    if (defaultModel) ed.setModel(defaultModel);
+    ed.setModel(null);
     ed.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
 
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
       const opened = openedFileRef.current;
       const model = modelsRef.current.get(LOCAL_FILE_KEY);
-      if (opened && model) {
+      if (!opened || !model) return;
+
+      const doSave = () => {
         saveFile(opened.handle, model.getValue(), opened.encoding).then(() => {
           savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
           setDirtyFiles((prev) => {
@@ -191,6 +196,13 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         }).catch((e) => {
           console.warn("Failed to save file:", e);
         });
+      };
+
+      const conn = connRef.current;
+      if (formatOnSaveRef.current && conn) {
+        formatDocument(conn, monaco, ed, formatOptionsRef.current).then(doSave);
+      } else {
+        doSave();
       }
     });
 
@@ -198,12 +210,18 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       console.warn("Failed to setup TextMate grammar:", e);
     });
 
-    startLsp().then((conn) => {
+    startLsp().then(async (conn) => {
       if (disposedRef.current) return;
       connRef.current = conn;
-      const currentModel = ed.getModel();
-      if (currentModel) {
-        openDocument(conn, currentModel.uri.toString(), "railsim2", currentModel.getValue());
+
+      // Format default sample before displaying
+      const defaultModel = modelsRef.current.get(defaultFile);
+      if (defaultModel) {
+        openDocument(conn, defaultModel.uri.toString(), "railsim2", defaultModel.getValue());
+        await formatModel(conn, monaco, defaultModel, formatOptionsRef.current);
+        changeDocument(conn, defaultModel.uri.toString(), versionRef.current++, defaultModel.getValue());
+        ed.setModel(defaultModel);
+        savedVersionRef.current.set(defaultFile, defaultModel.getAlternativeVersionId());
       }
 
       registerProviders(monaco, conn, (params) => {
@@ -255,11 +273,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const newInsertSpaces = patch.insertSpaces ?? insertSpaces;
     const newTabSize = patch.tabSize ?? tabSize;
     const newFullWidth = patch.fullWidth ?? fullWidth;
+    const newFormatOnSave = patch.formatOnSave ?? formatOnSave;
     setInsertSpaces(newInsertSpaces);
     setTabSize(newTabSize);
     setFullWidth(newFullWidth);
-    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize, fullWidth: newFullWidth };
+    setFormatOnSave(newFormatOnSave);
+    const settings: EditorSettings = { insertSpaces: newInsertSpaces, tabSize: newTabSize, fullWidth: newFullWidth, formatOnSave: newFormatOnSave };
     formatOptionsRef.current = { insertSpaces: newInsertSpaces, tabSize: newTabSize };
+    formatOnSaveRef.current = newFormatOnSave;
     saveSettings(settings);
     const ed = editorRef.current;
     if (ed) {
@@ -268,7 +289,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     for (const model of modelsRef.current.values()) {
       model.updateOptions({ insertSpaces: newInsertSpaces, tabSize: newTabSize });
     }
-  }, [insertSpaces, tabSize, fullWidth]);
+  }, [insertSpaces, tabSize, fullWidth, formatOnSave]);
 
   const withDirtyCheck = useCallback((action: () => void) => {
     if (dirtyFiles.has(activeFile)) {
@@ -288,11 +309,32 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
   const handleSwitchToSample = useCallback((fileName: string) => {
     if (fileName === activeFile) return;
-    withDirtyCheck(() => {
+    withDirtyCheck(async () => {
+      const conn = connRef.current;
+      const ed = editorRef.current;
+      const monaco = monacoRef.current;
+      const model = modelsRef.current.get(fileName);
+      if (!model || !ed) return;
+
+      // Close old document in LSP
+      const oldModel = ed.getModel();
+      if (oldModel && conn) {
+        closeDocument(conn, oldModel.uri.toString());
+      }
+
+      // Format model off-screen, then display
+      if (conn && monaco) {
+        openDocument(conn, model.uri.toString(), "railsim2", model.getValue());
+        await formatModel(conn, monaco, model, formatOptionsRef.current);
+        changeDocument(conn, model.uri.toString(), versionRef.current++, model.getValue());
+      }
+
+      ed.setModel(model);
+      versionRef.current = 2;
+      savedVersionRef.current.set(fileName, model.getAlternativeVersionId());
       setActiveFile(fileName);
-      switchToModel(fileName);
     });
-  }, [activeFile, switchToModel, withDirtyCheck]);
+  }, [activeFile, withDirtyCheck]);
 
   const applyOpenedFile = useCallback((opened: OpenedFile) => {
     const monaco = monacoRef.current;
@@ -343,6 +385,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const model = modelsRef.current.get(LOCAL_FILE_KEY);
     if (!opened || !model) return;
     try {
+      if (formatOnSave) {
+        const conn = connRef.current;
+        const ed = editorRef.current;
+        const monaco = monacoRef.current;
+        if (conn && ed && monaco) {
+          await formatDocument(conn, monaco, ed, formatOptionsRef.current);
+        }
+      }
       await saveFile(opened.handle, model.getValue(), opened.encoding);
       savedVersionRef.current.set(LOCAL_FILE_KEY, model.getAlternativeVersionId());
       setDirtyFiles((prev) => {
@@ -353,7 +403,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     } catch (e) {
       console.warn("Failed to save file:", e);
     }
-  }, []);
+  }, [formatOnSave]);
 
   const replaceLocalModel = useCallback((monaco: typeof import("monaco-editor"), fileName: string, content: string) => {
     const prevLocal = modelsRef.current.get(LOCAL_FILE_KEY);
@@ -536,6 +586,14 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                       <Item key="4">4</Item>
                       <Item key="8">8</Item>
                     </Picker>
+                  </Flex>
+                  <Flex justifyContent="space-between" alignItems="center">
+                    <span>保存時にフォーマット</span>
+                    <Switch
+                      aria-label="保存時にフォーマット"
+                      isSelected={formatOnSave}
+                      onChange={(value) => updateSettings({ formatOnSave: value })}
+                    />
                   </Flex>
                   <Flex justifyContent="space-between" alignItems="center">
                     <span>横幅を広げる</span>

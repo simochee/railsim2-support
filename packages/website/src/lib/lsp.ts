@@ -255,6 +255,18 @@ export interface FormatOptions {
   insertSpaces: boolean;
 }
 
+function toLspEdits(monaco: typeof Monaco, edits: { range: { start: { line: number; character: number }; end: { line: number; character: number } }; newText: string }[]) {
+  return edits.map((edit) => ({
+    range: new monaco.Range(
+      edit.range.start.line + 1,
+      edit.range.start.character + 1,
+      edit.range.end.line + 1,
+      edit.range.end.character + 1,
+    ),
+    text: edit.newText,
+  }));
+}
+
 export async function formatDocument(
   conn: ProtocolConnection,
   monaco: typeof Monaco,
@@ -270,18 +282,26 @@ export async function formatDocument(
       options,
     });
     if (!edits || edits.length === 0) return;
-
-    const monacoEdits = edits.map((edit) => ({
-      range: new monaco.Range(
-        edit.range.start.line + 1,
-        edit.range.start.character + 1,
-        edit.range.end.line + 1,
-        edit.range.end.character + 1,
-      ),
-      text: edit.newText,
-    }));
-    editor.executeEdits("railsim2-format", monacoEdits);
+    editor.executeEdits("railsim2-format", toLspEdits(monaco, edits));
   } catch {
     console.warn("Failed to format document");
+  }
+}
+
+export async function formatModel(
+  conn: ProtocolConnection,
+  monaco: typeof Monaco,
+  model: Monaco.editor.ITextModel,
+  options: FormatOptions,
+): Promise<void> {
+  try {
+    const edits = await conn.sendRequest(DocumentFormattingRequest.type, {
+      textDocument: { uri: model.uri.toString() },
+      options,
+    });
+    if (!edits || edits.length === 0) return;
+    model.applyEdits(toLspEdits(monaco, edits));
+  } catch {
+    console.warn("Failed to format model");
   }
 }
