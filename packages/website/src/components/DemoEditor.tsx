@@ -140,7 +140,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const isDirty = dirtyFiles.has(activeFile);
 
-  const currentFileName = (isLocalFile && localFileName) ? localFileName : "無題";
+  const currentFileName = (isLocalFile && localFileName) ? localFileName : "新規ファイル";
 
   const menuDisabledKeys: string[] = [];
   if (!FILE_ACCESS) {
