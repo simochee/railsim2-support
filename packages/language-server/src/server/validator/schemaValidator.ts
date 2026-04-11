@@ -369,6 +369,11 @@ function checkValueType(
     case "expression":
       // 任意 — チェックなし
       break;
+
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
   }
 }
 
