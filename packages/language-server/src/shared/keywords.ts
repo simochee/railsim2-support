@@ -23,9 +23,6 @@ function deriveObjectNames(): string[] {
   return [...names].sort();
 }
 
-/** スキーマ未定義だが RailSim2 で使われるレガシープロパティ */
-const LEGACY_PROPERTIES: string[] = [];
-
 function derivePropertyNames(): string[] {
   const names = new Set<string>();
   for (const obj of Object.values(semanticSchema)) {
@@ -33,7 +30,6 @@ function derivePropertyNames(): string[] {
       names.add(prop);
     }
   }
-  for (const p of LEGACY_PROPERTIES) names.add(p);
   return [...names].sort();
 }
 

@@ -43,6 +43,3 @@ export interface RootObjectEntry {
 
 /** PluginType ごとのトップレベル構造 */
 export type PluginTypeSchema = Record<string, RootObjectEntry[]>;
-
-/** @deprecated FileSchema は PluginTypeSchema に置き換え */
-export type FileSchema = PluginTypeSchema;
