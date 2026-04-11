@@ -1,6 +1,10 @@
-import { fileNamePluginTypeMap } from "@railsim2-support/language-server/schema";
-
-const VALID_PLUGIN_TYPES = new Set(Object.values(fileNamePluginTypeMap));
+// fileNamePluginTypeMap の値と一致する有効な PluginType 一覧。
+// language-server の CJS ビルドはブラウザ ESM で直接 import できないため手書き。
+// plugin-type.test.ts で language-server 側と一致検証している。
+export const VALID_PLUGIN_TYPES = new Set([
+  "Env", "Girder", "Line", "Pier", "Pole", "Rail",
+  "Skin", "Station", "Struct", "Surface", "Tie", "Train",
+]);
 
 /**
  * エディタ内容から PluginType を簡易推定する。

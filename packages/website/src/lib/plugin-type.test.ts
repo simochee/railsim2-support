@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { guessPluginType, suggestFileName } from "./plugin-type";
+import { fileNamePluginTypeMap } from "@railsim2-support/language-server/schema";
+import { guessPluginType, suggestFileName, VALID_PLUGIN_TYPES } from "./plugin-type";
+
+describe("VALID_PLUGIN_TYPES", () => {
+  it("matches language-server fileNamePluginTypeMap values", () => {
+    const expected = new Set(Object.values(fileNamePluginTypeMap));
+    expect(VALID_PLUGIN_TYPES).toEqual(expected);
+  });
+});
 
 describe("guessPluginType", () => {
   it("extracts PluginType from standard PluginHeader block", () => {
