@@ -223,7 +223,8 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
       .demo-tab-add-btn .codicon {
         font-size: 14px;
       }
-      .add-sample-popover {
+      /* Nested add menu */
+      .add-menu {
         position: absolute;
         top: 100%;
         left: 0;
@@ -232,10 +233,10 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         border: 1px solid var(--vscode-dropdown-border);
         border-radius: 4px;
         padding: 4px 0;
-        min-width: 180px;
+        min-width: 220px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       }
-      .add-sample-item {
+      .add-menu-item {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -248,18 +249,43 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         font-size: 13px;
         cursor: pointer;
         text-align: left;
+        position: relative;
       }
-      .add-sample-item:hover {
+      .add-menu-item:hover {
         background: var(--vscode-focusBorder);
         color: #ffffff;
       }
-      .add-sample-item:focus-visible {
+      .add-menu-item:focus-visible {
         outline: 1px solid var(--vscode-focusBorder);
         outline-offset: -1px;
       }
-      .add-sample-item .codicon {
+      .add-menu-item .codicon {
         font-size: 14px;
         opacity: 0.7;
+        flex-shrink: 0;
+      }
+      .add-menu-label {
+        flex: 1;
+      }
+      .add-menu-arrow {
+        font-size: 12px !important;
+        opacity: 0.5 !important;
+        margin-left: auto;
+      }
+      .add-menu-has-submenu {
+        position: relative;
+      }
+      .add-submenu {
+        position: absolute;
+        top: -4px;
+        left: 100%;
+        z-index: 101;
+        background: var(--vscode-dropdown-listBackground);
+        border: 1px solid var(--vscode-dropdown-border);
+        border-radius: 4px;
+        padding: 4px 0;
+        min-width: 180px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       }
       .editor-wrapper {
         height: calc(100vh - 180px);
