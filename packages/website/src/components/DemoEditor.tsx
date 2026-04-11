@@ -283,14 +283,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     [switchToModel],
   );
 
+  // Unconditionally closes a tab. Caller must ensure closing is safe
+  // (e.g. last-tab guard, dirty confirmation already handled).
   const performCloseTab = useCallback((key: string) => {
-    const currentVisible = localFileName
-      ? [...openTabs, LOCAL_FILE_KEY]
-      : [...openTabs];
-
     if (activeFile === key) {
-      const idx = currentVisible.indexOf(key);
-      const nextKey = currentVisible[idx + 1] ?? currentVisible[idx - 1];
+      const idx = visibleTabs.indexOf(key);
+      const nextKey = visibleTabs[idx + 1] ?? visibleTabs[idx - 1];
       if (nextKey) {
         switchToModel(nextKey);
         setActiveFile(nextKey);
@@ -318,13 +316,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       return next;
     });
     savedVersionRef.current.delete(key);
-  }, [activeFile, localFileName, openTabs, switchToModel]);
+  }, [activeFile, visibleTabs, switchToModel]);
 
   const handleCloseTab = useCallback((key: string) => {
-    const currentVisible = localFileName
-      ? [...openTabs, LOCAL_FILE_KEY]
-      : [...openTabs];
-    if (currentVisible.length <= 1) return;
+    if (visibleTabs.length <= 1) return;
 
     if (dirtyFiles.has(key)) {
       setClosingTab(key);
@@ -332,7 +327,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
 
     performCloseTab(key);
-  }, [localFileName, openTabs, dirtyFiles, performCloseTab]);
+  }, [visibleTabs, dirtyFiles, performCloseTab]);
 
   const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = tabsScrollRef.current;
@@ -499,6 +494,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   }, []);
 
   const canClose = visibleTabs.length > 1;
+
+  const closingTabName = closingTab === LOCAL_FILE_KEY
+    ? localFileName
+    : samples.find((sm) => sm.fileName === closingTab)?.displayName ?? closingTab;
 
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
@@ -702,13 +701,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             variant="destructive"
             primaryActionLabel="保存せずに閉じる"
             cancelLabel="キャンセル"
-            onPrimaryAction={() => {
-              performCloseTab(closingTab);
-              setClosingTab(null);
-            }}
+            onPrimaryAction={() => performCloseTab(closingTab)}
             onCancel={() => setClosingTab(null)}
           >
-            {`「${closingTab === LOCAL_FILE_KEY ? localFileName : samples.find((sm) => sm.fileName === closingTab)?.displayName ?? closingTab}」の変更はまだ保存されていません。保存せずに閉じますか？`}
+            {`「${closingTabName}」の変更はまだ保存されていません。保存せずに閉じますか？`}
           </AlertDialog>
         )}
       </DialogContainer>
