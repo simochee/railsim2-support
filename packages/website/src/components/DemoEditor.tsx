@@ -3,10 +3,11 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import type { ProtocolConnection } from "vscode-languageserver-protocol/browser";
 import "@vscode/codicons/dist/codicon.css";
-import { VSCodeButton, VSCodeDropdown, VSCodeOption } from "@vscode/webview-ui-toolkit/react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, type OpenedFile } from "../lib/file-access";
+import s from "./DemoEditor.module.css";
 
 interface Sample {
   fileName: string;
@@ -53,7 +54,7 @@ function saveSettings(settings: EditorSettings): void {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
   } catch {
-    // Ignore storage errors (private browsing, quota exceeded, etc.)
+    // Ignore storage errors
   }
 }
 
@@ -72,12 +73,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [showIndentPopover, setShowIndentPopover] = useState(false);
-  const [showAddMenu, setShowAddMenu] = useState(false);
-  const [showSampleSubmenu, setShowSampleSubmenu] = useState(false);
-  const indentBtnRef = useRef<HTMLSpanElement>(null);
+  const indentBtnRef = useRef<HTMLButtonElement>(null);
   const indentPopoverRef = useRef<HTMLDivElement>(null);
-  const addBtnRef = useRef<HTMLDivElement>(null);
-  const addMenuRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -90,18 +87,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     insertSpaces: initialSettings.insertSpaces,
   });
 
-  // Visible tabs: open sample tabs + local file tab
   const visibleTabs: string[] = localFileName
     ? [...openTabs, LOCAL_FILE_KEY]
     : openTabs;
 
-  // Samples not yet in openTabs (for submenu)
   const unopenedSamples = samples.filter((s) => !openTabs.includes(s.fileName));
-
-  const closeAddMenu = useCallback(() => {
-    setShowAddMenu(false);
-    setShowSampleSubmenu(false);
-  }, []);
+  const hasAddActions = unopenedSamples.length > 0 || FILE_ACCESS;
 
   const switchToModel = useCallback((key: string) => {
     const conn = connRef.current;
@@ -125,7 +116,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     monacoRef.current = monaco;
 
     monaco.languages.register({ id: "railsim2" });
-
     monaco.languages.setLanguageConfiguration("railsim2", {
       comments: {
         lineComment: langConf.comments.lineComment,
@@ -151,7 +141,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     if (defaultModel) ed.setModel(defaultModel);
     ed.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
 
-    // Cmd+S / Ctrl+S で保存
     ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
       const opened = openedFileRef.current;
       const model = modelsRef.current.get(LOCAL_FILE_KEY);
@@ -218,24 +207,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
-  const handleInsertSpacesChange = useCallback(
-    (e: Event | React.FormEvent<HTMLElement>) => {
-      const target = e.target as HTMLElement & { value: string };
-      const spaces = target.value === "spaces";
-      updateSettings(spaces, tabSize);
-    },
-    [tabSize, updateSettings],
-  );
-
-  const handleTabSizeChange = useCallback(
-    (e: Event | React.FormEvent<HTMLElement>) => {
-      const target = e.target as HTMLElement & { value: string };
-      const size = Number(target.value);
-      updateSettings(insertSpaces, size);
-    },
-    [insertSpaces, updateSettings],
-  );
-
   const handleTabClick = useCallback(
     (key: string) => {
       setActiveFile(key);
@@ -248,10 +219,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     const currentVisible = localFileName
       ? [...openTabs, LOCAL_FILE_KEY]
       : [...openTabs];
-
     if (currentVisible.length <= 1) return;
-
-    const isLocal = key === LOCAL_FILE_KEY;
 
     if (activeFile === key) {
       const idx = currentVisible.indexOf(key);
@@ -262,7 +230,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       }
     }
 
-    if (isLocal) {
+    if (key === LOCAL_FILE_KEY) {
       const conn = connRef.current;
       const prevModel = modelsRef.current.get(LOCAL_FILE_KEY);
       if (prevModel) {
@@ -281,11 +249,9 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     setOpenTabs((prev) => prev.includes(fileName) ? prev : [...prev, fileName]);
     setActiveFile(fileName);
     switchToModel(fileName);
-    closeAddMenu();
-  }, [switchToModel, closeAddMenu]);
+  }, [switchToModel]);
 
   const handleOpen = useCallback(async () => {
-    closeAddMenu();
     const monaco = monacoRef.current;
     if (!monaco) return;
 
@@ -314,13 +280,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       if (e instanceof DOMException && e.name === "AbortError") return;
       console.warn("Failed to open file:", e);
     }
-  }, [switchToModel, closeAddMenu]);
+  }, [switchToModel]);
 
   const handleSave = useCallback(async () => {
     const opened = openedFileRef.current;
     const model = modelsRef.current.get(LOCAL_FILE_KEY);
     if (!opened || !model) return;
-
     try {
       await saveFile(opened.handle, model.getValue(), opened.encoding);
     } catch (e) {
@@ -328,33 +293,22 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     }
   }, []);
 
-  // Close popovers on click-outside or Escape
+  // Close indent popover on click-outside or Escape
   useEffect(() => {
-    if (!showIndentPopover && !showAddMenu) return;
+    if (!showIndentPopover) return;
 
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
       if (
-        showIndentPopover &&
         indentPopoverRef.current && !indentPopoverRef.current.contains(target) &&
         indentBtnRef.current && !indentBtnRef.current.contains(target)
       ) {
         setShowIndentPopover(false);
       }
-      if (
-        showAddMenu &&
-        addMenuRef.current && !addMenuRef.current.contains(target) &&
-        addBtnRef.current && !addBtnRef.current.contains(target)
-      ) {
-        closeAddMenu();
-      }
     };
 
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setShowIndentPopover(false);
-        closeAddMenu();
-      }
+      if (e.key === "Escape") setShowIndentPopover(false);
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -363,7 +317,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [showIndentPopover, showAddMenu, closeAddMenu]);
+  }, [showIndentPopover]);
 
   useEffect(() => {
     return () => {
@@ -381,131 +335,119 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const isLocalFile = activeFile === LOCAL_FILE_KEY;
   const indentLabel = insertSpaces ? `Spaces: ${tabSize}` : `Tab Size: ${tabSize}`;
   const canClose = visibleTabs.length > 1;
-  const hasAddActions = unopenedSamples.length > 0 || FILE_ACCESS;
 
   return (
     <>
-      <div className="demo-header">
-        <span className="indent-btn-wrapper" ref={indentBtnRef}>
-          <VSCodeButton
-            appearance="secondary"
+      <div className={s.header}>
+        <span className={s.indentWrapper}>
+          <button
+            ref={indentBtnRef}
+            className={s.btn}
             onClick={() => setShowIndentPopover((v) => !v)}
           >
             {indentLabel}
-          </VSCodeButton>
+          </button>
           {showIndentPopover && (
-            <div className="indent-popover" ref={indentPopoverRef}>
-              <div className="indent-popover-row">
-                <label>Indent:</label>
-                <VSCodeDropdown value={insertSpaces ? "spaces" : "tab"} onChange={handleInsertSpacesChange}>
-                  <VSCodeOption value="tab">Tab</VSCodeOption>
-                  <VSCodeOption value="spaces">Spaces</VSCodeOption>
-                </VSCodeDropdown>
+            <div className={s.indentPopover} ref={indentPopoverRef}>
+              <div className={s.indentRow}>
+                <label htmlFor="indent-type">Indent:</label>
+                <select
+                  id="indent-type"
+                  className={s.select}
+                  value={insertSpaces ? "spaces" : "tab"}
+                  onChange={(e) => updateSettings(e.target.value === "spaces", tabSize)}
+                >
+                  <option value="tab">Tab</option>
+                  <option value="spaces">Spaces</option>
+                </select>
               </div>
-              <div className="indent-popover-row">
-                <label>Size:</label>
-                <VSCodeDropdown value={String(tabSize)} onChange={handleTabSizeChange}>
-                  <VSCodeOption value="1">1</VSCodeOption>
-                  <VSCodeOption value="2">2</VSCodeOption>
-                  <VSCodeOption value="4">4</VSCodeOption>
-                  <VSCodeOption value="8">8</VSCodeOption>
-                </VSCodeDropdown>
+              <div className={s.indentRow}>
+                <label htmlFor="indent-size">Size:</label>
+                <select
+                  id="indent-size"
+                  className={s.select}
+                  value={tabSize}
+                  onChange={(e) => updateSettings(insertSpaces, Number(e.target.value))}
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                  <option value={4}>4</option>
+                  <option value={8}>8</option>
+                </select>
               </div>
             </div>
           )}
         </span>
-        <VSCodeButton appearance="secondary" onClick={handleFormat}>
-          <span className="codicon codicon-list-flat" slot="start" />
+        <button className={s.btn} onClick={handleFormat}>
+          <span className="codicon codicon-list-flat" />
           Format
-        </VSCodeButton>
+        </button>
         {FILE_ACCESS && isLocalFile && (
-          <VSCodeButton appearance="secondary" onClick={handleSave}>
-            <span className="codicon codicon-save" slot="start" />
+          <button className={s.btn} onClick={handleSave}>
+            <span className="codicon codicon-save" />
             Save
-          </VSCodeButton>
+          </button>
         )}
       </div>
-      <div className="demo-tabs-wrapper">
+      <div className={s.tabsWrapper}>
         {hasAddActions && (
-          <div className="demo-tab-add" ref={addBtnRef}>
-            <button
-              type="button"
-              className="demo-tab-add-btn"
-              aria-label="Open file"
-              onClick={() => setShowAddMenu((v) => !v)}
-            >
-              <span className="codicon codicon-add" />
-            </button>
-            {showAddMenu && (
-              <div className="add-menu" ref={addMenuRef} role="menu">
-                {unopenedSamples.length > 0 && (
-                  <div
-                    className="add-menu-item add-menu-has-submenu"
-                    role="menuitem"
-                    tabIndex={0}
-                    aria-haspopup="menu"
-                    aria-expanded={showSampleSubmenu}
-                    onMouseEnter={() => setShowSampleSubmenu(true)}
-                    onMouseLeave={() => setShowSampleSubmenu(false)}
-                    onClick={() => setShowSampleSubmenu(true)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
-                        e.preventDefault();
-                        setShowSampleSubmenu(true);
-                      }
-                      if (e.key === "ArrowLeft") {
-                        setShowSampleSubmenu(false);
-                      }
-                    }}
-                    onFocus={() => setShowSampleSubmenu(true)}
-                  >
-                    <span className="codicon codicon-symbol-snippet" />
-                    <span className="add-menu-label">サンプル</span>
-                    <span className="codicon codicon-chevron-right add-menu-arrow" />
-                    {showSampleSubmenu && (
-                      <div className="add-submenu" role="menu">
-                        {unopenedSamples.map((s) => (
-                          <button
-                            key={s.fileName}
-                            type="button"
-                            className="add-menu-item"
-                            role="menuitem"
-                            onClick={() => handleAddSample(s.fileName)}
-                          >
-                            <span className="codicon codicon-file" />
-                            <span className="add-menu-label">{s.fileName}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {FILE_ACCESS && (
-                  <button
-                    type="button"
-                    className="add-menu-item"
-                    role="menuitem"
-                    onClick={handleOpen}
-                  >
-                    <span className="codicon codicon-folder-opened" />
-                    <span className="add-menu-label">ローカルファイルを開く...</span>
-                  </button>
-                )}
-              </div>
-            )}
+          <div className={s.addBtnArea}>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger asChild>
+                <button className={s.addBtn} aria-label="Open file">
+                  <span className="codicon codicon-add" />
+                </button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Portal>
+                <DropdownMenu.Content className={s.menuContent} sideOffset={2} align="start">
+                  {unopenedSamples.length > 0 && (
+                    <DropdownMenu.Sub>
+                      <DropdownMenu.SubTrigger className={s.menuSubTrigger}>
+                        <span className="codicon codicon-symbol-snippet" />
+                        <span>サンプル</span>
+                        <span className={`codicon codicon-chevron-right ${s.menuArrow}`} />
+                      </DropdownMenu.SubTrigger>
+                      <DropdownMenu.Portal>
+                        <DropdownMenu.SubContent className={s.menuContent} sideOffset={4}>
+                          {unopenedSamples.map((sample) => (
+                            <DropdownMenu.Item
+                              key={sample.fileName}
+                              className={s.menuItem}
+                              onSelect={() => handleAddSample(sample.fileName)}
+                            >
+                              <span className="codicon codicon-file" />
+                              <span>{sample.fileName}</span>
+                            </DropdownMenu.Item>
+                          ))}
+                        </DropdownMenu.SubContent>
+                      </DropdownMenu.Portal>
+                    </DropdownMenu.Sub>
+                  )}
+                  {unopenedSamples.length > 0 && FILE_ACCESS && (
+                    <DropdownMenu.Separator className={s.menuSeparator} />
+                  )}
+                  {FILE_ACCESS && (
+                    <DropdownMenu.Item className={s.menuItem} onSelect={handleOpen}>
+                      <span className="codicon codicon-folder-opened" />
+                      <span>ローカルファイルを開く...</span>
+                    </DropdownMenu.Item>
+                  )}
+                </DropdownMenu.Content>
+              </DropdownMenu.Portal>
+            </DropdownMenu.Root>
           </div>
         )}
-        <div className="demo-tabs-scroll" role="tablist">
+        <div className={s.tabsScroll} role="tablist">
           {openTabs.map((key) => {
-            const sample = samples.find((s) => s.fileName === key);
+            const sample = samples.find((sm) => sm.fileName === key);
             if (!sample) return null;
             return (
-              <div key={key} className={`demo-tab${activeFile === key ? " demo-tab-active" : ""}`}>
+              <div key={key} className={`${s.tab}${activeFile === key ? ` ${s.tabActive}` : ""}`}>
                 <span
                   role="tab"
                   tabIndex={0}
                   aria-selected={activeFile === key}
-                  className="demo-tab-label"
+                  className={s.tabLabel}
                   onClick={() => handleTabClick(key)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(key); }}
                 >
@@ -515,7 +457,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 {canClose && (
                   <button
                     type="button"
-                    className="demo-tab-close"
+                    className={s.tabClose}
                     aria-label={`Close ${sample.fileName}`}
                     onClick={() => handleCloseTab(key)}
                   >
@@ -526,12 +468,12 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             );
           })}
           {localFileName && (
-            <div className={`demo-tab${isLocalFile ? " demo-tab-active" : ""}`}>
+            <div className={`${s.tab}${isLocalFile ? ` ${s.tabActive}` : ""}`}>
               <span
                 role="tab"
                 tabIndex={0}
                 aria-selected={isLocalFile}
-                className="demo-tab-label"
+                className={s.tabLabel}
                 onClick={() => handleTabClick(LOCAL_FILE_KEY)}
                 onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleTabClick(LOCAL_FILE_KEY); }}
               >
@@ -541,7 +483,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               {canClose && (
                 <button
                   type="button"
-                  className="demo-tab-close"
+                  className={s.tabClose}
                   aria-label={`Close ${localFileName}`}
                   onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
                 >
@@ -552,7 +494,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           )}
         </div>
       </div>
-      <div className="editor-wrapper">
+      <div className={s.editorWrapper}>
         <Editor
           theme="vs-dark"
           onMount={handleMount}
