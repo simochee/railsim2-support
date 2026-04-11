@@ -112,6 +112,16 @@
   flex-shrink: 0;
 }
 
+/* ── Tab Bar Actions (right side) ────────────────────── */
+.tabsActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0 4px;
+}
+
 /* ── Editor ───────────────────────────────────────────── */
 .editorWrapper {
   height: calc(100vh - 180px);

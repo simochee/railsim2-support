@@ -18,6 +18,8 @@ import {
   Provider,
   Section,
   SubmenuTrigger,
+  Tooltip,
+  TooltipTrigger,
 } from "@adobe/react-spectrum";
 import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, type FormatOptions } from "../lib/lsp";
@@ -365,12 +367,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
           <span className="codicon codicon-list-flat" />
           Format
         </ActionButton>
-        {FILE_ACCESS && isLocalFile && (
-          <ActionButton onPress={handleSave}>
-            <span className="codicon codicon-save" />
-            Save
-          </ActionButton>
-        )}
       </div>
       <div className={s.tabsWrapper}>
         {hasAddActions && (
@@ -454,6 +450,35 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               )}
             </div>
           )}
+        </div>
+        <div className={s.tabsActions}>
+          {FILE_ACCESS && isLocalFile && (
+            <TooltipTrigger placement="bottom">
+              <ActionButton isQuiet onPress={handleSave} aria-label="Save">
+                <span className="codicon codicon-save" />
+              </ActionButton>
+              <Tooltip>Save</Tooltip>
+            </TooltipTrigger>
+          )}
+          <TooltipTrigger placement="bottom">
+            <ActionButton isQuiet onPress={handleFormat} aria-label="Format">
+              <span className="codicon codicon-list-flat" />
+            </ActionButton>
+            <Tooltip>Format</Tooltip>
+          </TooltipTrigger>
+          <DialogTrigger isDismissable>
+            <TooltipTrigger placement="bottom">
+              <ActionButton isQuiet aria-label="Settings">
+                <span className="codicon codicon-settings-gear" />
+              </ActionButton>
+              <Tooltip>Settings</Tooltip>
+            </TooltipTrigger>
+            <Dialog>
+              <Heading>Settings</Heading>
+              <Divider />
+              <Content>Coming soon.</Content>
+            </Dialog>
+          </DialogTrigger>
         </div>
       </div>
       <div className={s.editorWrapper}>
