@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse as parseJsonc } from "jsonc-parser";
 import EditorBanner from "../components/EditorBanner.astro";
-import { DemoEditor } from "../components/DemoEditor";
+import { OnlineEditor } from "../components/Editor";
 import { getSamples } from "../lib/samples";
 
 const samples = getSamples();
@@ -27,7 +27,7 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
 <html lang="ja">
   <head>
     <meta charset="UTF-8" />
-    <title>Live Demo - RailSim2 Support</title>
+    <title>オンラインエディター - RailSim2 Support</title>
     <style is:global>
       body {
         margin: 0;
@@ -35,19 +35,19 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
         background: #1e1e1e;
         color: #e0e0e0;
       }
-      .demo-container {
+      .editor-container {
         height: calc(100dvh - 48px);
         max-width: 1200px;
         margin: 0 auto;
         padding: 0 16px;
         box-sizing: border-box;
       }
-      .demo-container > *,
-      .demo-container > * > * {
+      .editor-container > *,
+      .editor-container > * > * {
         height: 100%;
       }
       @media (max-width: 1200px) {
-        .demo-container {
+        .editor-container {
           padding: 0;
         }
       }
@@ -55,8 +55,8 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
   </head>
   <body>
     <EditorBanner />
-    <div class="demo-container">
-      <DemoEditor client:only="react" samples={samples} grammar={grammar} langConf={langConf} />
+    <div class="editor-container">
+      <OnlineEditor client:only="react" samples={samples} grammar={grammar} langConf={langConf} />
     </div>
   </body>
 </html>

@@ -30,7 +30,7 @@ import { setupGrammar } from "../lib/grammar";
 import { startLsp, disposeLsp, openDocument, closeDocument, changeDocument, registerProviders, applyDiagnostics, formatDocument, formatModel, type FormatOptions } from "../lib/lsp";
 import { isFileAccessSupported, openFile, saveFile, saveFileAs, type OpenedFile } from "../lib/file-access";
 import { suggestFileName } from "../lib/plugin-type";
-import s from "./DemoEditor.module.css";
+import s from "./Editor.module.css";
 
 interface Sample {
   fileName: string;
@@ -55,7 +55,7 @@ const MOD = IS_MAC ? "⌘" : "Ctrl+";
 const SHIFT = IS_MAC ? "⇧" : "Shift+";
 const ALT = IS_MAC ? "⌥" : "Alt+";
 const LOCAL_FILE_KEY = "__local__";
-const SETTINGS_KEY = "railsim2-demo-settings";
+const SETTINGS_KEY = "railsim2-editor-settings";
 const VALID_TAB_SIZES = [1, 2, 4, 8];
 const DEFAULT_SAMPLE = "Train2.txt";
 
@@ -105,7 +105,7 @@ function resolveDefaultSample(samples: Sample[]): string {
     : samples[0]?.fileName ?? "";
 }
 
-export function DemoEditor({ samples, grammar, langConf }: Props) {
+export function OnlineEditor({ samples, grammar, langConf }: Props) {
   const [initialSettings] = useState(loadSettings);
   const defaultFile = resolveDefaultSample(samples);
   const [activeFile, setActiveFile] = useState(defaultFile);
@@ -186,7 +186,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     });
 
     for (const sample of samples) {
-      const uri = monaco.Uri.parse(`inmemory://demo/${sample.fileName}`);
+      const uri = monaco.Uri.parse(`inmemory://editor/${sample.fileName}`);
       const model = monaco.editor.createModel(sample.content, "railsim2", uri);
       model.updateOptions({ insertSpaces: formatOptionsRef.current.insertSpaces, tabSize: formatOptionsRef.current.tabSize });
       modelsRef.current.set(sample.fileName, model);
