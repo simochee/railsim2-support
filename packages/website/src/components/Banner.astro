@@ -24,7 +24,8 @@ import { Icon } from "astro-icon/components";
   .banner {
     position: sticky;
     top: 0;
-    margin-bottom: 40px;
+    height: 48px;
+    box-sizing: border-box;
     z-index: 9999;
     background: #1a1a2e;
     border-bottom: 3px solid #ff8000;
@@ -33,12 +34,12 @@ import { Icon } from "astro-icon/components";
   .banner-inner {
     max-width: 1024px;
     margin: 0 auto;
-    padding: 4px 16px;
+    padding: 0 16px;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    flex-wrap: wrap;
     color: #e0e0e0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 13px;
@@ -75,7 +76,6 @@ import { Icon } from "astro-icon/components";
   .banner-links {
     display: flex;
     gap: 20px;
-    flex-wrap: wrap;
     font-size: 13px;
   }
 
