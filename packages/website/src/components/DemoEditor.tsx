@@ -97,6 +97,8 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const [insertSpaces, setInsertSpaces] = useState(initialSettings.insertSpaces);
   const [tabSize, setTabSize] = useState(initialSettings.tabSize);
   const [fullWidth, setFullWidth] = useState(initialSettings.fullWidth);
+  const tabsScrollRef = useRef<HTMLDivElement | null>(null);
+  const dragState = useRef<{ isDragging: boolean; didDrag: boolean; startX: number; scrollLeft: number }>({ isDragging: false, didDrag: false, startX: 0, scrollLeft: 0 });
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const modelsRef = useRef<Map<string, editor.ITextModel>>(new Map());
   const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
@@ -235,6 +237,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
   const handleTabClick = useCallback(
     (key: string) => {
+      if (dragState.current.didDrag) return;
       setActiveFile(key);
       switchToModel(key);
     },
@@ -270,6 +273,30 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       setOpenTabs((prev) => prev.filter((t) => t !== key));
     }
   }, [activeFile, localFileName, openTabs, switchToModel]);
+
+  const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    dragState.current = { isDragging: true, didDrag: false, startX: e.pageX, scrollLeft: el.scrollLeft };
+    el.classList.add(s.tabsDragging);
+  }, []);
+
+  const handleTabsMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!dragState.current.isDragging) return;
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    const dx = e.pageX - dragState.current.startX;
+    if (Math.abs(dx) > 3) {
+      dragState.current.didDrag = true;
+    }
+    e.preventDefault();
+    el.scrollLeft = dragState.current.scrollLeft - dx;
+  }, []);
+
+  const handleTabsMouseUp = useCallback(() => {
+    dragState.current.isDragging = false;
+    tabsScrollRef.current?.classList.remove(s.tabsDragging);
+  }, []);
 
   const handleAddSample = useCallback((fileName: string) => {
     setOpenTabs((prev) => prev.includes(fileName) ? prev : [...prev, fileName]);
@@ -410,7 +437,15 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             </MenuTrigger>
           </div>
         )}
-        <div className={s.tabsScroll} role="tablist">
+        <div
+          ref={tabsScrollRef}
+          className={s.tabsScroll}
+          role="tablist"
+          onMouseDown={handleTabsMouseDown}
+          onMouseMove={handleTabsMouseMove}
+          onMouseUp={handleTabsMouseUp}
+          onMouseLeave={handleTabsMouseUp}
+        >
           {openTabs.map((key) => {
             const sample = samples.find((sm) => sm.fileName === key);
             if (!sample) return null;

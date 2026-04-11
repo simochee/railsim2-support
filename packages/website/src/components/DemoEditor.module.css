@@ -24,10 +24,19 @@
 .tabsScroll {
   display: flex;
   overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--spectrum-global-color-gray-400) transparent;
+  scrollbar-width: none;
   flex: 1;
+  cursor: grab;
   min-width: 0;
+}
+
+.tabsScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.tabsDragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .tab {
