@@ -525,7 +525,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
             const sample = samples.find((sm) => sm.fileName === key);
             if (!sample) return null;
             return (
-              <div key={key} className={`${s.tab}${activeFile === key ? ` ${s.tabActive}` : ""}`}>
+              <div key={key} className={`${s.tab}${activeFile === key ? ` ${s.tabActive}` : ""}${dirtyFiles.has(key) ? ` ${s.tabDirty}` : ""}`}>
                 <span
                   role="tab"
                   tabIndex={0}
@@ -538,20 +538,25 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   {sample.displayName}
                 </span>
                 {canClose && (
-                  <button
-                    type="button"
-                    className={s.tabClose}
-                    aria-label={`Close ${sample.displayName}`}
-                    onClick={() => handleCloseTab(key)}
-                  >
-                    <span className="codicon codicon-close" />
-                  </button>
+                  <>
+                    <span className={s.tabDot}>
+                      <span className="codicon codicon-circle-filled" />
+                    </span>
+                    <button
+                      type="button"
+                      className={s.tabClose}
+                      aria-label={`Close ${sample.displayName}`}
+                      onClick={() => handleCloseTab(key)}
+                    >
+                      <span className="codicon codicon-close" />
+                    </button>
+                  </>
                 )}
               </div>
             );
           })}
           {localFileName && (
-            <div className={`${s.tab}${isLocalFile ? ` ${s.tabActive}` : ""}`}>
+            <div className={`${s.tab}${isLocalFile ? ` ${s.tabActive}` : ""}${dirtyFiles.has(LOCAL_FILE_KEY) ? ` ${s.tabDirty}` : ""}`}>
               <span
                 role="tab"
                 tabIndex={0}
@@ -564,14 +569,19 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 {localFileName}
               </span>
               {canClose && (
-                <button
-                  type="button"
-                  className={s.tabClose}
-                  aria-label={`Close ${localFileName}`}
-                  onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
-                >
-                  <span className="codicon codicon-close" />
-                </button>
+                <>
+                  <span className={s.tabDot}>
+                    <span className="codicon codicon-circle-filled" />
+                  </span>
+                  <button
+                    type="button"
+                    className={s.tabClose}
+                    aria-label={`Close ${localFileName}`}
+                    onClick={() => handleCloseTab(LOCAL_FILE_KEY)}
+                  >
+                    <span className="codicon codicon-close" />
+                  </button>
+                </>
               )}
             </div>
           )}

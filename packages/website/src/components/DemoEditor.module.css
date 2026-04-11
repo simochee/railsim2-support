@@ -118,6 +118,43 @@
   font-size: 12px;
 }
 
+/* ── Dirty indicator ─────────────────────────────────── */
+.tabDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 4px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.tabDot :global(.codicon) {
+  font-size: 8px;
+}
+
+/* dirty tab: show dot by default, close button on hover */
+.tabDirty .tabDot {
+  display: inline-flex;
+}
+.tabDirty .tabClose {
+  display: none;
+}
+.tabDirty:hover .tabDot,
+.tabDirty.tabActive .tabDot {
+  display: none;
+}
+.tabDirty:hover .tabClose,
+.tabDirty.tabActive .tabClose {
+  display: inline-flex;
+}
+
+/* clean tab: dot always hidden */
+.tab:not(.tabDirty) .tabDot {
+  display: none;
+}
+
 /* ── File Menu Button ────────────────────────────────── */
 .addBtnArea {
   display: inline-flex;
