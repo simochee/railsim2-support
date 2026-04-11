@@ -493,6 +493,17 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    if (dirtyFiles.size === 0) return;
+
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirtyFiles.size]);
+
   const canClose = visibleTabs.length > 1;
 
   const closingTabName = closingTab === LOCAL_FILE_KEY
