@@ -1,4 +1,10 @@
 /* ── Layout ────────────────────────────────────────────── */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .fullWidth {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -11,7 +17,6 @@
   align-items: stretch;
   border-bottom: 1px solid var(--spectrum-global-color-gray-300);
   background: var(--spectrum-global-color-gray-75);
-  margin-top: 8px;
 }
 
 .tabsScroll {
@@ -132,9 +137,10 @@
 
 /* ── Editor ───────────────────────────────────────────── */
 .editorWrapper {
-  height: calc(100vh - 180px);
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
   border: 1px solid var(--spectrum-global-color-gray-300);
   border-top: none;
-  border-radius: 0 0 var(--spectrum-alias-border-radius-regular) var(--spectrum-alias-border-radius-regular);
   overflow: hidden;
 }

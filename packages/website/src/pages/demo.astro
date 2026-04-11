@@ -31,13 +31,25 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
     <style is:global>
       body {
         margin: 0;
+        overflow: hidden;
         background: #1e1e1e;
         color: #e0e0e0;
       }
       .demo-container {
+        height: calc(100dvh - 48px);
         max-width: 1200px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 0 16px;
+        box-sizing: border-box;
+      }
+      .demo-container > *,
+      .demo-container > * > * {
+        height: 100%;
+      }
+      @media (max-width: 1200px) {
+        .demo-container {
+          padding: 0;
+        }
       }
     </style>
   </head>

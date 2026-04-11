@@ -373,7 +373,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
 
   return (
     <Provider theme={defaultTheme} colorScheme="dark">
-      <div className={fullWidth ? s.fullWidth : undefined}>
+      <div className={`${s.root}${fullWidth ? ` ${s.fullWidth}` : ""}`}>
       <div className={s.tabsWrapper}>
         {hasAddActions && (
           <div className={s.addBtnArea}>
