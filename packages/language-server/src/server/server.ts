@@ -149,11 +149,8 @@ export function startServer(connection: Connection): void {
   connection.onHover((params) => {
     const doc = documents.get(params.textDocument.uri);
     if (!doc) return null;
-
-    const text = doc.getText();
-    const { file } = parse(text);
-
-    return getHover(file, params.position);
+    const cached = getOrParse(doc);
+    return getHover(cached.file, params.position);
   });
 
   documents.listen(connection);
