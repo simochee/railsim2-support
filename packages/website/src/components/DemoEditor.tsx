@@ -232,10 +232,6 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
       if (FILE_ACCESS) handleOpenRef.current();
     });
 
-    ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Comma, () => {
-      setShowSettings(true);
-    });
-
     ed.addCommand(monaco.KeyMod.Shift | monaco.KeyMod.Alt | monaco.KeyCode.KeyF, () => {
       const conn = connRef.current;
       if (conn) {
@@ -601,7 +597,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                 <Item key="save-as" textValue="名前を付けて保存..."><Text>名前を付けて保存...</Text><Keyboard>{`${SHIFT}${MOD}S`}</Keyboard></Item>
               </Section>
               <Section>
-                <Item key="settings" textValue="設定..."><Text>設定...</Text><Keyboard>{`${MOD},`}</Keyboard></Item>
+                <Item key="settings" textValue="設定...">設定...</Item>
               </Section>
             </Menu>
           </MenuTrigger>
