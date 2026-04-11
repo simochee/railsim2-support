@@ -18,6 +18,7 @@ import {
   type InlayHint as LspInlayHint,
   type Diagnostic as LspDiagnostic,
   CompletionItemKind as LspCompletionItemKind,
+  InsertTextFormat,
   InlayHintKind as LspInlayHintKind,
   DiagnosticSeverity as LspDiagnosticSeverity,
 } from "vscode-languageserver-protocol/browser";
@@ -43,7 +44,7 @@ export async function startLsp(): Promise<ProtocolConnection> {
         processId: null,
         capabilities: {
           textDocument: {
-            completion: { completionItem: { snippetSupport: false } },
+            completion: { completionItem: { snippetSupport: true } },
             hover: { contentFormat: ["plaintext", "markdown"] },
             inlayHint: {},
             publishDiagnostics: {},
@@ -118,6 +119,10 @@ export function registerProviders(
               label: item.label,
               kind: mapCompletionItemKind(monaco, item.kind),
               insertText: item.insertText ?? item.label,
+              insertTextRules:
+                item.insertTextFormat === InsertTextFormat.Snippet
+                  ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                  : undefined,
               detail: item.detail,
               documentation: item.documentation,
               range: undefined!,
