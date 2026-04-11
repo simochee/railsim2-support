@@ -241,7 +241,7 @@
 
 /* ── Radix Dropdown Menu ──────────────────────────────── */
 .menuContent {
-  min-width: 220px;
+  min-width: 160px;
   background: var(--vsc-menu-bg);
   border: 1px solid var(--vsc-menu-separator);
   border-radius: 6px;
@@ -316,9 +316,10 @@
 }
 
 .menuArrow {
-  font-size: 10px !important;
-  opacity: 0.4 !important;
+  font-size: 14px !important;
+  opacity: 0.6 !important;
   flex-shrink: 0;
+  margin-left: 16px;
 }
 
 .menuSeparator {
