@@ -400,15 +400,18 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
               </DropdownMenu.Trigger>
               <DropdownMenu.Portal>
                 <DropdownMenu.Content className={s.menuContent} sideOffset={2} align="start">
+                  <DropdownMenu.Label className={s.menuLabel}>ファイルを開く</DropdownMenu.Label>
                   {unopenedSamples.length > 0 && (
                     <DropdownMenu.Sub>
                       <DropdownMenu.SubTrigger className={s.menuSubTrigger}>
-                        <span className="codicon codicon-symbol-snippet" />
-                        <span>サンプル</span>
+                        <span className={s.menuSubTriggerIcon}>
+                          <span className="codicon codicon-symbol-snippet" />
+                          <span>サンプル</span>
+                        </span>
                         <span className={`codicon codicon-chevron-right ${s.menuArrow}`} />
                       </DropdownMenu.SubTrigger>
                       <DropdownMenu.Portal>
-                        <DropdownMenu.SubContent className={s.menuContent} sideOffset={4}>
+                        <DropdownMenu.SubContent className={s.menuContent} sideOffset={2} alignOffset={-4}>
                           {unopenedSamples.map((sample) => (
                             <DropdownMenu.Item
                               key={sample.fileName}

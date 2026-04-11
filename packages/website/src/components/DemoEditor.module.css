@@ -291,19 +291,34 @@
   flex-shrink: 0;
 }
 
+.menuLabel {
+  padding: 6px 8px;
+  font-family: var(--vsc-font);
+  font-size: 12px;
+  color: #858585;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
 .menuSubTrigger {
   composes: menuItem;
+  justify-content: space-between;
 }
 
 .menuSubTrigger[data-state="open"] {
   background: var(--vsc-menu-hover);
-  color: #ffffff;
+}
+
+.menuSubTriggerIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .menuArrow {
-  margin-left: auto;
-  font-size: 12px !important;
-  opacity: 0.5 !important;
+  font-size: 10px !important;
+  opacity: 0.4 !important;
+  flex-shrink: 0;
 }
 
 .menuSeparator {
