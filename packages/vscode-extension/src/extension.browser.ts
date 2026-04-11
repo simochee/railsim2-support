@@ -8,7 +8,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const worker = new Worker(serverModule.toString(true));
 
   client = new LanguageClient(
-    "railsim2-support",
+    "railsim2",
     "RailSim2 Support",
     { documentSelector: [{ language: "railsim2" }] },
     worker,
