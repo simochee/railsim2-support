@@ -1,0 +1,48 @@
+---
+import { Icon } from "astro-icon/components";
+import BannerShell from "./BannerShell.astro";
+---
+
+<BannerShell>
+  <Fragment slot="left">
+    <span class="banner-icon">
+      <Icon name="tabler:code" />
+    </span>
+    <span class="banner-title">RailSim2 Online Editor</span>
+  </Fragment>
+  <Fragment slot="right">
+    <a href="/">
+      <Icon name="tabler:help" /> ヘルプドキュメント
+    </a>
+    <a href="https://marketplace.visualstudio.com/items?itemName=simochee.vscode-railsim2-grammar" target="_blank" rel="noopener">
+      <Icon name="tabler:brand-vscode" /> VS Code 拡張機能
+    </a>
+  </Fragment>
+</BannerShell>
+
+<style>
+  .banner-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #ff8000;
+    border-radius: 4px;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .banner-icon :global(svg) {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2;
+  }
+
+  .banner-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #fff;
+    white-space: nowrap;
+  }
+</style>

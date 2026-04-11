@@ -1,0 +1,82 @@
+---
+---
+
+<div class="banner" data-pagefind-ignore="all">
+  <div class="banner-inner">
+    <span class="banner-left">
+      <slot name="left" />
+    </span>
+    <span class="banner-links">
+      <slot name="right" />
+    </span>
+  </div>
+</div>
+
+<style>
+  .banner {
+    position: sticky;
+    top: 0;
+    height: 48px;
+    box-sizing: border-box;
+    z-index: 9999;
+    background: #1a1a2e;
+    border-bottom: 3px solid #ff8000;
+  }
+
+  .banner-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: #e0e0e0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .banner-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .banner-inner :global(a) {
+    color: #64b5f6;
+    text-decoration: underline;
+  }
+
+  .banner-inner :global(a:hover) {
+    color: #90caf9;
+    background: transparent;
+  }
+
+  .banner-links {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+  }
+
+  .banner-links :global(a) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    color: #90caf9;
+    transition: color 0.15s;
+  }
+
+  .banner-links :global(a:hover) {
+    color: #fff;
+  }
+
+  .banner-links :global(svg) {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    stroke-width: 1.5;
+  }
+</style>

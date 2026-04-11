@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse as parseJsonc } from "jsonc-parser";
-import Banner from "../components/Banner.astro";
+import EditorBanner from "../components/EditorBanner.astro";
 import { DemoEditor } from "../components/DemoEditor";
 import { getSamples } from "../lib/samples";
 
@@ -54,7 +54,7 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
     </style>
   </head>
   <body>
-    <Banner />
+    <EditorBanner />
     <div class="demo-container">
       <DemoEditor client:only="react" samples={samples} grammar={grammar} langConf={langConf} />
     </div>
