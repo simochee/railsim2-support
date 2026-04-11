@@ -115,18 +115,28 @@ export function registerProviders(
 
           const items = Array.isArray(result) ? result : result.items;
           return {
-            suggestions: items.map((item: LspCompletionItem) => ({
-              label: item.label,
-              kind: mapCompletionItemKind(monaco, item.kind),
-              insertText: item.insertText ?? item.label,
-              insertTextRules:
-                item.insertTextFormat === InsertTextFormat.Snippet
-                  ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
-                  : undefined,
-              detail: item.detail,
-              documentation: item.documentation,
-              range: undefined!,
-            })),
+            suggestions: items.map((item: LspCompletionItem) => {
+              const textEdit = item.textEdit && "range" in item.textEdit ? item.textEdit : undefined;
+              return {
+                label: item.label,
+                kind: mapCompletionItemKind(monaco, item.kind),
+                insertText: textEdit?.newText ?? item.insertText ?? item.label,
+                insertTextRules:
+                  item.insertTextFormat === InsertTextFormat.Snippet
+                    ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+                    : undefined,
+                detail: item.detail,
+                documentation: item.documentation,
+                range: textEdit
+                  ? new monaco.Range(
+                      textEdit.range.start.line + 1,
+                      textEdit.range.start.character + 1,
+                      textEdit.range.end.line + 1,
+                      textEdit.range.end.character + 1,
+                    )
+                  : undefined!,
+              };
+            }),
           };
         } catch {
           return { suggestions: [] };

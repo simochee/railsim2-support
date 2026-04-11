@@ -1,4 +1,4 @@
-import { CompletionItem, CompletionItemKind, InsertTextFormat } from "vscode-languageserver";
+import { CompletionItem, CompletionItemKind, InsertTextFormat, TextEdit } from "vscode-languageserver";
 import type { Token, Position } from "../shared/tokens.js";
 import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast.js";
 import type { PropertySchema, RootObjectEntry } from "../schema/schemaTypes.js";
@@ -25,6 +25,16 @@ export type CompletionContext =
       schemaKey: string;
       parentChain: string[];
       body: BodyNode[];
+    }
+  | {
+      type: "propertyValue";
+      propertyName: string;
+      schemaKey: string;
+      parentChain: string[];
+      /** Range of the value token(s) being typed (for textEdit replacement) */
+      replaceRange: { start: Position; end: Position };
+      /** Whether to append ";" after the value */
+      appendSemicolon: boolean;
     }
   | { type: "switchRef"; switchIndex: SwitchIndex }
   | { type: "caseValue"; switchName: string; switchIndex: SwitchIndex }
@@ -98,22 +108,33 @@ export function findContext(
   // Filter to code tokens only (no comments)
   const codeTokens = tokens.filter((t) => t.type !== "lineComment" && t.type !== "blockComment");
 
-  let lastEqualsPos: Position | null = null;
-  let lastDelimPos: Position | null = null;
+  let lastEqualsIdx = -1;
+  let lastDelimIdx = -1;
 
-  for (const tok of codeTokens) {
-    const start = tokenStartPos(tok);
+  for (let i = 0; i < codeTokens.length; i++) {
+    const start = tokenStartPos(codeTokens[i]);
     if (!posLE(start, position)) break; // past cursor
-    if (tok.type === "equals") {
-      lastEqualsPos = start;
+    if (codeTokens[i].type === "equals") {
+      lastEqualsIdx = i;
     }
-    if (tok.type === "semicolon" || tok.type === "lbrace" || tok.type === "rbrace") {
-      lastDelimPos = start;
+    // Only count delimiters strictly before cursor (a `;` at cursor position
+    // means the cursor is between `=` and `;`, still in value territory)
+    if (
+      posLT(start, position) &&
+      (codeTokens[i].type === "semicolon" || codeTokens[i].type === "lbrace" || codeTokens[i].type === "rbrace")
+    ) {
+      lastDelimIdx = i;
     }
   }
 
-  if (lastEqualsPos !== null) {
-    if (lastDelimPos === null || posLT(lastDelimPos, lastEqualsPos)) {
+  if (lastEqualsIdx >= 0) {
+    if (lastDelimIdx < 0 || lastDelimIdx < lastEqualsIdx) {
+      // Cursor is in property value position (after = and before ;/{/})
+      // Try to build a propertyValue context
+      const pvCtx = buildPropertyValueContext(
+        codeTokens, lastEqualsIdx, position, file, fileName,
+      );
+      if (pvCtx) return pvCtx;
       return { type: "none" };
     }
   }
@@ -282,6 +303,99 @@ function resolveRootEntries(file: FileNode, fileName?: string): RootObjectEntry[
 }
 
 // ---------------------------------------------------------------------------
+// Property value context builder
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a propertyValue context by walking tokens backward from the `=` to find
+ * the property name, then resolving the containing object's schemaKey via AST.
+ */
+function buildPropertyValueContext(
+  codeTokens: Token[],
+  equalsIdx: number,
+  cursorPos: Position,
+  file: FileNode,
+  fileName?: string,
+): Extract<CompletionContext, { type: "propertyValue" }> | null {
+  // Find the identifier token immediately before the `=`
+  let propertyName: string | null = null;
+  for (let i = equalsIdx - 1; i >= 0; i--) {
+    if (codeTokens[i].type === "identifier") {
+      propertyName = codeTokens[i].value;
+      break;
+    }
+    // Skip comma for multi-value but stop at any structural token
+    if (
+      codeTokens[i].type === "semicolon" ||
+      codeTokens[i].type === "lbrace" ||
+      codeTokens[i].type === "rbrace"
+    ) {
+      break;
+    }
+  }
+  if (!propertyName) return null;
+
+  // Determine replaceRange: from the token after `=` to the cursor
+  const equalsEnd = tokenEndPos(codeTokens[equalsIdx]);
+  let valueStart: Position = cursorPos;
+  // Find the first non-whitespace token after `=` that is before cursor
+  for (let i = equalsIdx + 1; i < codeTokens.length; i++) {
+    const start = tokenStartPos(codeTokens[i]);
+    if (!posLE(start, cursorPos)) break;
+    // Use the start of the first value token as replacement start
+    valueStart = start;
+    break;
+  }
+  // If no value token found, replace starts at cursor (empty)
+  if (posLE(cursorPos, equalsEnd)) {
+    valueStart = cursorPos;
+  }
+
+  // Determine appendSemicolon: check if there's a `;` at or after cursor
+  // within the current statement boundary
+  let appendSemicolon = true;
+  for (let i = equalsIdx + 1; i < codeTokens.length; i++) {
+    const start = tokenStartPos(codeTokens[i]);
+    if (posLT(start, cursorPos)) continue; // strictly before cursor
+    if (codeTokens[i].type === "semicolon") {
+      appendSemicolon = false;
+    }
+    // Stop at first token at/after cursor
+    break;
+  }
+
+  // Resolve containing object's schemaKey via AST walk
+  const rootSchemaKeyMap = new Map<string, string>();
+  const rootEntries = resolveRootEntries(file, fileName);
+  if (rootEntries) {
+    for (const entry of rootEntries) {
+      if (entry.schemaKey) {
+        rootSchemaKeyMap.set(entry.name, entry.schemaKey);
+      }
+    }
+  }
+
+  // Suppress if cursor is on a different line than the `=` — this happens when
+  // the previous statement is missing a `;` and the cursor moved to the next line
+  const equalsPos = tokenStartPos(codeTokens[equalsIdx]);
+  if (equalsPos.line !== cursorPos.line) return null;
+
+  const result = findInnermostObject(
+    file.body, equalsPos, [], undefined, codeTokens, rootSchemaKeyMap,
+  );
+  if (!result) return null;
+
+  return {
+    type: "propertyValue",
+    propertyName,
+    schemaKey: result.schemaKey,
+    parentChain: result.parentChain,
+    replaceRange: { start: valueStart, end: cursorPos },
+    appendSemicolon,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // getCompletions
 // ---------------------------------------------------------------------------
 
@@ -298,6 +412,10 @@ export function getCompletions(
 
   if (ctx.type === "root") {
     return buildRootCompletions(file, ctx.fileName, ctx.pluginType);
+  }
+
+  if (ctx.type === "propertyValue") {
+    return buildPropertyValueCompletions(ctx);
   }
 
   if (ctx.type === "switchRef") {
@@ -406,6 +524,39 @@ function buildObjectBodyCompletions(
   }
 
   return items;
+}
+
+// ---------------------------------------------------------------------------
+// Property value completions
+// ---------------------------------------------------------------------------
+
+function buildPropertyValueCompletions(
+  ctx: Extract<CompletionContext, { type: "propertyValue" }>,
+): CompletionItem[] {
+  const schema = semanticSchema[ctx.schemaKey];
+  if (!schema) return [];
+
+  const propSchema = schema.properties[ctx.propertyName];
+  if (!propSchema) return [];
+
+  let values: string[];
+  if (propSchema.type === "enum" && propSchema.enumValues && propSchema.enumValues.length > 0) {
+    values = propSchema.enumValues;
+  } else if (propSchema.type === "yes-no") {
+    values = ["yes", "no"];
+  } else {
+    return [];
+  }
+
+  const suffix = ctx.appendSemicolon ? ";" : "";
+  return values.map((value) => ({
+    label: value,
+    kind: CompletionItemKind.EnumMember,
+    textEdit: TextEdit.replace(
+      { start: ctx.replaceRange.start, end: ctx.replaceRange.end },
+      value + suffix,
+    ),
+  }));
 }
 
 // ---------------------------------------------------------------------------

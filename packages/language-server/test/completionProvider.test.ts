@@ -95,11 +95,23 @@ describe("findContext", () => {
     expect(ctx.type).toBe("none");
   });
 
-  it("after = before ; (property value) → none", () => {
+  it("after = before ; (property value) → propertyValue for enum/yes-no", () => {
+    const src = "PluginHeader {\n  PluginType = \n}";
+    const { file, tokens } = setup(src);
+    const ctx = findContext(file, tokens, pos(1, 15), "Rail2.txt");
+    expect(ctx.type).toBe("propertyValue");
+    if (ctx.type === "propertyValue") {
+      expect(ctx.propertyName).toBe("PluginType");
+      expect(ctx.appendSemicolon).toBe(true);
+    }
+  });
+
+  it("after = before ; (property value) → none for non-enum types", () => {
     const src = "RailInfo {\n  Gauge = \n}";
     const { file, tokens } = setup(src);
     const ctx = findContext(file, tokens, pos(1, 12), "Rail2.txt");
-    expect(ctx.type).toBe("none");
+    // Gauge is float type, so propertyValue context is returned but no completions
+    expect(ctx.type).toBe("propertyValue");
   });
 
   it("after ; back to normal context → objectBody", () => {
@@ -386,7 +398,7 @@ describe("getCompletions", () => {
     expect(items).toHaveLength(0);
   });
 
-  it("property value position → empty array", () => {
+  it("property value position for non-enum type → empty array", () => {
     const src = "RailInfo {\n  Gauge = \n}";
     const { file, tokens } = setup(src);
     const items = getCompletions(file, tokens, pos(1, 12), "Rail2.txt");
@@ -441,6 +453,83 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(1, 2), "Rail2.txt");
     const fc = items.find((i) => i.label === "FlattenCant");
     expect(fc?.detail).toBe("yes-no");
+  });
+});
+
+// =========================================================================
+// property value completions
+// =========================================================================
+
+describe("property value completions", () => {
+  it("enum property → individual enum values", () => {
+    const src = "PluginHeader {\n  PluginType = \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 15));
+    expect(items.some((i) => i.label === "Rail")).toBe(true);
+    expect(items.some((i) => i.label === "Train")).toBe(true);
+    expect(items.some((i) => i.label === "Skin")).toBe(true);
+    expect(items.every((i) => i.kind === CompletionItemKind.EnumMember)).toBe(true);
+  });
+
+  it("yes-no property → yes and no", () => {
+    const src = "RailInfo {\n  FlattenCant = \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 16), "Rail2.txt");
+    expect(items).toHaveLength(2);
+    expect(items.some((i) => i.label === "yes")).toBe(true);
+    expect(items.some((i) => i.label === "no")).toBe(true);
+  });
+
+  it("appends semicolon when missing", () => {
+    const src = "PluginHeader {\n  PluginType = \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 15));
+    const rail = items.find((i) => i.label === "Rail");
+    expect(rail?.textEdit).toBeDefined();
+    expect((rail!.textEdit as { newText: string }).newText).toBe("Rail;");
+  });
+
+  it("does not append semicolon when already present", () => {
+    const src = "PluginHeader {\n  PluginType = ;\n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 15));
+    const rail = items.find((i) => i.label === "Rail");
+    expect(rail?.textEdit).toBeDefined();
+    expect((rail!.textEdit as { newText: string }).newText).toBe("Rail");
+  });
+
+  it("replaces typed prefix with textEdit", () => {
+    const src = "PluginHeader {\n  PluginType = R\n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 16));
+    const rail = items.find((i) => i.label === "Rail");
+    expect(rail?.textEdit).toBeDefined();
+    const edit = rail!.textEdit as { range: { start: Position; end: Position }; newText: string };
+    expect(edit.range.start).toEqual(pos(1, 15));
+    expect(edit.range.end).toEqual(pos(1, 16));
+  });
+
+  it("float property value position → empty", () => {
+    const src = "RailInfo {\n  Gauge = \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 12), "Rail2.txt");
+    expect(items).toHaveLength(0);
+  });
+
+  it("cursor on next line after unterminated value → no multi-line textEdit", () => {
+    const src = "PluginHeader {\n  PluginType = R\n  \n}";
+    const { file, tokens } = setup(src);
+    // Cursor on blank line 2 — should NOT produce property value completions
+    const items = getCompletions(file, tokens, pos(2, 2));
+    const rail = items.find((i) => i.label === "Rail");
+    expect(rail).toBeUndefined();
+  });
+
+  it("cursor after existing semicolon → objectBody, not propertyValue", () => {
+    const src = "PluginHeader {\n  PluginType = Rail;\n  \n}";
+    const { file, tokens } = setup(src);
+    const ctx = findContext(file, tokens, pos(2, 2));
+    expect(ctx.type).toBe("objectBody");
   });
 });
 
