@@ -529,7 +529,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                     ))}
                   </Menu>
                 </SubmenuTrigger>
-                <Item key="open-local">デバイスから開く...</Item>
+                <Item key="open-local">ファイルを開く...</Item>
               </Section>
               <Section>
                 <Item key="save">上書き保存</Item>
