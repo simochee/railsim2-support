@@ -590,7 +590,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
                   <Item key="samples">サンプルを開く</Item>
                   <Menu onAction={handleMenuAction}>
                     {samples.map((sample) => (
-                      <Item key={sample.fileName}>{sample.displayName}</Item>
+                      <Item key={sample.fileName} textValue={sample.displayName}><Text><span className="codicon codicon-file" /> {sample.displayName}</Text></Item>
                     ))}
                   </Menu>
                 </SubmenuTrigger>
