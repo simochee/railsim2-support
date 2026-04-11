@@ -5,7 +5,8 @@
     "scripts": {
         "dev": "astro dev",
         "build": "astro build",
-        "preview": "astro preview"
+        "preview": "astro preview",
+        "test": "vitest run"
     },
     "dependencies": {
         "@adobe/react-spectrum": "^3.46.2",
@@ -31,6 +32,7 @@
         "@railsim2-support/language-server": "workspace:*",
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
-        "railsim2-support": "workspace:*"
+        "railsim2-support": "workspace:*",
+        "vitest": "^4.1.3"
     }
 }

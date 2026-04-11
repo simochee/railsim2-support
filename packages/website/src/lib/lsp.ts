@@ -282,6 +282,58 @@ function toLspEdits(monaco: typeof Monaco, edits: { range: { start: { line: numb
   }));
 }
 
+/**
+ * Maps a cursor offset from old text to new text by counting non-whitespace characters.
+ * When the cursor is on whitespace, preserves the relative position within the
+ * whitespace region so blank-line cursors don't jump to the next token.
+ */
+export function mapOffsetByNonWhitespace(oldText: string, newText: string, oldOffset: number): number {
+  let nonWsCount = 0;
+  for (let i = 0; i < oldOffset; i++) {
+    if (!/\s/.test(oldText[i])) nonWsCount++;
+  }
+
+  const cursorOnWs = oldOffset >= oldText.length || /\s/.test(oldText[oldOffset]);
+
+  if (!cursorOnWs) {
+    let count = 0;
+    for (let i = 0; i < newText.length; i++) {
+      if (!/\s/.test(newText[i])) {
+        if (count === nonWsCount) return i;
+        count++;
+      }
+    }
+    return newText.length;
+  }
+
+  // Cursor is on whitespace: find anchor (position after the last counted non-WS char)
+  // in both old and new text, then preserve the WS offset from that anchor.
+  let oldAnchor = 0;
+  let oldCount = 0;
+  for (let i = 0; i < oldText.length && oldCount < nonWsCount; i++) {
+    if (!/\s/.test(oldText[i])) {
+      oldCount++;
+      oldAnchor = i + 1;
+    }
+  }
+
+  let newAnchor = 0;
+  let newCount = 0;
+  for (let i = 0; i < newText.length && newCount < nonWsCount; i++) {
+    if (!/\s/.test(newText[i])) {
+      newCount++;
+      newAnchor = i + 1;
+    }
+  }
+
+  const wsOffset = oldOffset - oldAnchor;
+  let availableWs = 0;
+  for (let i = newAnchor; i < newText.length && /\s/.test(newText[i]); i++) {
+    availableWs++;
+  }
+  return newAnchor + Math.min(wsOffset, availableWs);
+}
+
 export async function formatDocument(
   conn: ProtocolConnection,
   monaco: typeof Monaco,
@@ -297,7 +349,18 @@ export async function formatDocument(
       options,
     });
     if (!edits || edits.length === 0) return;
-    editor.executeEdits("railsim2-format", toLspEdits(monaco, edits));
+
+    const position = editor.getPosition();
+    const oldText = model.getValue();
+    const oldOffset = position ? model.getOffsetAt(position) : 0;
+
+    editor.executeEdits("railsim2-format", toLspEdits(monaco, edits), () => {
+      if (!position) return null;
+      const newText = model.getValue();
+      const newOffset = mapOffsetByNonWhitespace(oldText, newText, oldOffset);
+      const newPos = model.getPositionAt(newOffset);
+      return [new monaco.Selection(newPos.lineNumber, newPos.column, newPos.lineNumber, newPos.column)];
+    });
   } catch {
     console.warn("Failed to format document");
   }
