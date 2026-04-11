@@ -5,9 +5,11 @@ import type { ProtocolConnection } from "vscode-languageserver-protocol/browser"
 import "@vscode/codicons/dist/codicon.css";
 import {
   ActionButton,
+  AlertDialog,
   Content,
   defaultTheme,
   Dialog,
+  DialogContainer,
   DialogTrigger,
   Divider,
   Flex,
@@ -109,6 +111,7 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
   const versionRef = useRef(2);
   const savedVersionRef = useRef<Map<string, number>>(new Map());
   const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
+  const [closingTab, setClosingTab] = useState<string | null>(null);
   const formatOptionsRef = useRef<FormatOptions>({
     tabSize: initialSettings.tabSize,
     insertSpaces: initialSettings.insertSpaces,
@@ -280,11 +283,10 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     [switchToModel],
   );
 
-  const handleCloseTab = useCallback((key: string) => {
+  const performCloseTab = useCallback((key: string) => {
     const currentVisible = localFileName
       ? [...openTabs, LOCAL_FILE_KEY]
       : [...openTabs];
-    if (currentVisible.length <= 1) return;
 
     if (activeFile === key) {
       const idx = currentVisible.indexOf(key);
@@ -317,6 +319,20 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
     });
     savedVersionRef.current.delete(key);
   }, [activeFile, localFileName, openTabs, switchToModel]);
+
+  const handleCloseTab = useCallback((key: string) => {
+    const currentVisible = localFileName
+      ? [...openTabs, LOCAL_FILE_KEY]
+      : [...openTabs];
+    if (currentVisible.length <= 1) return;
+
+    if (dirtyFiles.has(key)) {
+      setClosingTab(key);
+      return;
+    }
+
+    performCloseTab(key);
+  }, [localFileName, openTabs, dirtyFiles, performCloseTab]);
 
   const handleTabsMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = tabsScrollRef.current;
@@ -679,6 +695,23 @@ export function DemoEditor({ samples, grammar, langConf }: Props) {
         />
       </div>
       </div>
+      <DialogContainer onDismiss={() => setClosingTab(null)}>
+        {closingTab && (
+          <AlertDialog
+            title="未保存の変更"
+            variant="destructive"
+            primaryActionLabel="保存せずに閉じる"
+            cancelLabel="キャンセル"
+            onPrimaryAction={() => {
+              performCloseTab(closingTab);
+              setClosingTab(null);
+            }}
+            onCancel={() => setClosingTab(null)}
+          >
+            {`「${closingTab === LOCAL_FILE_KEY ? localFileName : samples.find((sm) => sm.fileName === closingTab)?.displayName ?? closingTab}」の変更はまだ保存されていません。保存せずに閉じますか？`}
+          </AlertDialog>
+        )}
+      </DialogContainer>
     </Provider>
   );
 }
