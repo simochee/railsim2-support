@@ -1,6 +1,7 @@
-import type { FileNode, TopLevelNode, BodyNode, IfNode, ApplySwitchNode, ExprNode } from "../../shared/ast.js";
+import type { FileNode, ExprNode } from "../../shared/ast.js";
 import type { Diagnostic } from "../../shared/diagnostics.js";
 import { type SwitchIndex, getReferencedSwitch, SYSTEM_SWITCHES } from "../switchSymbols.js";
+import { walkNodes } from "../../shared/astWalker.js";
 
 export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
@@ -17,25 +18,10 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
   }
 
   // Walk AST to find switch references
-  function visit(nodes: (TopLevelNode | BodyNode)[]): void {
-    for (const node of nodes) {
-      switch (node.type) {
-        case "object":
-          visit(node.body);
-          break;
-        case "if":
-          checkSwitchRef(node.condition);
-          visit(node.then);
-          if (node.else_) visit(node.else_);
-          break;
-        case "applySwitch":
-          checkSwitchRef(node.switchName);
-          for (const c of node.cases) visit(c.body);
-          if (node.default_) visit(node.default_);
-          break;
-      }
-    }
-  }
+  walkNodes(file.body, {
+    if_(node) { checkSwitchRef(node.condition); },
+    applySwitch(node) { checkSwitchRef(node.switchName); },
+  });
 
   function checkSwitchRef(expr: ExprNode): void {
     const name = getReferencedSwitch(expr);
@@ -43,7 +29,6 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
     if (switchIndex.definitions.has(name)) return;
     if (SYSTEM_SWITCHES.has(name)) return;
 
-    // For binary expressions, point to the string literal (left side)
     const range = expr.type === "binary" && expr.left.type === "string"
       ? expr.left.range
       : expr.range;
@@ -55,6 +40,5 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
     });
   }
 
-  visit(file.body);
   return diagnostics;
 }
