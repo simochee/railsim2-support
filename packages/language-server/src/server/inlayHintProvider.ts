@@ -2,10 +2,8 @@ import { InlayHint, InlayHintKind } from "vscode-languageserver";
 import type { Range } from "vscode-languageserver";
 import type { FileNode, TopLevelNode, BodyNode, ExprNode } from "../shared/ast.js";
 import type { SwitchIndex, SwitchEntry } from "./switchSymbols.js";
-import { getSwitchEntries } from "./switchSymbols.js";
+import { getSwitchEntries, COMPARISON_OPS } from "./switchSymbols.js";
 import type { Position } from "../shared/tokens.js";
-
-const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
 
 export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: Range): InlayHint[] {
   const hints: InlayHint[] = [];

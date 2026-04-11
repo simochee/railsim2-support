@@ -111,7 +111,7 @@ export function getSwitchEntries(name: string, switchIndex: SwitchIndex): readon
   return SYSTEM_SWITCH_ENTRIES.get(name);
 }
 
-const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
+export const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
 
 export function getReferencedSwitch(expr: ExprNode): string | null {
   if (expr.type === "string") return expr.value || null;
