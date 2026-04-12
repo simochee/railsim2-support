@@ -621,41 +621,55 @@ export function parse(source: string): ParseResult {
     // カッコはオプショナルなグルーピングとして透過的に扱う。
     // ただし (1+2)*3 のような演算式のカッコとは区別する必要がある。
     // 先読み: '(' の後が 値, ',' のパターンならタプル構文と判断する。
-    const parenWrapped = check("lparen") && isTupleParenStart();
-    if (parenWrapped) advance(); // '(' を消費
+    //
+    // 複数タプルの場合もある: Direction = (0.0, 0.0, 0.0), (0.0, 0.0, 0.0);
+    // 各タプルは個別にフラットに展開される。
 
-    // Parse comma-separated expressions until ';' (or ')' if paren-wrapped)
-    if (check("semicolon") || check("rbrace") || check("eof")) {
-      addError(`Expected expression after '='`, rangeOf(peek()));
-    } else {
-      try {
-        values.push(parseExpr());
-      } catch {
-        synchronize();
-        return {
-          type: "property",
-          name,
-          values,
-          range: rangeSpan(startPos, endOf(tokens[pos - 1] ?? nameToken)),
-          nameRange,
-        };
-      }
-
-      while (check("comma")) {
-        advance(); // ','
-        if (check("semicolon") || check("rbrace") || check("eof")) break;
-        if (parenWrapped && check("rparen")) break;
+    /**
+     * タプル構文 (x, y, z) の中身をフラットに values へ追加する。
+     * タプルでない場合は単一の式をパースして追加する。
+     */
+    function parseMaybetupleValues(): void {
+      const isTuple = check("lparen") && isTupleParenStart();
+      if (isTuple) {
+        advance(); // '(' を消費
         try {
           values.push(parseExpr());
         } catch {
           synchronize();
-          break;
+          return;
+        }
+        while (check("comma")) {
+          advance();
+          if (check("rparen")) break;
+          try {
+            values.push(parseExpr());
+          } catch {
+            synchronize();
+            break;
+          }
+        }
+        expect("rparen", "Expected ')'");
+      } else {
+        try {
+          values.push(parseExpr());
+        } catch {
+          synchronize();
         }
       }
     }
 
-    if (parenWrapped) {
-      expect("rparen", "Expected ')'");
+    // Parse comma-separated values (each may be a tuple)
+    if (check("semicolon") || check("rbrace") || check("eof")) {
+      addError(`Expected expression after '='`, rangeOf(peek()));
+    } else {
+      parseMaybetupleValues();
+
+      while (check("comma")) {
+        advance(); // ','
+        if (check("semicolon") || check("rbrace") || check("eof")) break;
+        parseMaybetupleValues();
+      }
     }
 
     const semi = expect("semicolon", "Expected ';'");

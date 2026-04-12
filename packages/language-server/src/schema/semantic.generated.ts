@@ -2472,7 +2472,8 @@ export const semanticSchema: SemanticSchema = {
       Direction: {
         type: "vector-3d",
         required: true,
-        multiple: false
+        multiple: false,
+        arity: 6
       },
       InitialRadius: {
         type: "vector-2d",

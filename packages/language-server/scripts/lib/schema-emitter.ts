@@ -81,14 +81,17 @@ function convertProperty(rp: ResolvedProperty): EmittedProperty {
       result.type = "expression";
       result.arity = rp.arity;
     }
-  } else if (
-    rp.arity > 1 &&
-    result.type !== "vector-2d" &&
-    result.type !== "vector-3d" &&
-    result.type !== "enum"
-  ) {
-    // Non-float with arity > 1 — keep as-is but record arity
-    result.arity = rp.arity;
+  } else if (rp.arity > 1 && result.type !== "enum") {
+    // Non-float with arity > 1 — record effective flat arity.
+    // For vector types, multiply by the vector size since tuples are flattened.
+    // e.g., "vector-3d, vector-3d" (arity=2) → flat arity = 6
+    if (result.type === "vector-2d") {
+      result.arity = rp.arity * 2;
+    } else if (result.type === "vector-3d") {
+      result.arity = rp.arity * 3;
+    } else {
+      result.arity = rp.arity;
+    }
   }
 
   return result;

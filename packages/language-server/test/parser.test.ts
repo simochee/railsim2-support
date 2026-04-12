@@ -187,6 +187,16 @@ describe("parser", () => {
     expect(prop.values).toHaveLength(3);
   });
 
+  it("should parse multiple parenthesized tuples (e.g. Direction = vec3, vec3)", () => {
+    const { file, diagnostics } = parse(
+      "Particle { Direction = (-3.2, 0.4, -0.4), (-4.0, -0.4, 0.4); }",
+    );
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values).toHaveLength(6);
+  });
+
   it("should parse negative values in parenthesized list", () => {
     const { file, diagnostics } = parse("Axle { Coord = (-8.25, 0.43); }");
     expect(diagnostics).toHaveLength(0);
