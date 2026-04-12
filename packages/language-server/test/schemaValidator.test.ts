@@ -386,17 +386,30 @@ If (1) {
   });
 
   // ================================================================
-  // expression 型（binary 式）はスキップ
+  // binary 式は非 expression 型で拒否、expression 型で許可
   // ================================================================
-  it("式 (binary) は expression 扱いでスキップ", () => {
+  it("float 型プロパティに binary 式 → error", () => {
     const src = `
 RailInfo {
   Gauge = 1.0 + 0.067;
 }
 `;
     const diags = validate(src);
-    const gaugeErrors = diags.filter((d) => d.message.includes("Gauge"));
-    expect(gaugeErrors).toHaveLength(0);
+    expect(
+      diags.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
+    ).toBe(true);
+  });
+
+  it("expression 型プロパティに binary 式 → エラーなし", () => {
+    const src = `
+Object3D "Main" {
+  ModelFileName = "body.x";
+  NoCastShadow = 1 + 2;
+}
+`;
+    const diags = validate(src);
+    const noCastErrors = diags.filter((d) => d.message.includes("NoCastShadow"));
+    expect(noCastErrors).toHaveLength(0);
   });
 
   // ================================================================

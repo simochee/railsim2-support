@@ -316,9 +316,6 @@ function checkValueType(
     return;
   }
 
-  // binary 式 → expression 扱い（スキップ）
-  if (value.type === "binary") return;
-
   switch (type) {
     case "float":
     case "vector-2d":
@@ -388,7 +385,6 @@ function isFloatCompatible(value: ExprNode): boolean {
   if (value.type === "unary" && value.op === "-") {
     return isFloatCompatible(value.operand);
   }
-  if (value.type === "binary") return true; // expression 扱い
   if (value.type === "group") return isFloatCompatible(value.inner);
   return false;
 }
@@ -398,7 +394,6 @@ function isIntegerCompatible(value: ExprNode): boolean {
   if (value.type === "unary" && value.op === "-") {
     return isIntegerCompatible(value.operand);
   }
-  if (value.type === "binary") return true; // expression 扱い
   if (value.type === "group") return isIntegerCompatible(value.inner);
   return false;
 }
