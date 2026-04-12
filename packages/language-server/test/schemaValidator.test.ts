@@ -700,6 +700,32 @@ Body "Bogie1" {
     expect(invalidChild).toHaveLength(0);
   });
 
+  // ================================================================
+  // expression 型 + 明示 arity
+  // ================================================================
+  it("expression 型 + 明示 arity に値不足 → error", () => {
+    const src = `
+Object3D "test" {
+  ChangeAlpha = 0.5;
+}
+`;
+    const diags = validate(src);
+    expect(
+      diags.some((d) => d.message.includes("expects 2 value(s)") && d.severity === "error"),
+    ).toBe(true);
+  });
+
+  it("expression 型 + 明示 arity に正しい値数 → エラーなし", () => {
+    const src = `
+Object3D "test" {
+  ChangeAlpha = 0, 0.5;
+}
+`;
+    const diags = validate(src);
+    const arityErrors = diags.filter((d) => d.message.includes("ChangeAlpha") && d.message.includes("value(s)"));
+    expect(arityErrors).toHaveLength(0);
+  });
+
   it("Object3D 内の複数 StaticMove は multiple=true なので重複エラーにならない", () => {
     const src = `
 Object3D "Door" {
