@@ -547,4 +547,11 @@ ApplySwitch "_FRONT" {
     expect(comment!.range.end.line).toBe(2);
     expect(comment!.range.end.character).toBe(8);
   });
+
+  it("should terminate string at newline", () => {
+    const src = '"unclosed\nBody { X = 1; }';
+    const { file, diagnostics } = parse(src);
+    // 改行で文字列が打ち切られるので、Body はパースできるはず
+    expect(file.body.length).toBeGreaterThan(0);
+  });
 });

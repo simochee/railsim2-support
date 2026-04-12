@@ -115,6 +115,17 @@ export function tokenize(source: string): Token[] {
       continue;
     }
 
+    // .N 形式の数値 (例: .5, .123)
+    if (ch === "." && pos + 1 < source.length && isDigit(source[pos + 1])) {
+      advance(); // .
+      while (pos < source.length && isDigit(peek())) {
+        advance();
+      }
+      const value = source.slice(startOffset, pos);
+      tokens.push(makeToken("number", value, startLine, startChar, startOffset));
+      continue;
+    }
+
     // Number
     if (isDigit(ch)) {
       while (pos < source.length && isDigit(peek())) {
@@ -134,7 +145,7 @@ export function tokenize(source: string): Token[] {
     // String
     if (ch === '"') {
       advance(); // opening "
-      while (pos < source.length && peek() !== '"') {
+      while (pos < source.length && peek() !== '"' && peek() !== "\n") {
         if (peek() === "\\" && pos + 1 < source.length && source[pos + 1] === '"') {
           advance(); // backslash
           advance(); // escaped quote
