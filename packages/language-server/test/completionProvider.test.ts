@@ -596,10 +596,10 @@ describe("switch completions", () => {
   });
 
   it('開き引用符 " 直後でスイッチ名を補完する', () => {
-    // User just typed: ApplySwitch "  (unterminated string)
-    const src = 'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  ApplySwitch "\n}';
+    // User just typed: ApplySwitch "  (unterminated string, same line)
+    const src = 'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  ApplySwitch ""\n}';
     const { file, tokens, switchIndex } = setupWithSwitch(src);
-    // cursor right after the opening " on line 4
+    // cursor inside the empty string on line 4
     const items = getCompletions(file, tokens, pos(4, 15), "Train2.txt", switchIndex);
     expect(items.some((i) => i.label === "ライト")).toBe(true);
     expect(items.some((i) => i.label === "_FRONT")).toBe(true);

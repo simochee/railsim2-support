@@ -145,7 +145,7 @@ export function tokenize(source: string): Token[] {
     // String
     if (ch === '"') {
       advance(); // opening "
-      while (pos < source.length && peek() !== '"' && peek() !== "\n") {
+      while (pos < source.length && peek() !== '"' && peek() !== "\n" && peek() !== "\r") {
         if (peek() === "\\" && pos + 1 < source.length && source[pos + 1] === '"') {
           advance(); // backslash
           advance(); // escaped quote
@@ -153,7 +153,7 @@ export function tokenize(source: string): Token[] {
           advance();
         }
       }
-      if (pos < source.length) {
+      if (pos < source.length && peek() === '"') {
         advance(); // closing "
       }
       const value = source.slice(startOffset, pos);
