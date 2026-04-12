@@ -68,6 +68,16 @@ describe("tokenizer", () => {
       ]);
     });
 
+    it("tokenizes .N floats", () => {
+      const tokens = tokenize(".5 .123 .0");
+      expect(typesAndValues(tokens)).toEqual([
+        ["number", ".5"],
+        ["number", ".123"],
+        ["number", ".0"],
+        ["eof", ""],
+      ]);
+    });
+
     it("does not consume trailing dot without digits", () => {
       // "42." should be number "42" then unknown "."
       const tokens = tokenize("42.");
