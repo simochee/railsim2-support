@@ -335,7 +335,16 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(1, 2));
     const coord = items.find((i) => i.label === "SourceCoord");
     expect(coord).toBeDefined();
-    expect(coord!.insertText).toBe("SourceCoord = ${1:0}, ${2:0}, ${3:0};");
+    expect(coord!.insertText).toBe("SourceCoord = (${1:0}, ${2:0}, ${3:0});");
+  });
+
+  it("vector-3d property with arity 6 → two tuples", () => {
+    const src = "Particle {\n  \n}";
+    const { file, tokens } = setup(src);
+    const items = getCompletions(file, tokens, pos(1, 2));
+    const dir = items.find((i) => i.label === "Direction");
+    expect(dir).toBeDefined();
+    expect(dir!.insertText).toBe("Direction = (${1:0}, ${2:0}, ${3:0}), (${4:0}, ${5:0}, ${6:0});");
   });
 
   it("vector-2d property → 2 placeholders", () => {
@@ -344,7 +353,7 @@ describe("getCompletions", () => {
     const items = getCompletions(file, tokens, pos(1, 2));
     const coord = items.find((i) => i.label === "Coord");
     expect(coord).toBeDefined();
-    expect(coord!.insertText).toBe("Coord = ${1:0}, ${2:0};");
+    expect(coord!.insertText).toBe("Coord = (${1:0}, ${2:0});");
   });
 
   it("enum property → choice snippet", () => {

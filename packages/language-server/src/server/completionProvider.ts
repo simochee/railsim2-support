@@ -583,12 +583,17 @@ function buildPropertyValueCompletions(
 function buildPropertySnippet(name: string, schema: PropertySchema): string {
   const arity = schema.arity ?? 1;
 
-  // Special multi-value types
-  if (schema.type === "vector-2d") {
-    return `${name} = \${1:0}, \${2:0};`;
-  }
-  if (schema.type === "vector-3d") {
-    return `${name} = \${1:0}, \${2:0}, \${3:0};`;
+  // Special multi-value types — vector properties use parenthesized tuple syntax
+  if (schema.type === "vector-2d" || schema.type === "vector-3d") {
+    const dim = schema.type === "vector-2d" ? 2 : 3;
+    const tupleCount = Math.max(1, Math.floor(arity / dim));
+    const tuples: string[] = [];
+    let idx = 1;
+    for (let t = 0; t < tupleCount; t++) {
+      const parts = Array.from({ length: dim }, () => `\${${idx++}:0}`);
+      tuples.push(`(${parts.join(", ")})`);
+    }
+    return `${name} = ${tuples.join(", ")};`;
   }
 
   // General arity > 1
