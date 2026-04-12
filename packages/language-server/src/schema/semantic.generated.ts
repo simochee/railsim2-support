@@ -2467,29 +2467,34 @@ export const semanticSchema: SemanticSchema = {
       Lifetime: {
         type: "vector-2d",
         required: true,
-        multiple: false
+        multiple: false,
+        fillable: true
       },
       Direction: {
         type: "vector-3d",
         required: true,
         multiple: false,
-        arity: 6
+        arity: 6,
+        fillable: true
       },
       InitialRadius: {
         type: "vector-2d",
         required: true,
-        multiple: false
+        multiple: false,
+        fillable: true
       },
       FinalRadius: {
         type: "vector-2d",
         required: true,
-        multiple: false
+        multiple: false,
+        fillable: true
       },
       Color: {
         type: "color",
         required: true,
         multiple: false,
-        arity: 2
+        arity: 2,
+        fillable: true
       },
       BlendMode: {
         type: "enum",

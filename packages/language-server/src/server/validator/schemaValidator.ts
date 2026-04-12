@@ -11,6 +11,7 @@ import type { ObjectSchema, PropertySchema, PropertyType } from "../../schema/sc
 import { semanticSchema, getPluginTypeSchema } from "../../schema/semantic.generated.js";
 import { resolveSchemaKey } from "../../schema/schemaUtils.js";
 import { extractPluginType } from "../../schema/pluginType.js";
+import { evaluateStaticNumber } from "../switchSymbols.js";
 
 /**
  * AST + スキーマから意味レベルのエラーを検出する。
@@ -274,17 +275,29 @@ function validatePropertyType(
 
   // arity チェック (expression 型で arity 未指定の場合はスキップ)
   if (expectedArity != null && values.length !== expectedArity) {
-    diagnostics.push({
-      message: `Property '${prop.name}' in '${objectName}' expects ${expectedArity} value(s), got ${values.length}`,
-      range: prop.range,
-      severity: "error",
-    });
-    return;
+    // fillable の場合、値が不足していても arity 以下なら許可 (RailSim2 が最後の値で埋める)
+    if (schema.fillable && values.length > 0 && values.length < expectedArity) {
+      // OK — RailSim2 が最後の値で埋める
+    } else {
+      diagnostics.push({
+        message: `Property '${prop.name}' in '${objectName}' expects ${expectedArity} value(s), got ${values.length}`,
+        range: prop.range,
+        severity: "error",
+      });
+      return;
+    }
   }
 
   // 各値の型チェック
   for (const value of values) {
     checkValueType(value, schema.type, prop.name, objectName, schema, diagnostics);
+  }
+
+  // 範囲チェック (warning)
+  if (schema.min != null || schema.max != null) {
+    for (const value of values) {
+      checkRange(value, schema, prop.name, objectName, diagnostics);
+    }
   }
 }
 

@@ -726,6 +726,62 @@ Object3D "test" {
     expect(arityErrors).toHaveLength(0);
   });
 
+  // ================================================================
+  // fillable プロパティ (fill flag)
+  // ================================================================
+  it("fillable プロパティに値不足 → エラーなし", () => {
+    const src = `
+Particle {
+  TextureFileName = "smoke.bmp";
+  AttachObject = "Main";
+  SourceCoord = 0.0, 0.0, 0.0;
+  MinQty = 1.0;
+  Lifetime = 5.0;
+  Direction = 0.0, 1.0, 0.0;
+  InitialRadius = 0.5;
+  FinalRadius = 1.0;
+  Color = #ffffff;
+  BlendMode = Alpha;
+}
+`;
+    const diags = validate(src);
+    const arityErrors = diags.filter((d) => d.message.includes("value(s)"));
+    expect(arityErrors).toHaveLength(0);
+  });
+
+  it("fillable でないプロパティに値不足 → エラーあり", () => {
+    const src = `
+Headlight {
+  SourceCoord = 1.0, 2.0;
+}
+`;
+    const diags = validate(src);
+    expect(
+      diags.some((d) => d.message.includes("expects 3 value(s)") && d.severity === "error"),
+    ).toBe(true);
+  });
+
+  it("fillable プロパティに値超過 → エラーあり", () => {
+    const src = `
+Particle {
+  TextureFileName = "smoke.bmp";
+  AttachObject = "Main";
+  SourceCoord = 0.0, 0.0, 0.0;
+  MinQty = 1.0;
+  Lifetime = 5.0, 3.0, 1.0;
+  Direction = 0.0, 1.0, 0.0, 0.0, 0.5, 0.0;
+  InitialRadius = 0.5, 1.0;
+  FinalRadius = 1.0, 2.0;
+  Color = #ffffff, #000000;
+  BlendMode = Alpha;
+}
+`;
+    const diags = validate(src);
+    expect(
+      diags.some((d) => d.message.includes("Lifetime") && d.message.includes("expects 2 value(s)")),
+    ).toBe(true);
+  });
+
   it("Object3D 内の複数 StaticMove は multiple=true なので重複エラーにならない", () => {
     const src = `
 Object3D "Door" {

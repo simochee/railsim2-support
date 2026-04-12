@@ -29,7 +29,10 @@ interface EmittedProperty {
   required: boolean;
   multiple: boolean;
   arity?: number;
+  fillable?: boolean;
   enumValues?: string[];
+  min?: number;
+  max?: number;
 }
 
 function convertProperty(rp: ResolvedProperty): EmittedProperty {
@@ -38,6 +41,20 @@ function convertProperty(rp: ResolvedProperty): EmittedProperty {
     required: rp.required,
     multiple: rp.multiple,
   };
+
+  // fillable flag (from override)
+  if ((rp as Record<string, unknown>).fillable) {
+    result.fillable = true;
+  }
+
+  // min/max range (from override)
+  const rpAny = rp as Record<string, unknown>;
+  if (typeof rpAny.min === "number") {
+    result.min = rpAny.min as number;
+  }
+  if (typeof rpAny.max === "number") {
+    result.max = rpAny.max as number;
+  }
 
   // Parse enum type
   if (rp.type.startsWith("enum:")) {
@@ -300,9 +317,21 @@ function emitPropertyValue(prop: EmittedProperty, level: number): string {
     parts.push(`${indent(level)}arity: ${prop.arity}`);
   }
 
+  if (prop.fillable) {
+    parts.push(`${indent(level)}fillable: true`);
+  }
+
   if (prop.enumValues !== undefined) {
     const vals = prop.enumValues.map((v) => `"${v}"`).join(", ");
     parts.push(`${indent(level)}enumValues: [${vals}]`);
+  }
+
+  if (prop.min !== undefined) {
+    parts.push(`${indent(level)}min: ${prop.min}`);
+  }
+
+  if (prop.max !== undefined) {
+    parts.push(`${indent(level)}max: ${prop.max}`);
   }
 
   return parts.join(",\n");

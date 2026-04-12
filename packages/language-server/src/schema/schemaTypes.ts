@@ -16,7 +16,10 @@ export interface PropertySchema {
   required: boolean;
   multiple: boolean; // true = 同名プロパティ複数回許可
   arity?: number; // 値の個数。省略時は1。Coord = 1.0, 2.0; なら arity: 2
+  fillable?: boolean; // true = 値不足時に最後の値で埋められる (RailSim2 fill flag)
   enumValues?: string[]; // type === "enum" の場合
+  min?: number; // 値の下限 (warning)
+  max?: number; // 値の上限 (warning)
 }
 
 export interface ChildSchema {

@@ -8,7 +8,10 @@ export interface PropertyOverride {
   required?: boolean;
   multiple?: boolean;
   arity?: number | null; // null = arity を削除（expression の可変長化）
+  fillable?: boolean; // true = 値不足時に最後の値で埋められる (RailSim2 fill flag)
   enumValues?: string[];
+  min?: number; // 値の下限 (warning)
+  max?: number; // 値の上限 (warning)
 }
 
 export interface ChildOverride {
@@ -129,8 +132,12 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
     },
   },
 
-  // ── LensFlare: children multiple ──
+  // ── LensFlare: children multiple + Twinkle range ──
+  // vendor/CLensFlare.cpp: Twinkle は 0.0〜1.0 の点滅度合い
   LensFlare: {
+    properties: {
+      Twinkle: { min: 0, max: 1 },
+    },
     children: {
       Circle: { multiple: true, schemaKey: "Circle:LensFlare" },
       Hexagon: { multiple: true, schemaKey: "Hexagon:LensFlare" },
@@ -391,6 +398,18 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
   Headlight: {
     children: {
       LensFlare: { required: false, multiple: true },
+    },
+  },
+
+  // ── Particle: fill flag 対応 (vendor/CParticle.cpp:181-186) ──
+  // AsgnFloat/AsgnVector3D/AsgnColor の最終引数 fill=true により値不足時に最後の値で埋められる
+  Particle: {
+    properties: {
+      Lifetime: { fillable: true },
+      Direction: { fillable: true },
+      InitialRadius: { fillable: true },
+      FinalRadius: { fillable: true },
+      Color: { fillable: true },
     },
   },
 
