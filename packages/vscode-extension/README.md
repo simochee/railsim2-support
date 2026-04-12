@@ -94,6 +94,6 @@ RailSim2 -k-build の独自記法には対応していません。
 
 ## RailSim2 について
 
-[RailSim2](http://railsim2.net/) は osak 氏が開発した鉄道シミュレーターです。RailSim2 本体は [GNU Lesser General Public License v2.1 (LGPL-2.1)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) のもとで公開されています。
+[RailSim2](http://railsim2.net/) は おかづ 氏が開発した鉄道シミュレーターです。RailSim2 本体は [GNU Lesser General Public License v2.1 (LGPL-2.1)](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) のもとで公開されています。
 
 この拡張機能は RailSim2 本体とは独立した非公式のツールであり、[MIT License](https://opensource.org/licenses/MIT) のもとで公開されています。RailSim2 本体の開発者とは関係ありません。
