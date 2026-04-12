@@ -165,7 +165,10 @@ describe("parser", () => {
     expect(expr.type).toBe("binary");
     if (expr.type === "binary") {
       expect(expr.op).toBe("*");
-      expect(expr.left.type).toBe("binary");
+      expect(expr.left.type).toBe("group");
+      if (expr.left.type === "group") {
+        expect(expr.left.inner.type).toBe("binary");
+      }
     }
   });
 

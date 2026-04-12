@@ -262,10 +262,11 @@ export function parse(source: string): ParseResult {
     }
 
     if (t.type === "lparen") {
+      const startPos = posOf(t);
       advance(); // (
       const inner = parseExpr();
-      expect("rparen", "Expected ')'");
-      return inner;
+      const rparen = expect("rparen", "Expected ')'");
+      return { type: "group" as const, inner, range: rangeSpan(startPos, endOf(rparen)) };
     }
 
     // Error: unexpected token in expression

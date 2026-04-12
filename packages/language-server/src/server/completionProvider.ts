@@ -16,7 +16,7 @@ import {
 import { resolveSchemaKey } from "../schema/schemaUtils.js";
 import { extractPluginType } from "../schema/pluginType.js";
 import type { SwitchIndex } from "./switchSymbols.js";
-import { SYSTEM_SWITCHES, getSwitchEntries } from "./switchSymbols.js";
+import { SYSTEM_SWITCHES, getSwitchEntries, unwrapGroup } from "./switchSymbols.js";
 
 // ---------------------------------------------------------------------------
 // Context types
@@ -738,8 +738,9 @@ function findEnclosingApplySwitchName(
         if (deeper) return deeper;
       }
       // No deeper ApplySwitch found — this is the innermost one
-      if (node.switchName.type === "string") {
-        return node.switchName.value;
+      const sn = unwrapGroup(node.switchName);
+      if (sn.type === "string") {
+        return sn.value;
       }
     }
   }

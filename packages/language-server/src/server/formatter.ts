@@ -313,7 +313,11 @@ function detectValueGroups(raw: string): ValueGroup[] {
     if (trimmed.startsWith("(") && trimmed.endsWith(")") && isTupleSegment(trimmed)) {
       const inner = trimmed.slice(1, -1);
       const innerParts = splitTopLevelCommas(inner);
-      groups.push({ tuple: true, count: innerParts.length });
+      if (innerParts.length >= 2) {
+        groups.push({ tuple: true, count: innerParts.length });
+      } else {
+        groups.push({ tuple: false, count: 1 });
+      }
     } else {
       groups.push({ tuple: false, count: 1 });
     }

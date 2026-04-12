@@ -2,7 +2,7 @@ import { InlayHint, InlayHintKind } from "vscode-languageserver";
 import type { Range } from "vscode-languageserver";
 import type { FileNode, TopLevelNode, BodyNode, ExprNode } from "../shared/ast.js";
 import type { SwitchIndex, SwitchEntry } from "./switchSymbols.js";
-import { getSwitchEntries, COMPARISON_OPS } from "./switchSymbols.js";
+import { getSwitchEntries, COMPARISON_OPS, unwrapGroup } from "./switchSymbols.js";
 import type { Position } from "../shared/tokens.js";
 
 export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: Range): InlayHint[] {
@@ -38,18 +38,20 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
 
   function visitExpr(expr: ExprNode): void {
     if (expr.type === "binary") {
-      if (
-        COMPARISON_OPS.has(expr.op) &&
-        expr.left.type === "string" &&
-        expr.right.type === "number"
-      ) {
-        const entries = getSwitchEntries(expr.left.value, switchIndex);
-        addHintForNumber(expr.right, entries);
+      if (COMPARISON_OPS.has(expr.op)) {
+        const left = unwrapGroup(expr.left);
+        const right = unwrapGroup(expr.right);
+        if (left.type === "string" && right.type === "number") {
+          const entries = getSwitchEntries(left.value, switchIndex);
+          addHintForNumber(right, entries);
+        }
       }
       visitExpr(expr.left);
       visitExpr(expr.right);
     } else if (expr.type === "unary") {
       visitExpr(expr.operand);
+    } else if (expr.type === "group") {
+      visitExpr(expr.inner);
     }
   }
 
@@ -68,8 +70,9 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
           break;
         case "applySwitch": {
           let entries: readonly SwitchEntry[] | undefined;
-          if (node.switchName.type === "string") {
-            entries = getSwitchEntries(node.switchName.value, switchIndex);
+          const sn = unwrapGroup(node.switchName);
+          if (sn.type === "string") {
+            entries = getSwitchEntries(sn.value, switchIndex);
           }
           for (const c of node.cases) {
             if (!rangesOverlap(c.range)) continue;

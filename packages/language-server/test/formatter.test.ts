@@ -191,10 +191,9 @@ MaxVelocity = 130.0;
   });
 
   it("should not treat expression parens as tuple", () => {
-    // Note: exprText drops grouping parens due to parser range — a pre-existing issue
     const input = "Body { X = (1+2)*3, 4; }";
     const result = format(input);
-    expect(result).toBe("Body {\n\tX = 1+2)*3, 4;\n}\n");
+    expect(result).toBe("Body {\n\tX = (1+2)*3, 4;\n}\n");
   });
 
   it("should handle bare value followed by tuple", () => {
@@ -243,6 +242,14 @@ MaxVelocity = 130.0;
   it("should format top-level If", () => {
     const result = format("If 1 { Body { } }");
     expect(result).toBe("If 1 {\n\tBody {\n\t}\n}\n");
+  });
+
+  // --- Single parenthesized expression (not a tuple) ---
+
+  it("should not double-wrap single parenthesized expression", () => {
+    const input = "Body { X = (1+2), 4; }";
+    const result = format(input);
+    expect(result).toBe("Body {\n\tX = (1+2), 4;\n}\n");
   });
 
   // --- Realistic file ---

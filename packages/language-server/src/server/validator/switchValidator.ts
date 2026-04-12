@@ -7,6 +7,7 @@ import {
   SYSTEM_SWITCHES,
   evaluateStaticNumber,
   extractSwitchComparison,
+  unwrapGroup,
 } from "../switchSymbols.js";
 import { walkNodes } from "../../shared/astWalker.js";
 
@@ -53,8 +54,11 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
     if (switchIndex.definitions.has(name)) return;
     if (SYSTEM_SWITCHES.has(name)) return;
 
+    const unwrapped = unwrapGroup(expr);
     const range =
-      expr.type === "binary" && expr.left.type === "string" ? expr.left.range : expr.range;
+      unwrapped.type === "binary" && unwrapGroup(unwrapped.left).type === "string"
+        ? unwrapGroup(unwrapped.left).range
+        : expr.range;
 
     diagnostics.push({
       message: `Reference to undefined switch '${name}'`,

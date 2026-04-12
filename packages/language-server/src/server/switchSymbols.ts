@@ -193,10 +193,18 @@ export function getSwitchEntries(
 
 export const COMPARISON_OPS = new Set(["==", "!=", "<", ">", "<=", ">="]);
 
+export function unwrapGroup(expr: ExprNode): ExprNode {
+  return expr.type === "group" ? unwrapGroup(expr.inner) : expr;
+}
+
 export function getReferencedSwitch(expr: ExprNode): string | null {
+  expr = unwrapGroup(expr);
   if (expr.type === "string") return expr.value || null;
   if (expr.type === "binary" && COMPARISON_OPS.has(expr.op)) {
-    if (expr.left.type === "string") return expr.left.value || null;
+    const left = unwrapGroup(expr.left);
+    const right = unwrapGroup(expr.right);
+    if (left.type === "string") return left.value || null;
+    if (right.type === "string") return right.value || null;
   }
   return null;
 }
@@ -208,6 +216,7 @@ export function evaluateStaticNumber(expr: ExprNode): number | null {
     if (inner === null) return null;
     return expr.op === "-" ? -inner : inner;
   }
+  if (expr.type === "group") return evaluateStaticNumber(expr.inner);
   return null;
 }
 
@@ -218,13 +227,16 @@ export interface SwitchComparison {
 }
 
 export function extractSwitchComparison(expr: ExprNode): SwitchComparison | null {
+  expr = unwrapGroup(expr);
   if (expr.type !== "binary" || (expr.op !== "==" && expr.op !== "!=")) return null;
 
-  if (expr.left.type === "string" && expr.left.value) {
-    return { switchName: expr.left.value, switchNameRange: expr.left.range, value: expr.right };
+  const left = unwrapGroup(expr.left);
+  const right = unwrapGroup(expr.right);
+  if (left.type === "string" && left.value) {
+    return { switchName: left.value, switchNameRange: left.range, value: right };
   }
-  if (expr.right.type === "string" && expr.right.value) {
-    return { switchName: expr.right.value, switchNameRange: expr.right.range, value: expr.left };
+  if (right.type === "string" && right.value) {
+    return { switchName: right.value, switchNameRange: right.range, value: left };
   }
   return null;
 }

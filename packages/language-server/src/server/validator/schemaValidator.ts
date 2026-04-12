@@ -310,6 +310,12 @@ function checkValueType(
   schema: PropertySchema,
   diagnostics: Diagnostic[],
 ): void {
+  // group → 内側を再帰チェック
+  if (value.type === "group") {
+    checkValueType(value.inner, type, propName, objectName, schema, diagnostics);
+    return;
+  }
+
   // binary 式 → expression 扱い（スキップ）
   if (value.type === "binary") return;
 
@@ -379,21 +385,21 @@ function checkValueType(
 
 function isFloatCompatible(value: ExprNode): boolean {
   if (value.type === "number") return true;
-  if (value.type === "unary" && value.op === "-" && value.operand.type === "number") return true;
+  if (value.type === "unary" && value.op === "-") {
+    return isFloatCompatible(value.operand);
+  }
   if (value.type === "binary") return true; // expression 扱い
+  if (value.type === "group") return isFloatCompatible(value.inner);
   return false;
 }
 
 function isIntegerCompatible(value: ExprNode): boolean {
   if (value.type === "number" && Number.isInteger(value.value)) return true;
-  if (
-    value.type === "unary" &&
-    value.op === "-" &&
-    value.operand.type === "number" &&
-    Number.isInteger(value.operand.value)
-  )
-    return true;
+  if (value.type === "unary" && value.op === "-") {
+    return isIntegerCompatible(value.operand);
+  }
   if (value.type === "binary") return true; // expression 扱い
+  if (value.type === "group") return isIntegerCompatible(value.inner);
   return false;
 }
 
