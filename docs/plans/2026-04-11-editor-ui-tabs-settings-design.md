@@ -1,4 +1,4 @@
-# Demo UI: File Tabs & Indentation Settings Dialog
+# Editor UI: File Tabs & Indentation Settings Dialog
 
 ## Overview
 
@@ -24,7 +24,7 @@ Replace the file dropdown with a VS Code-style tab bar, and replace inline inden
 
 ## Feature 2: localStorage Persistence
 
-- Key: `railsim2-demo-settings`
+- Key: `railsim2-editor-settings`
 - Shape: `{ insertSpaces: boolean, tabSize: number }`
 - Read on mount with validation: `insertSpaces` must be boolean, `tabSize` must be in [1, 2, 4, 8]
 - Falls back to `{ insertSpaces: false, tabSize: 4 }` on invalid data
@@ -43,5 +43,5 @@ Replace the file dropdown with a VS Code-style tab bar, and replace inline inden
 
 ## Files to Modify
 
-- `packages/website/src/components/DemoEditor.tsx` - All three features
-- `packages/website/src/pages/demo.astro` - CSS for tab bar, popover, updated layout
+- `packages/website/src/components/Editor.tsx` - All three features
+- `packages/website/src/pages/editor.astro` - CSS for tab bar, popover, updated layout
