@@ -1475,7 +1475,7 @@ export const semanticSchema: SemanticSchema = {
       },
       FixAxis: {
         type: "vector-3d",
-        required: true,
+        required: false,
         multiple: false
       }
     },
@@ -1855,7 +1855,7 @@ export const semanticSchema: SemanticSchema = {
     properties: {
       AttachX: {
         type: "float",
-        required: true,
+        required: false,
         multiple: false
       },
       AttachCoord: {

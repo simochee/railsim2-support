@@ -286,6 +286,22 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
     },
   },
 
+  // ── JointZYX: AttachX は BNF 上必須だが実装では省略可能 ──
+  // vendor/CTrainPlugin.cpp:50-51: if-else パターン（デフォルト 0.0f）
+  JointZYX: {
+    properties: {
+      AttachX: { required: false },
+    },
+  },
+
+  // ── TrackWind: FixAxis は BNF 上必須だが実装では省略可能 ──
+  // vendor/CCustomizerMover.cpp:273-278: if-else パターン（デフォルト m_FixAxisFlag = false）
+  TrackWind: {
+    properties: {
+      FixAxis: { required: false },
+    },
+  },
+
   // ── ChangeMaterial: MaterialID is expression (variable arity) ──
   ChangeMaterial: {
     properties: {
