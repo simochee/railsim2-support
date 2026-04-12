@@ -1,7 +1,7 @@
 {
   "name": "railsim2-support",
   "displayName": "RailSim2 Support",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "RailSim2 プラグイン定義ファイルの開発支援",
   "categories": [
     "Programming Languages"
