@@ -3,10 +3,7 @@ import {
   TextDocumentSyncKind,
   DiagnosticSeverity as LspSeverity,
 } from "vscode-languageserver";
-import type {
-  Connection,
-  Diagnostic as LspDiagnostic,
-} from "vscode-languageserver";
+import type { Connection, Diagnostic as LspDiagnostic } from "vscode-languageserver";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI, Utils } from "vscode-uri";
 import { parse } from "./parser.js";
@@ -114,7 +111,13 @@ export function startServer(connection: Connection): void {
 
     const fileName = Utils.basename(URI.parse(params.textDocument.uri));
     const cached = getOrParse(doc);
-    return getCompletions(cached.file, cached.tokens, params.position, fileName, cached.switchIndex);
+    return getCompletions(
+      cached.file,
+      cached.tokens,
+      params.position,
+      fileName,
+      cached.switchIndex,
+    );
   });
 
   documents.onDidClose((event) => {

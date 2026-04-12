@@ -38,7 +38,11 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
 
   function visitExpr(expr: ExprNode): void {
     if (expr.type === "binary") {
-      if (COMPARISON_OPS.has(expr.op) && expr.left.type === "string" && expr.right.type === "number") {
+      if (
+        COMPARISON_OPS.has(expr.op) &&
+        expr.left.type === "string" &&
+        expr.right.type === "number"
+      ) {
         const entries = getSwitchEntries(expr.left.value, switchIndex);
         addHintForNumber(expr.right, entries);
       }

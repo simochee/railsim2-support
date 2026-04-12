@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { parse } from "../src/server/parser.js";
-import { buildSwitchIndex, getReferencedSwitch, SYSTEM_SWITCHES } from "../src/server/switchSymbols.js";
+import {
+  buildSwitchIndex,
+  getReferencedSwitch,
+  SYSTEM_SWITCHES,
+} from "../src/server/switchSymbols.js";
 
 describe("buildSwitchIndex", () => {
   it("should collect DefineSwitch definitions", () => {

@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { semanticSchema, pluginTypeSchemas, getPluginTypeSchema, getFileSchema } from "../src/schema/semantic.generated.js";
+import {
+  semanticSchema,
+  pluginTypeSchemas,
+  getPluginTypeSchema,
+  getFileSchema,
+} from "../src/schema/semantic.generated.js";
 
 describe("semanticSchema", () => {
   it("全ルートオブジェクトが定義されている", () => {

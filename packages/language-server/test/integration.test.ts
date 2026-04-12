@@ -371,7 +371,9 @@ TrainInfo { Gauge = 1.0; }`;
     const diagnostics = validateTextDocument(input);
     expect(
       diagnostics.some(
-        (d) => d.message.includes("not allowed as root object for PluginType") && d.message.includes("TrainInfo"),
+        (d) =>
+          d.message.includes("not allowed as root object for PluginType") &&
+          d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
   });
@@ -428,7 +430,9 @@ Body {
   If "存在しない" == 0 { }
 }
     `);
-    expect(diags.some(d => d.message.includes("存在しない") && d.severity === "warning")).toBe(true);
+    expect(diags.some((d) => d.message.includes("存在しない") && d.severity === "warning")).toBe(
+      true,
+    );
   });
 
   it("should not warn on defined switch reference", () => {
@@ -440,7 +444,7 @@ Body {
   If "ライト" == 0 { }
 }
     `);
-    expect(diags.some(d => d.message.includes("ライト") && d.severity === "warning")).toBe(false);
+    expect(diags.some((d) => d.message.includes("ライト") && d.severity === "warning")).toBe(false);
   });
 
   it("should not warn on system switch reference", () => {
@@ -453,8 +457,8 @@ Body {
   }
 }
     `);
-    expect(diags.some(d => d.message.includes("_FRONT"))).toBe(false);
-    expect(diags.some(d => d.message.includes("_NIGHT"))).toBe(false);
+    expect(diags.some((d) => d.message.includes("_FRONT"))).toBe(false);
+    expect(diags.some((d) => d.message.includes("_NIGHT"))).toBe(false);
   });
 });
 

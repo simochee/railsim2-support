@@ -19,8 +19,12 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
 
   // Walk AST to find switch references
   walkNodes(file.body, {
-    if_(node) { checkSwitchRef(node.condition); },
-    applySwitch(node) { checkSwitchRef(node.switchName); },
+    if_(node) {
+      checkSwitchRef(node.condition);
+    },
+    applySwitch(node) {
+      checkSwitchRef(node.switchName);
+    },
   });
 
   function checkSwitchRef(expr: ExprNode): void {
@@ -29,9 +33,8 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
     if (switchIndex.definitions.has(name)) return;
     if (SYSTEM_SWITCHES.has(name)) return;
 
-    const range = expr.type === "binary" && expr.left.type === "string"
-      ? expr.left.range
-      : expr.range;
+    const range =
+      expr.type === "binary" && expr.left.type === "string" ? expr.left.range : expr.range;
 
     diagnostics.push({
       message: `Reference to undefined switch '${name}'`,

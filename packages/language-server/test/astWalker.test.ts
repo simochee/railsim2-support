@@ -12,11 +12,21 @@ describe("walkNodes", () => {
     const { file } = parse(src);
     const visited: string[] = [];
     walkNodes(file.body, {
-      object(node) { visited.push(`object:${node.name}`); },
-      property(node) { visited.push(`property:${node.name}`); },
-      if_() { visited.push("if"); },
-      applySwitch() { visited.push("applySwitch"); },
-      case_() { visited.push("case"); },
+      object(node) {
+        visited.push(`object:${node.name}`);
+      },
+      property(node) {
+        visited.push(`property:${node.name}`);
+      },
+      if_() {
+        visited.push("if");
+      },
+      applySwitch() {
+        visited.push("applySwitch");
+      },
+      case_() {
+        visited.push("case");
+      },
     });
     expect(visited).toContain("object:PluginHeader");
     expect(visited).toContain("property:PluginType");
@@ -33,8 +43,12 @@ describe("walkNodes", () => {
     const { file } = parse(src);
     const visited: string[] = [];
     walkNodes(file.body, {
-      object(node) { visited.push(node.name); },
-      property(node) { visited.push(node.name); },
+      object(node) {
+        visited.push(node.name);
+      },
+      property(node) {
+        visited.push(node.name);
+      },
     });
     expect(visited).toEqual(["Outer", "Inner", "Prop"]);
   });
@@ -44,7 +58,9 @@ describe("walkNodes", () => {
     const { file } = parse(src);
     const props: string[] = [];
     walkNodes(file.body, {
-      property(node) { props.push(node.name); },
+      property(node) {
+        props.push(node.name);
+      },
     });
     expect(props).toContain("A");
     expect(props).toContain("B");
@@ -55,7 +71,9 @@ describe("walkNodes", () => {
     const { file } = parse(src);
     const props: string[] = [];
     walkNodes(file.body, {
-      property(node) { props.push(node.name); },
+      property(node) {
+        props.push(node.name);
+      },
     });
     expect(props).toContain("A");
     expect(props).toContain("B");
@@ -65,8 +83,12 @@ describe("walkNodes", () => {
     const { file } = parse("");
     const visited: string[] = [];
     walkNodes(file.body, {
-      object() { visited.push("object"); },
-      property() { visited.push("property"); },
+      object() {
+        visited.push("object");
+      },
+      property() {
+        visited.push("property");
+      },
     });
     expect(visited).toEqual([]);
   });

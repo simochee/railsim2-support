@@ -549,8 +549,7 @@ describe("switch completions", () => {
   });
 
   it("If の文字列内でスイッチ名を補完する", () => {
-    const src =
-      'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If "" == 0 {\n  }\n}';
+    const src = 'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If "" == 0 {\n  }\n}';
     const { file, tokens, switchIndex } = setupWithSwitch(src);
     const items = getCompletions(file, tokens, pos(4, 6), "Train2.txt", switchIndex);
     expect(items.some((i) => i.label === "ライト")).toBe(true);
@@ -570,13 +569,7 @@ describe("switch completions", () => {
   it("通常の文字列内では補完しない", () => {
     const src = 'Body "test" {\n  ModelFileName = "test.x";\n}';
     const { file, tokens, switchIndex } = setupWithSwitch(src);
-    const items = getCompletions(
-      file,
-      tokens,
-      pos(1, 22),
-      "Rail2.txt",
-      switchIndex,
-    );
+    const items = getCompletions(file, tokens, pos(1, 22), "Rail2.txt", switchIndex);
     expect(items).toHaveLength(0);
   });
 
@@ -587,8 +580,7 @@ describe("switch completions", () => {
   });
 
   it("括弧付き If でもスイッチ名を補完する", () => {
-    const src =
-      'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If ("" == 0) {\n  }\n}';
+    const src = 'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  If ("" == 0) {\n  }\n}';
     const { file, tokens, switchIndex } = setupWithSwitch(src);
     const items = getCompletions(file, tokens, pos(4, 7), "Train2.txt", switchIndex);
     expect(items.some((i) => i.label === "ライト")).toBe(true);
@@ -596,8 +588,7 @@ describe("switch completions", () => {
 
   it('開き引用符 " 直後でスイッチ名を補完する', () => {
     // User just typed: ApplySwitch "  (unterminated string)
-    const src =
-      'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  ApplySwitch "\n}';
+    const src = 'DefineSwitch "ライト" {\n  Entry = "点灯";\n}\nBody {\n  ApplySwitch "\n}';
     const { file, tokens, switchIndex } = setupWithSwitch(src);
     // cursor right after the opening " on line 4
     const items = getCompletions(file, tokens, pos(4, 15), "Train2.txt", switchIndex);
@@ -609,21 +600,21 @@ describe("switch completions", () => {
     const src = [
       'DefineSwitch "外側" {',
       '  Entry = "A";',
-      '}',
+      "}",
       'DefineSwitch "内側" {',
       '  Entry = "X";',
       '  Entry = "Y";',
-      '}',
-      'Body {',
+      "}",
+      "Body {",
       '  ApplySwitch "外側" {',
-      '    Case 0:',
+      "    Case 0:",
       '      ApplySwitch "内側" {',
-      '        Case :',
-      '        Default:',
-      '      }',
-      '    Default:',
-      '  }',
-      '}',
+      "        Case :",
+      "        Default:",
+      "      }",
+      "    Default:",
+      "  }",
+      "}",
     ].join("\n");
     const { file, tokens, switchIndex } = setupWithSwitch(src);
     // cursor after "Case " in inner ApplySwitch (line 11, char 13)

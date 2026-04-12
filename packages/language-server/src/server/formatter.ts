@@ -141,9 +141,7 @@ function formatProperty(node: PropertyNode, depth: number, ctx: FormatContext): 
 function reindentProperty(node: PropertyNode, depth: number, ctx: FormatContext): string {
   const prefix = ind(depth, ctx);
   const startLine = node.range.start.line;
-  const endLine = node.trailingComment
-    ? node.trailingComment.range.end.line
-    : node.range.end.line;
+  const endLine = node.trailingComment ? node.trailingComment.range.end.line : node.range.end.line;
 
   const lines = ctx.sourceLines.slice(startLine, endLine + 1);
   if (lines.length === 0) return "";

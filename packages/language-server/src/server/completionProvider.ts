@@ -1,4 +1,9 @@
-import { CompletionItem, CompletionItemKind, InsertTextFormat, TextEdit } from "vscode-languageserver";
+import {
+  CompletionItem,
+  CompletionItemKind,
+  InsertTextFormat,
+  TextEdit,
+} from "vscode-languageserver";
 import type { Token, Position } from "../shared/tokens.js";
 import type { FileNode, ObjectNode, BodyNode, TopLevelNode } from "../shared/ast.js";
 import type { PropertySchema, RootObjectEntry } from "../schema/schemaTypes.js";
@@ -121,7 +126,9 @@ export function findContext(
     // means the cursor is between `=` and `;`, still in value territory)
     if (
       posLT(start, position) &&
-      (codeTokens[i].type === "semicolon" || codeTokens[i].type === "lbrace" || codeTokens[i].type === "rbrace")
+      (codeTokens[i].type === "semicolon" ||
+        codeTokens[i].type === "lbrace" ||
+        codeTokens[i].type === "rbrace")
     ) {
       lastDelimIdx = i;
     }
@@ -131,9 +138,7 @@ export function findContext(
     if (lastDelimIdx < 0 || lastDelimIdx < lastEqualsIdx) {
       // Cursor is in property value position (after = and before ;/{/})
       // Try to build a propertyValue context
-      const pvCtx = buildPropertyValueContext(
-        codeTokens, lastEqualsIdx, position, file, fileName,
-      );
+      const pvCtx = buildPropertyValueContext(codeTokens, lastEqualsIdx, position, file, fileName);
       if (pvCtx) return pvCtx;
       return { type: "none" };
     }
@@ -170,9 +175,12 @@ export function findContext(
   }
 
   const rawPluginType = extractPluginType(file);
-  const pluginType = rawPluginType && getPluginTypeSchema(rawPluginType)
-    ? rawPluginType
-    : (fileName ? fileNamePluginTypeMap[fileName] : undefined);
+  const pluginType =
+    rawPluginType && getPluginTypeSchema(rawPluginType)
+      ? rawPluginType
+      : fileName
+        ? fileNamePluginTypeMap[fileName]
+        : undefined;
   return { type: "root", fileName, pluginType };
 }
 
@@ -381,7 +389,12 @@ function buildPropertyValueContext(
   if (equalsPos.line !== cursorPos.line) return null;
 
   const result = findInnermostObject(
-    file.body, equalsPos, [], undefined, codeTokens, rootSchemaKeyMap,
+    file.body,
+    equalsPos,
+    [],
+    undefined,
+    codeTokens,
+    rootSchemaKeyMap,
   );
   if (!result) return null;
 
@@ -433,7 +446,11 @@ export function getCompletions(
 // Root completions
 // ---------------------------------------------------------------------------
 
-function buildRootCompletions(file: FileNode, fileName?: string, pluginType?: string): CompletionItem[] {
+function buildRootCompletions(
+  file: FileNode,
+  fileName?: string,
+  pluginType?: string,
+): CompletionItem[] {
   const rootEntries = pluginType
     ? getPluginTypeSchema(pluginType)
     : fileName
@@ -634,9 +651,7 @@ function detectSwitchContext(
   }
 
   // Filter code tokens (no comments) up to cursor
-  const codeTokens = tokens.filter(
-    (t) => t.type !== "lineComment" && t.type !== "blockComment",
-  );
+  const codeTokens = tokens.filter((t) => t.type !== "lineComment" && t.type !== "blockComment");
   const tokensBefore = codeTokens.filter((t) => posLE(tokenStartPos(t), position));
 
   if (insideString) {
@@ -659,7 +674,12 @@ function detectSwitchContext(
   let foundCase = false;
   for (let i = tokensStrictlyBefore.length - 1; i >= 0; i--) {
     const t = tokensStrictlyBefore[i];
-    if (t.type === "colon" || t.type === "semicolon" || t.type === "lbrace" || t.type === "rbrace") {
+    if (
+      t.type === "colon" ||
+      t.type === "semicolon" ||
+      t.type === "lbrace" ||
+      t.type === "rbrace"
+    ) {
       break;
     }
     if (t.type === "identifier" && t.value === "Case") {
@@ -744,10 +764,7 @@ function buildSwitchRefCompletions(switchIndex: SwitchIndex): CompletionItem[] {
   return items;
 }
 
-function buildCaseValueCompletions(
-  switchName: string,
-  switchIndex: SwitchIndex,
-): CompletionItem[] {
+function buildCaseValueCompletions(switchName: string, switchIndex: SwitchIndex): CompletionItem[] {
   const entries = getSwitchEntries(switchName, switchIndex);
   if (!entries) return [];
   return entries.map((entry) => ({

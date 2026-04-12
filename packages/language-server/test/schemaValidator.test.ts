@@ -178,7 +178,9 @@ TrainInfo {
     const diags = validate(src);
     expect(
       diags.some(
-        (d) => d.message.includes("not allowed as root object for PluginType") && d.message.includes("TrainInfo"),
+        (d) =>
+          d.message.includes("not allowed as root object for PluginType") &&
+          d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
   });
@@ -649,7 +651,9 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    const rootErrors = diags.filter((d) => d.message.includes("not allowed as root object for PluginType"));
+    const rootErrors = diags.filter((d) =>
+      d.message.includes("not allowed as root object for PluginType"),
+    );
     expect(rootErrors.length).toBeGreaterThan(0);
   });
 

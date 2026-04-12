@@ -3,7 +3,11 @@
  */
 import type { SymbolTable } from "./symbol-table.js";
 import type { ResolvedObject, ResolvedProperty, ResolvedChild } from "./symbol-table.js";
-import { schemaOverrides, additionalSchemas, pluginTypeSchemaOverrides } from "../schema-overrides.js";
+import {
+  schemaOverrides,
+  additionalSchemas,
+  pluginTypeSchemaOverrides,
+} from "../schema-overrides.js";
 
 // ── Type conversion ──────────────────────────────────────────────────
 

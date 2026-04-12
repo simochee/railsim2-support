@@ -72,9 +72,9 @@ Body { }
     `);
     const index = buildSwitchIndex(file);
     const diags = validateSwitches(file, index);
-    const dupDiags = diags.filter(d => d.message === "Duplicate switch definition 'ライト'");
+    const dupDiags = diags.filter((d) => d.message === "Duplicate switch definition 'ライト'");
     expect(dupDiags).toHaveLength(2);
-    expect(dupDiags.every(d => d.severity === "warning")).toBe(true);
+    expect(dupDiags.every((d) => d.severity === "warning")).toBe(true);
   });
 
   it("should not warn when string is used in complex expression (&&, ||)", () => {
