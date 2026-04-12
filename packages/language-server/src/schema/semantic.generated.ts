@@ -125,7 +125,9 @@ export const semanticSchema: SemanticSchema = {
       Twinkle: {
         type: "float",
         required: false,
-        multiple: false
+        multiple: false,
+        min: 0,
+        max: 1
       },
       Inclination: {
         type: "float",

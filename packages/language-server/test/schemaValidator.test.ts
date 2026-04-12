@@ -802,4 +802,81 @@ Object3D "Door" {
     );
     expect(dupErrors).toHaveLength(0);
   });
+
+  // ================================================================
+  // 範囲チェック (min/max)
+  // ================================================================
+  it("min/max 範囲外の値 → warning", () => {
+    const src = `
+LensFlare {
+  StartAngle = 25.0;
+  Twinkle = 1.5;
+}
+`;
+    const diags = validate(src);
+    expect(
+      diags.some(
+        (d) =>
+          d.message.includes("Twinkle") &&
+          d.message.includes("above maximum") &&
+          d.severity === "warning",
+      ),
+    ).toBe(true);
+  });
+
+  it("min/max 範囲下限未満 → warning", () => {
+    const src = `
+LensFlare {
+  StartAngle = 25.0;
+  Twinkle = -0.5;
+}
+`;
+    const diags = validate(src);
+    expect(
+      diags.some(
+        (d) =>
+          d.message.includes("Twinkle") &&
+          d.message.includes("below minimum") &&
+          d.severity === "warning",
+      ),
+    ).toBe(true);
+  });
+
+  it("min/max 範囲内の値 → warning なし", () => {
+    const src = `
+LensFlare {
+  StartAngle = 25.0;
+  Twinkle = 0.5;
+}
+`;
+    const diags = validate(src);
+    const rangeWarnings = diags.filter(
+      (d) => d.message.includes("Twinkle") && d.severity === "warning",
+    );
+    expect(rangeWarnings).toHaveLength(0);
+  });
+
+  it("min/max 境界値 (0.0, 1.0) → warning なし", () => {
+    const src = `
+LensFlare {
+  StartAngle = 25.0;
+  Twinkle = 0.0;
+}
+`;
+    const diags1 = validate(src);
+    expect(
+      diags1.filter((d) => d.message.includes("Twinkle") && d.severity === "warning"),
+    ).toHaveLength(0);
+
+    const src2 = `
+LensFlare {
+  StartAngle = 25.0;
+  Twinkle = 1.0;
+}
+`;
+    const diags2 = validate(src2);
+    expect(
+      diags2.filter((d) => d.message.includes("Twinkle") && d.severity === "warning"),
+    ).toHaveLength(0);
+  });
 });

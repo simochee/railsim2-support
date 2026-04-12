@@ -275,7 +275,7 @@ function validatePropertyType(
 
   // arity チェック (expression 型で arity 未指定の場合はスキップ)
   if (expectedArity != null && values.length !== expectedArity) {
-    // fillable の場合、値が不足していても arity 以下なら許可 (RailSim2 が最後の値で埋める)
+    // fillable の場合、値が1個以上かつ arity 以下なら許可 (RailSim2 が最後の値で埋める)
     if (schema.fillable && values.length > 0 && values.length < expectedArity) {
       // OK — RailSim2 が最後の値で埋める
     } else {
@@ -431,6 +431,32 @@ function pushTypeMismatch(
     range: actual.range,
     severity: "error",
   });
+}
+
+function checkRange(
+  value: ExprNode,
+  schema: PropertySchema,
+  propName: string,
+  objectName: string,
+  diagnostics: Diagnostic[],
+): void {
+  // 定数値のみチェック（式はスキップ）
+  const num = evaluateStaticNumber(value);
+  if (num === null) return;
+  if (schema.min != null && num < schema.min) {
+    diagnostics.push({
+      message: `Value ${num} for '${propName}' in '${objectName}' is below minimum ${schema.min}`,
+      range: value.range,
+      severity: "warning",
+    });
+  }
+  if (schema.max != null && num > schema.max) {
+    diagnostics.push({
+      message: `Value ${num} for '${propName}' in '${objectName}' is above maximum ${schema.max}`,
+      range: value.range,
+      severity: "warning",
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
