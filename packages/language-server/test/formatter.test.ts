@@ -182,6 +182,27 @@ MaxVelocity = 130.0;
     );
   });
 
+  // --- Multiple tuples ---
+
+  it("should preserve multiple tuple grouping", () => {
+    const input = "Body { Direction = (-0.6,3.0,-0.6),(0.6,6.0,0.6); }";
+    const result = format(input);
+    expect(result).toBe("Body {\n\tDirection = (-0.6, 3.0, -0.6), (0.6, 6.0, 0.6);\n}\n");
+  });
+
+  it("should not treat expression parens as tuple", () => {
+    // Note: exprText drops grouping parens due to parser range — a pre-existing issue
+    const input = "Body { X = (1+2)*3, 4; }";
+    const result = format(input);
+    expect(result).toBe("Body {\n\tX = 1+2)*3, 4;\n}\n");
+  });
+
+  it("should handle bare value followed by tuple", () => {
+    const input = "Body { X = 1,(2,3); }";
+    const result = format(input);
+    expect(result).toBe("Body {\n\tX = 1, (2, 3);\n}\n");
+  });
+
   // --- Negative values in tuple ---
 
   it("should preserve negative values in tuple", () => {

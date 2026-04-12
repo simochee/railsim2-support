@@ -273,10 +273,111 @@ function propertyValueText(node: PropertyNode, ctx: FormatContext): string {
     return raw;
   }
 
-  // Multi-value: check for tuple parens and normalize comma spacing
-  const hasTupleParen = raw.startsWith("(") && raw.endsWith(")");
-  const vals = node.values.map((v) => exprText(v, ctx)).join(", ");
-  return hasTupleParen ? `(${vals})` : vals;
+  // Multi-value: detect tuple grouping from source and rebuild with normalized spacing
+  const groups = detectValueGroups(raw);
+  const vals = node.values.map((v) => exprText(v, ctx));
+  const parts: string[] = [];
+  let idx = 0;
+  for (const g of groups) {
+    if (g.tuple) {
+      parts.push(`(${vals.slice(idx, idx + g.count).join(", ")})`);
+    } else {
+      parts.push(vals.slice(idx, idx + g.count).join(", "));
+    }
+    idx += g.count;
+  }
+  // Safety: append remaining values if groups didn't cover all
+  for (; idx < vals.length; idx++) {
+    parts.push(vals[idx]);
+  }
+  return parts.join(", ");
+}
+
+interface ValueGroup {
+  tuple: boolean;
+  count: number; // number of flat values this group consumes
+}
+
+/**
+ * Split the raw value text into top-level segments separated by commas,
+ * then classify each segment as a tuple `(a, b, c)` or a bare value.
+ * A segment starting with `(` is a tuple only when the matching `)` ends the segment.
+ * This correctly handles expressions like `(1+2)*3` (not a tuple) and
+ * mixed patterns like `1, (2, 3)` (bare + tuple).
+ */
+function detectValueGroups(raw: string): ValueGroup[] {
+  const segments = splitTopLevelCommas(raw);
+  const groups: ValueGroup[] = [];
+  for (const seg of segments) {
+    const trimmed = seg.trim();
+    if (trimmed.startsWith("(") && trimmed.endsWith(")") && isTupleSegment(trimmed)) {
+      const inner = trimmed.slice(1, -1);
+      const innerParts = splitTopLevelCommas(inner);
+      groups.push({ tuple: true, count: innerParts.length });
+    } else {
+      groups.push({ tuple: false, count: 1 });
+    }
+  }
+  return groups;
+}
+
+/** Split text by top-level commas, respecting parentheses and string literals. */
+function splitTopLevelCommas(text: string): string[] {
+  const parts: string[] = [];
+  let depth = 0;
+  let start = 0;
+  let i = 0;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch === '"') {
+      i++;
+      while (i < text.length && text[i] !== '"') {
+        if (text[i] === "\\") i++;
+        i++;
+      }
+      i++;
+      continue;
+    }
+    if (ch === "(") { depth++; i++; continue; }
+    if (ch === ")") { depth--; i++; continue; }
+    if (ch === "," && depth === 0) {
+      parts.push(text.slice(start, i));
+      start = i + 1;
+      i++;
+      continue;
+    }
+    i++;
+  }
+  parts.push(text.slice(start));
+  return parts;
+}
+
+/**
+ * Check that a `(...)` segment is actually a tuple and not an expression like `(1+2)*3`.
+ * A true tuple's outer parens enclose the entire segment — the matching `)` for the
+ * opening `(` must be at the end of the trimmed segment.
+ */
+function isTupleSegment(trimmed: string): boolean {
+  // Find matching ')' for the opening '('
+  let depth = 1;
+  let i = 1;
+  while (i < trimmed.length && depth > 0) {
+    const ch = trimmed[i];
+    if (ch === '"') {
+      i++;
+      while (i < trimmed.length && trimmed[i] !== '"') {
+        if (trimmed[i] === "\\") i++;
+        i++;
+      }
+    } else if (ch === "(") {
+      depth++;
+    } else if (ch === ")") {
+      depth--;
+    }
+    i++;
+  }
+  // depth === 0 means we found matching ')'; i should be at end of trimmed
+  return depth === 0 && i === trimmed.length;
 }
 
 function conditionText(
