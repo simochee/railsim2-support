@@ -89,6 +89,217 @@ Body {
     expect(diags).toHaveLength(0);
   });
 
+  it("should warn for out-of-range Case value in ApplySwitch", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  ApplySwitch "ライト" {
+    Case 0:
+    Case 1:
+    Case 3:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].severity).toBe("warning");
+    expect(diags[0].message).toContain("3");
+    expect(diags[0].message).toContain("ライト");
+  });
+
+  it("should warn for negative Case value", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  ApplySwitch "ライト" {
+    Case -1:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("-1");
+  });
+
+  it("should warn for non-integer Case value", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  ApplySwitch "ライト" {
+    Case 1.5:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("integer");
+  });
+
+  it("should not warn for valid Case values", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  ApplySwitch "ライト" {
+    Case 0:
+    Case 1:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should not check Case values for system switches", () => {
+    const { file } = parse(`
+Body {
+  ApplySwitch "_FRONT" {
+    Case 99:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should warn for out-of-range value in If == comparison", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If "ライト" == 5 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("5");
+    expect(diags[0].message).toContain("ライト");
+  });
+
+  it("should warn for out-of-range value in If != comparison", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If "ライト" != 5 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("5");
+  });
+
+  it("should warn for reversed comparison (number == string)", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If 5 == "ライト" { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("5");
+  });
+
+  it("should not warn for valid If comparison values", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If "ライト" == 0 { }
+  If "ライト" != 1 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should not check If comparison for < > <= >= operators", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  If "ライト" > 99 { }
+  If "ライト" < 99 { }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(0);
+  });
+
+  it("should warn when DefineSwitch has no entries", () => {
+    const { file } = parse(`
+DefineSwitch "空スイッチ" { }
+Body {
+  ApplySwitch "空スイッチ" {
+    Case 0:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("no entries");
+  });
+
+  it("should include entry labels in warning for small switches", () => {
+    const { file } = parse(`
+DefineSwitch "ライト" {
+  Entry = "点灯";
+  Entry = "消灯";
+}
+Body {
+  ApplySwitch "ライト" {
+    Case 3:
+    Default:
+  }
+}
+    `);
+    const index = buildSwitchIndex(file);
+    const diags = validateSwitches(file, index);
+    expect(diags).toHaveLength(1);
+    expect(diags[0].message).toContain("点灯");
+    expect(diags[0].message).toContain("消灯");
+  });
+
   it("should point diagnostic range to the string literal in comparison", () => {
     const { file } = parse(`
 Body {

@@ -200,3 +200,31 @@ export function getReferencedSwitch(expr: ExprNode): string | null {
   }
   return null;
 }
+
+export function evaluateStaticNumber(expr: ExprNode): number | null {
+  if (expr.type === "number") return expr.value;
+  if (expr.type === "unary" && (expr.op === "+" || expr.op === "-")) {
+    const inner = evaluateStaticNumber(expr.operand);
+    if (inner === null) return null;
+    return expr.op === "-" ? -inner : inner;
+  }
+  return null;
+}
+
+export interface SwitchComparison {
+  switchName: string;
+  switchNameRange: Range;
+  value: ExprNode;
+}
+
+export function extractSwitchComparison(expr: ExprNode): SwitchComparison | null {
+  if (expr.type !== "binary" || (expr.op !== "==" && expr.op !== "!=")) return null;
+
+  if (expr.left.type === "string" && expr.left.value) {
+    return { switchName: expr.left.value, switchNameRange: expr.left.range, value: expr.right };
+  }
+  if (expr.right.type === "string" && expr.right.value) {
+    return { switchName: expr.right.value, switchNameRange: expr.right.range, value: expr.left };
+  }
+  return null;
+}
