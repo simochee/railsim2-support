@@ -227,6 +227,7 @@ export function tokenize(source: string): Token[] {
       "|": "pipe",
       "!": "bang",
       "~": "tilde",
+      "?": "question",
     };
     if (singleCharMap[ch]) {
       advance();

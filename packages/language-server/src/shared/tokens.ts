@@ -21,6 +21,7 @@ export type TokenType =
   | "caret"
   | "tilde"
   | "bang"
+  | "question"
   | "ampersandAmpersand"
   | "pipePipe"
   | "lessLess"

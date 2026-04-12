@@ -270,10 +270,10 @@ describe("tokenizer", () => {
   });
 
   describe("unknown tokens", () => {
-    it("tokenizes ? as unknown", () => {
+    it("tokenizes ? as question", () => {
       const tokens = tokenize("?");
       expect(typesAndValues(tokens)).toEqual([
-        ["unknown", "?"],
+        ["question", "?"],
         ["eof", ""],
       ]);
     });

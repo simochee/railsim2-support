@@ -217,6 +217,7 @@ export function evaluateStaticNumber(expr: ExprNode): number | null {
     return expr.op === "-" ? -inner : inner;
   }
   if (expr.type === "group") return evaluateStaticNumber(expr.inner);
+  if (expr.type === "ternary") return null;
   return null;
 }
 

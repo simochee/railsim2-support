@@ -69,4 +69,5 @@ export type ExprNode =
   | { type: "boolean"; value: boolean; range: Range }
   | { type: "binary"; op: string; left: ExprNode; right: ExprNode; range: Range }
   | { type: "unary"; op: string; operand: ExprNode; range: Range }
-  | { type: "group"; inner: ExprNode; range: Range };
+  | { type: "group"; inner: ExprNode; range: Range }
+  | { type: "ternary"; condition: ExprNode; consequent: ExprNode; alternate: ExprNode; range: Range };

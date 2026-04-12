@@ -52,6 +52,10 @@ export function getInlayHints(file: FileNode, switchIndex: SwitchIndex, range: R
       visitExpr(expr.operand);
     } else if (expr.type === "group") {
       visitExpr(expr.inner);
+    } else if (expr.type === "ternary") {
+      visitExpr(expr.condition);
+      visitExpr(expr.consequent);
+      visitExpr(expr.alternate);
     }
   }
 

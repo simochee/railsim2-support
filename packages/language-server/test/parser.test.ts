@@ -564,6 +564,33 @@ ApplySwitch "_FRONT" {
     expect(file.body.length).toBeGreaterThan(0);
   });
 
+  it("should parse ternary expression", () => {
+    const src = 'Body { X = !"Switch" ? 1 : 0; }';
+    const { file, diagnostics } = parse(src);
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values[0].type).toBe("ternary");
+    if (prop.values[0].type === "ternary") {
+      expect(prop.values[0].condition.type).toBe("unary");
+      expect(prop.values[0].consequent.type).toBe("number");
+      expect(prop.values[0].alternate.type).toBe("number");
+    }
+  });
+
+  it("ternary has lower precedence than binary", () => {
+    // 1 + 2 ? 3 : 4 should parse as (1 + 2) ? 3 : 4, not 1 + (2 ? 3 : 4)
+    const src = "Body { X = 1 + 2 ? 3 : 4; }";
+    const { file, diagnostics } = parse(src);
+    expect(diagnostics).toHaveLength(0);
+    const obj = file.body[0] as ObjectNode;
+    const prop = obj.body[0] as PropertyNode;
+    expect(prop.values[0].type).toBe("ternary");
+    if (prop.values[0].type === "ternary") {
+      expect(prop.values[0].condition.type).toBe("binary");
+    }
+  });
+
   it("should handle BOM at start of file", () => {
     const src = '\uFEFFBody { X = 1; }';
     const { file, diagnostics } = parse(src);

@@ -316,6 +316,14 @@ function checkValueType(
     return;
   }
 
+  // ternary / binary → expression 型のみ許可
+  if (value.type === "ternary" || value.type === "binary") {
+    if (type !== "expression") {
+      pushTypeMismatch(propName, objectName, type, value, diagnostics);
+    }
+    return;
+  }
+
   switch (type) {
     case "float":
     case "vector-2d":

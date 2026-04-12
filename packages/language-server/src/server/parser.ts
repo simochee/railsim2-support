@@ -212,6 +212,16 @@ export function parse(source: string): ParseResult {
       };
     }
 
+    // Ternary: lowest precedence (13, below || at 12), right-associative
+    const TERNARY_PREC = 13;
+    if (check("question") && TERNARY_PREC <= minPrec) {
+      advance(); // ?
+      const consequent = parseExpr();
+      expect("colon", "Expected ':' in ternary expression");
+      const alternate = parseExpr(TERNARY_PREC); // right-associative
+      return { type: "ternary", condition: left, consequent, alternate, range: rangeSpan(left.range.start, alternate.range.end) };
+    }
+
     return left;
   }
 
