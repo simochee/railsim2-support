@@ -44,7 +44,7 @@ export function tokenize(source: string): Token[] {
   }
 
   function isWhitespace(ch: string): boolean {
-    return ch === " " || ch === "\t" || ch === "\r" || ch === "\n" || ch === "\u3000";
+    return ch === " " || ch === "\t" || ch === "\r" || ch === "\n" || ch === "\u3000" || ch === "\uFEFF";
   }
 
   function isAlpha(ch: string): boolean {

@@ -9,6 +9,15 @@ import type {
 } from "../src/shared/ast.js";
 
 describe("parser", () => {
+  it("should parse .5 as number value", () => {
+    const src = "Body { Coord = .5; }";
+    const { file } = parse(src);
+    const body = file.body[0] as ObjectNode;
+    const prop = body.body[0] as PropertyNode;
+    expect(prop.values[0].type).toBe("number");
+    expect((prop.values[0] as any).value).toBeCloseTo(0.5);
+  });
+
   // Basics
   it("should parse empty input → file with empty body, no diagnostics", () => {
     const { file, diagnostics } = parse("");
@@ -553,5 +562,14 @@ ApplySwitch "_FRONT" {
     const { file, diagnostics } = parse(src);
     // 改行で文字列が打ち切られるので、Body はパースできるはず
     expect(file.body.length).toBeGreaterThan(0);
+  });
+
+  it("should handle BOM at start of file", () => {
+    const src = '\uFEFFBody { X = 1; }';
+    const { file, diagnostics } = parse(src);
+    expect(file.body.length).toBe(1);
+    const obj = file.body[0] as ObjectNode;
+    expect(obj.name).toBe("Body");
+    expect(diagnostics.length).toBe(0);
   });
 });
