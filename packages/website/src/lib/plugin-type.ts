@@ -3,7 +3,7 @@
 // plugin-type.test.ts で language-server 側と一致検証している。
 export const VALID_PLUGIN_TYPES = new Set([
   "Env", "Girder", "Line", "Pier", "Pole", "Rail",
-  "Skin", "Station", "Struct", "Surface", "Tie", "Train",
+  "RailwayPluginSet", "Skin", "Station", "Struct", "Surface", "Tie", "Train",
 ]);
 
 /**

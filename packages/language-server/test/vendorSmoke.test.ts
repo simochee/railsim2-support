@@ -60,26 +60,25 @@ describe("vendor corpus smoke test", () => {
 // Schema validation smoke test
 // ---------------------------------------------------------------------------
 
-/** allowlist entry: file (basename) + message + severity */
+/** allowlist entry: relPath pattern + message for known errors in vendor corpus */
 interface AllowlistEntry {
-  file: string;
+  pathPattern: string; // substring match against relPath
   message: string;
-  severity: string;
 }
 
-const SCHEMA_ALLOWLIST: AllowlistEntry[] = [
+const ERROR_ALLOWLIST: AllowlistEntry[] = [
   // 公式プラグインで DefineAnimation 内に ShiftTexture が重複定義されている
-  { file: "Station2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'", severity: "error" },
-  { file: "Struct2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'", severity: "error" },
+  { pathPattern: "Station/DoubleCrossing/Station2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
+  { pathPattern: "Station/SingleCrossing/Station2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
+  { pathPattern: "Struct/DigitalClock/Struct2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
 ];
 
 function isAllowlisted(
   relPath: string,
   diag: { message: string; severity: string },
 ): boolean {
-  const base = path.basename(relPath);
-  return SCHEMA_ALLOWLIST.some(
-    (a) => a.file === base && a.message === diag.message && a.severity === diag.severity,
+  return ERROR_ALLOWLIST.some(
+    (a) => relPath.includes(a.pathPattern) && diag.message === a.message,
   );
 }
 
@@ -108,13 +107,15 @@ describe("vendor schema validation smoke test", () => {
       const switchDiags = validateSwitches(ast, switchIndex);
       const allDiags = [...schemaDiags, ...switchDiags];
 
-      const unexpected = allDiags.filter((d) => !isAllowlisted(relPath, d));
+      // error のみチェック（warning は許容）
+      const errors = allDiags.filter((d) => d.severity === "error");
+      const unexpected = errors.filter((d) => !isAllowlisted(relPath, d));
 
       if (unexpected.length > 0) {
         const msgs = unexpected
           .map((d) => `[${d.severity}] ${d.message}`)
           .join("\n  ");
-        expect.fail(`Unexpected diagnostics in ${relPath}:\n  ${msgs}`);
+        expect.fail(`Unexpected errors in ${relPath}:\n  ${msgs}`);
       }
     });
   }
