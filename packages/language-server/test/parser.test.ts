@@ -559,7 +559,7 @@ ApplySwitch "_FRONT" {
 
   it("should terminate string at newline", () => {
     const src = '"unclosed\nBody { X = 1; }';
-    const { file, diagnostics } = parse(src);
+    const { file } = parse(src);
     // 改行で文字列が打ち切られるので、Body はパースできるはず
     expect(file.body.length).toBeGreaterThan(0);
   });

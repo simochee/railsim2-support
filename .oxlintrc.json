@@ -8,5 +8,5 @@
     "rules": {
         "typescript/array-type": ["error", { "default": "array", "readonly": "array" }]
     },
-    "ignorePatterns": ["out/", "dist/", "node_modules/", "vendor/", "packages/website/", "*.generated.ts"]
+    "ignorePatterns": ["out/", "dist/", "node_modules/", "vendor/", "packages/website/", ".astro/", "*.generated.ts"]
 }
