@@ -5,6 +5,6 @@ import { getHelpPages } from "../lib/vendor";
 const index = getHelpPages().find((p) => p.slug === "index")!;
 ---
 
-<HelpLayout title={index.title}>
+<HelpLayout title={index.title} description={index.description}>
   <Fragment set:html={index.body} />
 </HelpLayout>

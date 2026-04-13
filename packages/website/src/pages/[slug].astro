@@ -7,13 +7,13 @@ export function getStaticPaths() {
     .filter((p) => p.slug !== "index")
     .map((page) => ({
       params: { slug: page.slug },
-      props: { title: page.title, body: page.body },
+      props: { title: page.title, body: page.body, description: page.description },
     }));
 }
 
-const { title, body } = Astro.props;
+const { title, body, description } = Astro.props;
 ---
 
-<HelpLayout title={title}>
+<HelpLayout title={title} description={description} noindex>
   <Fragment set:html={body} />
 </HelpLayout>
