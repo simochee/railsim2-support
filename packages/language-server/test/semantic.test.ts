@@ -104,9 +104,10 @@ describe("pluginTypeSchemas", () => {
     "Surface",
     "Env",
     "Skin",
+    "RailwayPluginSet",
   ];
 
-  it("12プラグインタイプ分の定義が存在する", () => {
+  it("13プラグインタイプ分の定義が存在する", () => {
     for (const pt of expectedPluginTypes) {
       expect(pluginTypeSchemas[pt], `${pt} should be defined`).toBeDefined();
     }

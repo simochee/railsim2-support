@@ -447,6 +447,38 @@ export const additionalSchemas: Record<string, AdditionalSchema> = {
     },
     children: {},
   },
+  // ── DatafileHeader — RailwayPluginSet 等の非プラグインファイル共通ヘッダ ──
+  DatafileHeader: {
+    properties: {
+      RailSimVersion: { type: "float", required: true, multiple: false },
+      DatafileType: { type: "identifier", required: true, multiple: false },
+    },
+    children: {},
+  },
+  // ── RailwayPluginSet — 線路セットアップ定義 ──
+  RailwayPluginSet: {
+    properties: {
+      SettingName: { type: "string", required: true, multiple: false },
+      RailPlugin: { type: "string", required: true, multiple: false },
+      RailCheck: { type: "yes-no", required: true, multiple: false },
+      TiePlugin: { type: "string", required: true, multiple: false },
+      TieCheck: { type: "yes-no", required: true, multiple: false },
+      GirderPlugin: { type: "string", required: true, multiple: false },
+      GirderCheck: { type: "yes-no", required: true, multiple: false },
+      PierPlugin: { type: "string", required: true, multiple: false },
+      PierCheck: { type: "yes-no", required: true, multiple: false },
+      LinePlugin: { type: "string", required: true, multiple: false },
+      LineCheck: { type: "yes-no", required: true, multiple: false },
+      PolePlugin: { type: "string", required: true, multiple: false },
+      PoleCheck: { type: "yes-no", required: true, multiple: false },
+      EnableCant: { type: "yes-no", required: true, multiple: false },
+      LiftRailSurface: { type: "yes-no", required: true, multiple: false },
+      MultiTrack: { type: "yes-no", required: true, multiple: false },
+      TrackNum: { type: "integer", required: true, multiple: false },
+      TrackInterval: { type: "float", required: true, multiple: false },
+    },
+    children: {},
+  },
   // ── Model:Pole — Pole2.txt の Model は ModelFileName + ModelScale のみ ──
   // vendor/CPolePlugin.cpp:29-31: 両方とも throw パターン（必須）
   // ※ Skin の Model（Arrow/Link/Segment/Compass/WindDir）とは別定義
@@ -535,6 +567,10 @@ export const pluginTypeSchemaOverrides: Record<string, FileSchemaEntry[]> = {
     { name: "Landscape", required: false, multiple: true },
     { name: "Sun", required: false, multiple: false },
     { name: "Moon", required: false, multiple: false },
+  ],
+  RailwayPluginSet: [
+    { name: "DatafileHeader", required: true, multiple: false },
+    { name: "RailwayPluginSet", required: true, multiple: false },
   ],
   Skin: [
     { name: "PluginHeader", required: true, multiple: false },

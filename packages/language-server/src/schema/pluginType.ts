@@ -7,12 +7,23 @@ import type { FileNode } from "../shared/ast.js";
  */
 export function extractPluginType(file: FileNode): string | undefined {
   for (const node of file.body) {
-    if (node.type !== "object" || node.name !== "PluginHeader") continue;
+    if (node.type !== "object") continue;
 
-    for (const child of node.body) {
-      if (child.type !== "property" || child.name !== "PluginType") continue;
-      if (child.values.length === 1 && child.values[0].type === "identifier") {
-        return child.values[0].value;
+    if (node.name === "PluginHeader") {
+      for (const child of node.body) {
+        if (child.type !== "property" || child.name !== "PluginType") continue;
+        if (child.values.length === 1 && child.values[0].type === "identifier") {
+          return child.values[0].value;
+        }
+      }
+    }
+
+    if (node.name === "DatafileHeader") {
+      for (const child of node.body) {
+        if (child.type !== "property" || child.name !== "DatafileType") continue;
+        if (child.values.length === 1 && child.values[0].type === "identifier") {
+          return child.values[0].value;
+        }
       }
     }
   }

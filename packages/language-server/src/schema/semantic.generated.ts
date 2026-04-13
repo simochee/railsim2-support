@@ -3256,6 +3256,118 @@ export const semanticSchema: SemanticSchema = {
     children: {
     },
   },
+  DatafileHeader: {
+    properties: {
+      RailSimVersion: {
+        type: "float",
+        required: true,
+        multiple: false
+      },
+      DatafileType: {
+        type: "identifier",
+        required: true,
+        multiple: false
+      }
+    },
+    children: {
+    },
+  },
+  RailwayPluginSet: {
+    properties: {
+      SettingName: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      RailPlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      RailCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      TiePlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      TieCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      GirderPlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      GirderCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      PierPlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      PierCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      LinePlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      LineCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      PolePlugin: {
+        type: "string",
+        required: true,
+        multiple: false
+      },
+      PoleCheck: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      EnableCant: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      LiftRailSurface: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      MultiTrack: {
+        type: "yes-no",
+        required: true,
+        multiple: false
+      },
+      TrackNum: {
+        type: "integer",
+        required: true,
+        multiple: false
+      },
+      TrackInterval: {
+        type: "float",
+        required: true,
+        multiple: false
+      }
+    },
+    children: {
+    },
+  },
   "Model:Pole": {
     properties: {
       ModelFileName: {
@@ -3363,6 +3475,10 @@ export const pluginTypeSchemas: PluginTypeSchema = {
     { name: "DefineSwitch", required: false, multiple: true },
     { name: "DefineAnimation", required: false, multiple: true },
     { name: "PrimaryAssembly", required: false, multiple: false }
+  ],
+  RailwayPluginSet: [
+    { name: "DatafileHeader", required: true, multiple: false },
+    { name: "RailwayPluginSet", required: true, multiple: false }
   ]
 };
 
@@ -3378,7 +3494,8 @@ export const fileNamePluginTypeMap: Record<string, string> = {
   "Struct2.txt": "Struct",
   "Surface2.txt": "Surface",
   "Tie2.txt": "Tie",
-  "Train2.txt": "Train"
+  "Train2.txt": "Train",
+  "RailwayPluginSet2.txt": "RailwayPluginSet"
 };
 
 export function getPluginTypeSchema(pluginType: string): RootObjectEntry[] | undefined {
