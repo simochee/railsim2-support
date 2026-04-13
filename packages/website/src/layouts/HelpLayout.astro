@@ -5,9 +5,11 @@ import { getVendorCss } from "../lib/vendor";
 
 interface Props {
   title: string;
+  description?: string;
+  noindex?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, description, noindex } = Astro.props;
 const vendorCss = getVendorCss();
 ---
 
@@ -16,6 +18,12 @@ const vendorCss = getVendorCss();
   <head>
     <meta charset="UTF-8" />
     <title>{title}</title>
+    <meta property="og:title" content={title} />
+    <meta property="og:site_name" content="RailSim II Manual" />
+    <meta property="og:description" content={description ?? "RailSim II プラグイン開発のマニュアルドキュメント"} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    {noindex && <meta name="robots" content="noindex" />}
     <Fragment set:html={`<style>${vendorCss}</style>`} />
     <style is:global>
       body {
