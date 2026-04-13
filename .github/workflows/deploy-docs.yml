@@ -32,7 +32,7 @@ jobs:
         run: pnpm docs:build
 
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@da0e0e55bbee1194dc7fa36b3289920e5bbaf066 # v3.14.1
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65 # v3.14.1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
