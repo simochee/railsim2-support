@@ -28,6 +28,11 @@ const langConf = parseJsonc(readFileSync(langConfPath, "utf-8"));
   <head>
     <meta charset="UTF-8" />
     <title>オンラインエディター - RailSim2 Support</title>
+    <meta property="og:title" content="オンラインエディター" />
+    <meta property="og:site_name" content="RailSim II Manual" />
+    <meta property="og:description" content="RailSim II プラグインのコードをブラウザ上で編集・プレビューできるオンラインエディターです。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
     <style is:global>
       body {
         margin: 0;
