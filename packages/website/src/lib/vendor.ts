@@ -16,7 +16,7 @@ const HELP_SRC = resolve(RAILSIM2_ROOT, "Help");
 
 function extractTitle(html: string): string {
   const match = html.match(/<title>(.*?)<\/title>/i);
-  return match?.[1] ?? "RailSim II Help";
+  return match?.[1] ?? "RailSim II Manual";
 }
 
 export function extractDescription(html: string): string | undefined {
