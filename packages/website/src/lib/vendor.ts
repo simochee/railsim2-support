@@ -64,6 +64,7 @@ export interface HelpPage {
   slug: string;
   title: string;
   body: string;
+  description?: string;
 }
 
 export function getHelpPages(): HelpPage[] {
@@ -73,6 +74,7 @@ export function getHelpPages(): HelpPage[] {
       slug: "index",
       title: extractTitle(indexRaw),
       body: fixIndexPageLinks(extractBody(indexRaw)),
+      description: extractDescription(indexRaw),
     },
   ];
 
@@ -83,6 +85,7 @@ export function getHelpPages(): HelpPage[] {
       slug: file.replace(".html", ""),
       title: extractTitle(raw),
       body: fixHelpPageLinks(extractBody(raw)),
+      description: extractDescription(raw),
     });
   }
 
