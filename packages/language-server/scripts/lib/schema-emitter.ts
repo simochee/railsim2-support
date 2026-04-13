@@ -88,8 +88,9 @@ function convertProperty(rp: ResolvedProperty): EmittedProperty {
     result.type = mapped;
   }
 
-  // Arity-based upgrades for float
-  if (result.type === "float" && rp.arity > 1) {
+  // Arity-based upgrades for float (skip when type was explicitly set by override)
+  const typeOverridden = !!(rp as Record<string, unknown>)._typeOverridden;
+  if (result.type === "float" && rp.arity > 1 && !typeOverridden) {
     if (rp.arity === 2) {
       result.type = "vector-2d";
     } else if (rp.arity === 3) {
@@ -98,6 +99,9 @@ function convertProperty(rp: ResolvedProperty): EmittedProperty {
       result.type = "expression";
       result.arity = rp.arity;
     }
+  } else if (result.type === "float" && rp.arity > 1 && typeOverridden) {
+    // Override explicitly requested float with arity — keep as-is
+    result.arity = rp.arity;
   } else if (rp.arity > 1 && result.type !== "enum") {
     // Non-float with arity > 1 — record effective flat arity.
     // For vector types, multiply by the vector size since tuples are flattened.
@@ -132,6 +136,10 @@ function applyOverrides(objects: Record<string, ResolvedObject>): Record<string,
             Object.assign(obj.properties[propName], rest);
           } else {
             Object.assign(obj.properties[propName], patch);
+          }
+          // Mark that the type was explicitly overridden (prevents auto-upgrade)
+          if (patch.type !== undefined) {
+            (obj.properties[propName] as Record<string, unknown>)._typeOverridden = true;
           }
         } else {
           // New property from override

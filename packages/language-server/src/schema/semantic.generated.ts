@@ -2467,9 +2467,10 @@ export const semanticSchema: SemanticSchema = {
         multiple: false
       },
       Lifetime: {
-        type: "vector-2d",
+        type: "float",
         required: true,
         multiple: false,
+        arity: 2,
         fillable: true
       },
       Direction: {
@@ -2480,15 +2481,17 @@ export const semanticSchema: SemanticSchema = {
         fillable: true
       },
       InitialRadius: {
-        type: "vector-2d",
+        type: "float",
         required: true,
         multiple: false,
+        arity: 2,
         fillable: true
       },
       FinalRadius: {
-        type: "vector-2d",
+        type: "float",
         required: true,
         multiple: false,
+        arity: 2,
         fillable: true
       },
       Color: {

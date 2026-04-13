@@ -403,12 +403,14 @@ export const schemaOverrides: Record<string, SchemaOverride> = {
 
   // ── Particle: fill flag 対応 (vendor/CParticle.cpp:181-186) ──
   // AsgnFloat/AsgnVector3D/AsgnColor の最終引数 fill=true により値不足時に最後の値で埋められる
+  // Lifetime/InitialRadius/FinalRadius は AsgnFloat(..., 2, true) で float×2。
+  // BNF 由来の vector-2d は座標ベクトルを意味するため float + arity:2 に修正。
   Particle: {
     properties: {
-      Lifetime: { fillable: true },
+      Lifetime: { type: "float", arity: 2, fillable: true },
       Direction: { fillable: true },
-      InitialRadius: { fillable: true },
-      FinalRadius: { fillable: true },
+      InitialRadius: { type: "float", arity: 2, fillable: true },
+      FinalRadius: { type: "float", arity: 2, fillable: true },
       Color: { fillable: true },
     },
   },
