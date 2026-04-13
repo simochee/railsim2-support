@@ -28,7 +28,7 @@ describe("getHover", () => {
     const md = (hover!.contents as { kind: string; value: string }).value;
     expect(md).toContain("**Body**");
     expect(md).toContain("車輌の台車や本体を構成する基本的なオブジェクト");
-    expect(md).toContain("https://railsim2.simochee.net/");
+    expect(md).toContain("https://rs2.simochee.net/");
   });
 
   it("should return markdown hover for RailInfo object", () => {
@@ -61,7 +61,7 @@ describe("getHover", () => {
     expect(hover).not.toBeNull();
     const md = (hover!.contents as { kind: string; value: string }).value;
     expect(md).toContain("**Height**");
-    expect(md).toContain("https://railsim2.simochee.net/");
+    expect(md).toContain("https://rs2.simochee.net/");
   });
 
   // ── Null cases ──────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ describe("getHover", () => {
     expect(hover).not.toBeNull();
     const md = (hover!.contents as { kind: string; value: string }).value;
     expect(md).toContain("**SomeUnknownProp**");
-    expect(md).toContain("https://railsim2.simochee.net/");
+    expect(md).toContain("https://rs2.simochee.net/");
   });
 
   it("should return null for unknown property under unknown object", () => {

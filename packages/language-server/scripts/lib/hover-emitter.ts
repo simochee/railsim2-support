@@ -13,7 +13,7 @@ import { readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { readHelpHtml, extractPropertyDocs, extractOverview, extractTitle } from "./html-reader.js";
 
-const DOCS_BASE_URL = "https://railsim2.simochee.net";
+const DOCS_BASE_URL = "https://rs2.simochee.net";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 

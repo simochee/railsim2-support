@@ -133,7 +133,7 @@ function lspAssets(): AstroIntegration {
 }
 
 export default defineConfig({
-  site: "https://railsim2.simochee.net",
+  site: "https://rs2.simochee.net",
   build: { format: "preserve" },
   vite: {
     optimizeDeps: { include: ["encoding-japanese"] },
