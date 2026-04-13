@@ -19,6 +19,13 @@ function extractTitle(html: string): string {
   return match?.[1] ?? "RailSim II Help";
 }
 
+export function extractDescription(html: string): string | undefined {
+  const match = html.match(
+    /<h2\b[^>]*>\s*概要\s*<\/h2>\s*<p\b[^>]*>([\s\S]*?)<\/p>/i,
+  );
+  return match?.[1]?.replace(/<[^>]*>/g, "").trim() || undefined;
+}
+
 function extractBody(html: string): string {
   const match = html.match(/<body>([\s\S]*)<\/body>/i);
   return match?.[1] ?? "";
