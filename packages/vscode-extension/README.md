@@ -12,6 +12,16 @@ RailSim2 プラグイン定義ファイルの開発を支援する Visual Studio
 
 上記以外のファイル名で作業している場合は、VS Code 右下の言語モードから `RailSim2` を選択してください。
 
+### 対応プラグインタイプ
+
+通常プラグイン 12 種と RailwayPluginSet に対応しています。
+
+| 対応 | プラグインタイプ |
+| --- | --- |
+| :white_check_mark: | Train, Station, Struct, Env, Girder, Line, Pier, Pole, Rail, Skin, Surface, Tie |
+| :white_check_mark: | RailwayPluginSet |
+| :x: | Language, TrainGroupTemplate, TrainTemplate, Layout (.rs2) |
+
 ## 機能紹介
 
 ### シンタックスハイライト
@@ -45,7 +55,7 @@ RailSim2 プラグイン定義ファイルの開発を支援する Visual Studio
 
 ### フォーマット
 
-ファイル全体のインデントや空白を自動で整えます。VS Code の「ドキュメントのフォーマット」（`Shift+Alt+F`）で実行できます。
+ファイル全体のインデントや空白を自動で整えます。エディタ上で右クリックし、メニューから「ドキュメントのフォーマット」を選択すると実行できます。
 
 ### インレイヒント
 
@@ -65,7 +75,7 @@ RailSim2 のプラグイン定義ファイルは Shift_JIS（SJIS）で保存す
 
 VS Code の設定で、ファイルを開くときに文字コードを自動で判定するようにします。
 
-1. `Ctrl+,`（Mac: `Cmd+,`）で設定を開く
+1. 画面上部のメニューバーから **ファイル** > **ユーザー設定** > **設定** を開く（Mac では **Code** > **基本設定** > **設定**）
 2. 検索欄に `Auto Guess Encoding` と入力する
 3. **Files: Auto Guess Encoding** にチェックを入れる
 
