@@ -25,6 +25,7 @@ const vendorCss = getVendorCss();
     <meta property="og:description" content={description ?? "RailSim II プラグイン開発のマニュアルドキュメント"} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url.href} />
+    <meta name="twitter:card" content="summary" />
     {noindex && <meta name="robots" content="noindex" />}
     <Fragment set:html={`<style>${vendorCss}</style>`} />
     <style is:global>
