@@ -1,11 +1,10 @@
 {
 	"$schema": "node_modules/wrangler/schemas/config.schema.json",
 	"name": "railsim2-support-docs",
-	"main": "packages/website/src/worker.ts",
 	"compatibility_date": "2026-04-14",
 	"assets": {
 		"directory": "packages/website/dist",
-		"html_handling": "none",
+		"html_handling": "auto-trailing-slash",
 		"not_found_handling": "none"
 	}
 }
