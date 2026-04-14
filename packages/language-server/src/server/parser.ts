@@ -13,6 +13,7 @@ import type {
 } from "../shared/ast.js";
 import type { Diagnostic, ParseResult } from "../shared/diagnostics.js";
 import { containsPosition } from "../shared/rangeUtils.js";
+import { parser as msg } from "../shared/messages.js";
 import { tokenize } from "./tokenizer.js";
 
 // ---------------------------------------------------------------------------
@@ -217,7 +218,7 @@ export function parse(source: string): ParseResult {
     if (check("question") && TERNARY_PREC <= minPrec) {
       advance(); // ?
       const consequent = parseExpr();
-      expect("colon", "Expected ':' in ternary expression");
+      expect("colon", msg.expectedTernaryColon());
       const alternate = parseExpr(TERNARY_PREC); // right-associative
       return { type: "ternary", condition: left, consequent, alternate, range: rangeSpan(left.range.start, alternate.range.end) };
     }
@@ -275,12 +276,12 @@ export function parse(source: string): ParseResult {
       const startPos = posOf(t);
       advance(); // (
       const inner = parseExpr();
-      const rparen = expect("rparen", "Expected ')'");
+      const rparen = expect("rparen", msg.expectedToken(")"));
       return { type: "group" as const, inner, range: rangeSpan(startPos, endOf(rparen)) };
     }
 
     // Error: unexpected token in expression
-    addError(`Unexpected token '${t.value || t.type}' in expression`, rangeOf(t));
+    addError(msg.unexpectedTokenInExpr(t.value || t.type), rangeOf(t));
     // Return a synthetic number node so we can keep parsing
     return { type: "number", value: 0, range: rangeOf(t) };
   }
@@ -473,7 +474,7 @@ export function parse(source: string): ParseResult {
       if (isObjectStart()) return parseObject();
 
       // Otherwise treat as error and skip
-      addError(`Unexpected identifier '${t.value}' at top level`, rangeOf(t));
+      addError(msg.unexpectedIdentifierTopLevel(t.value), rangeOf(t));
       const before1 = pos;
       synchronize();
       if (pos === before1) advance();
@@ -481,7 +482,7 @@ export function parse(source: string): ParseResult {
     }
 
     // Unexpected token
-    addError(`Unexpected token '${t.value || t.type}' at top level`, rangeOf(t));
+    addError(msg.unexpectedTokenTopLevel(t.value || t.type), rangeOf(t));
     const before2 = pos;
     synchronize();
     if (pos === before2) advance();
@@ -528,9 +529,9 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    const openBrace = expect("lbrace", "Expected '{'");
+    const openBrace = expect("lbrace", msg.expectedToken("{"));
     const body = parseBody();
-    const closeBrace = expect("rbrace", "Expected '}'");
+    const closeBrace = expect("rbrace", msg.expectedToken("}"));
     const endPos = closeBrace.length > 0 ? endOf(closeBrace) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
@@ -571,7 +572,7 @@ export function parse(source: string): ParseResult {
         } else if (isObjectStart()) {
           body.push(parseObject());
         } else {
-          addError(`Unexpected identifier '${t.value}'`, rangeOf(t));
+          addError(msg.unexpectedIdentifier(t.value), rangeOf(t));
           const before = pos;
           synchronize();
           if (pos === before) advance();
@@ -579,7 +580,7 @@ export function parse(source: string): ParseResult {
         continue;
       }
 
-      addError(`Unexpected token '${t.value || t.type}'`, rangeOf(t));
+      addError(msg.unexpectedToken(t.value || t.type), rangeOf(t));
       const before = pos;
       synchronize();
       if (pos === before) advance();
@@ -624,7 +625,7 @@ export function parse(source: string): ParseResult {
     const nameRange = rangeOf(nameToken);
     const name = nameToken.value;
 
-    expect("equals", "Expected '='");
+    expect("equals", msg.expectedToken("="));
 
     const values: ExprNode[] = [];
 
@@ -660,7 +661,7 @@ export function parse(source: string): ParseResult {
             break;
           }
         }
-        expect("rparen", "Expected ')'");
+        expect("rparen", msg.expectedToken(")"));
       } else {
         try {
           values.push(parseExpr());
@@ -672,7 +673,7 @@ export function parse(source: string): ParseResult {
 
     // Parse comma-separated values (each may be a tuple)
     if (check("semicolon") || check("rbrace") || check("eof")) {
-      addError(`Expected expression after '='`, rangeOf(peek()));
+      addError(msg.expectedExpression(), rangeOf(peek()));
     } else {
       parseMaybetupleValues();
 
@@ -683,7 +684,7 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    const semi = expect("semicolon", "Expected ';'");
+    const semi = expect("semicolon", msg.expectedToken(";"));
     const endPos =
       semi.length > 0
         ? endOf(semi)
@@ -706,9 +707,9 @@ export function parse(source: string): ParseResult {
 
     const condition = parseExpr();
 
-    const thenOpen = expect("lbrace", "Expected '{'");
+    const thenOpen = expect("lbrace", msg.expectedToken("{"));
     const thenBody = parseBody();
-    let lastBrace = expect("rbrace", "Expected '}'");
+    let lastBrace = expect("rbrace", msg.expectedToken("}"));
     const thenRange = rangeSpan(endOf(thenOpen), posOf(lastBrace));
 
     let elseBody: BodyNode[] | undefined;
@@ -716,9 +717,9 @@ export function parse(source: string): ParseResult {
 
     if (checkValue("identifier", "Else")) {
       advance(); // "Else"
-      const elseOpen = expect("lbrace", "Expected '{'");
+      const elseOpen = expect("lbrace", msg.expectedToken("{"));
       elseBody = parseBody();
-      lastBrace = expect("rbrace", "Expected '}'");
+      lastBrace = expect("rbrace", msg.expectedToken("}"));
       elseRange = rangeSpan(endOf(elseOpen), posOf(lastBrace));
     }
 
@@ -741,7 +742,7 @@ export function parse(source: string): ParseResult {
 
     const switchName = parseExpr();
 
-    expect("lbrace", "Expected '{'");
+    expect("lbrace", msg.expectedToken("{"));
 
     const cases: CaseNode[] = [];
     let default_: BodyNode[] | undefined;
@@ -752,13 +753,13 @@ export function parse(source: string): ParseResult {
         cases.push(parseCase());
       } else if (checkValue("identifier", "Default")) {
         advance(); // "Default"
-        const colonToken = expect("colon", "Expected ':'");
+        const colonToken = expect("colon", msg.expectedToken(":"));
         const bodyStart = endOf(colonToken);
         default_ = parseBody(true);
         // defaultRange ends at the next rbrace/eof (what peek() points to now)
         defaultRange = rangeSpan(bodyStart, posOf(peek()));
       } else {
-        addError(`Expected 'Case' or 'Default' in ApplySwitch`, rangeOf(peek()));
+        addError(msg.expectedCaseOrDefault(), rangeOf(peek()));
         const before = pos;
         synchronize();
         // Guard: if synchronize() didn't advance, force progress to prevent infinite loop
@@ -766,7 +767,7 @@ export function parse(source: string): ParseResult {
       }
     }
 
-    const closeBraceAS = expect("rbrace", "Expected '}'");
+    const closeBraceAS = expect("rbrace", msg.expectedToken("}"));
     const endPos = closeBraceAS.length > 0 ? endOf(closeBraceAS) : endOf(tokens[tokens.length - 1]); // EOF position for unclosed structures
 
     return {
@@ -791,7 +792,7 @@ export function parse(source: string): ParseResult {
       values.push(parseExpr());
     }
 
-    const colonToken = expect("colon", "Expected ':'");
+    const colonToken = expect("colon", msg.expectedToken(":"));
     const bodyStart = endOf(colonToken);
 
     const body = parseBody(true);
