@@ -72,7 +72,7 @@ function validateRoot(
     if (node.type !== "object") continue; // If / ApplySwitch はスキップ
     if (!allowedNames.has(node.name)) {
       diagnostics.push({
-        message: `'${node.name}' is not allowed as root object for PluginType '${pluginType}'`,
+        message: `'${node.name}' は PluginType '${pluginType}' のルートオブジェクトとして使用できません`,
         range: node.nameRange,
         severity: "error",
       });
@@ -84,14 +84,14 @@ function validateRoot(
     const count = rootCounts.get(entry.name) ?? 0;
     if (entry.required && count === 0) {
       diagnostics.push({
-        message: `Required root object '${entry.name}' is missing for PluginType '${pluginType}'`,
+        message: `PluginType '${pluginType}' に必須のルートオブジェクト '${entry.name}' がありません`,
         range: file.range,
         severity: "warning",
       });
     }
     if (!entry.multiple && count > 1) {
       diagnostics.push({
-        message: `Duplicate root object '${entry.name}' for PluginType '${pluginType}'`,
+        message: `PluginType '${pluginType}' のルートオブジェクト '${entry.name}' が重複しています`,
         range: file.range,
         severity: "error",
       });
@@ -201,7 +201,7 @@ function validateProperties(
     const propSchema = schema.properties[child.name];
     if (!propSchema) {
       diagnostics.push({
-        message: `Invalid property '${child.name}' in '${node.name}'`,
+        message: `'${node.name}' に無効なプロパティ '${child.name}' があります`,
         range: child.nameRange,
         severity: "error",
       });
@@ -216,7 +216,7 @@ function validateProperties(
   for (const [name, propSchema] of Object.entries(schema.properties)) {
     if (propSchema.required && !seenAll.has(name)) {
       diagnostics.push({
-        message: `Required property '${name}' is missing in '${node.name}'`,
+        message: `'${node.name}' に必須のプロパティ '${name}' がありません`,
         range: node.nameRange,
         severity: "warning",
       });
@@ -240,7 +240,7 @@ function checkDuplicateProps(
       if (propSchema && !propSchema.multiple) {
         if (seen.has(child.name)) {
           diagnostics.push({
-            message: `Duplicate property '${child.name}' in '${objectName}'`,
+            message: `'${objectName}' のプロパティ '${child.name}' が重複しています`,
             range: child.nameRange,
             severity: "error",
           });
@@ -280,7 +280,7 @@ function validatePropertyType(
       // OK — RailSim2 が最後の値で埋める
     } else {
       diagnostics.push({
-        message: `Property '${prop.name}' in '${objectName}' expects ${expectedArity} value(s), got ${values.length}`,
+        message: `'${objectName}' のプロパティ '${prop.name}' は ${expectedArity} 個の値が必要ですが、${values.length} 個指定されています`,
         range: prop.range,
         severity: "error",
       });
@@ -383,7 +383,7 @@ function checkValueType(
         pushTypeMismatch(propName, objectName, "enum", value, diagnostics);
       } else if (schema.enumValues && !schema.enumValues.includes(value.value)) {
         diagnostics.push({
-          message: `Type mismatch: '${propName}' in '${objectName}' expects enum value (${schema.enumValues.join(", ")}), got '${value.value}'`,
+          message: `型の不一致: '${objectName}' の '${propName}' は enum 値 (${schema.enumValues.join(", ")}) が必要ですが、'${value.value}' が指定されています`,
           range: value.range,
           severity: "error",
         });
@@ -427,7 +427,7 @@ function pushTypeMismatch(
   diagnostics: Diagnostic[],
 ): void {
   diagnostics.push({
-    message: `Type mismatch: '${propName}' in '${objectName}' expects ${expected}, got ${actual.type}`,
+    message: `型の不一致: '${objectName}' の '${propName}' は ${expected} 型が必要ですが、${actual.type} が指定されています`,
     range: actual.range,
     severity: "error",
   });
@@ -445,14 +445,14 @@ function checkRange(
   if (num === null) return;
   if (schema.min != null && num < schema.min) {
     diagnostics.push({
-      message: `Value ${num} for '${propName}' in '${objectName}' is below minimum ${schema.min}`,
+      message: `'${objectName}' の '${propName}' の値 ${num} は最小値 ${schema.min} を下回っています`,
       range: value.range,
       severity: "warning",
     });
   }
   if (schema.max != null && num > schema.max) {
     diagnostics.push({
-      message: `Value ${num} for '${propName}' in '${objectName}' is above maximum ${schema.max}`,
+      message: `'${objectName}' の '${propName}' の値 ${num} は最大値 ${schema.max} を超えています`,
       range: value.range,
       severity: "warning",
     });
@@ -477,7 +477,7 @@ function validateChildren(
     if (child.type === "object") {
       if (!schema.children[child.name]) {
         diagnostics.push({
-          message: `Invalid child object '${child.name}' in '${node.name}'`,
+          message: `'${node.name}' に無効な子オブジェクト '${child.name}' があります`,
           range: child.nameRange,
           severity: "error",
         });
@@ -493,7 +493,7 @@ function validateChildren(
   for (const [name, childSchema] of Object.entries(schema.children)) {
     if (childSchema.required && !seenAll.has(name)) {
       diagnostics.push({
-        message: `Required child object '${name}' is missing in '${node.name}'`,
+        message: `'${node.name}' に必須の子オブジェクト '${name}' がありません`,
         range: node.nameRange,
         severity: "warning",
       });
@@ -517,7 +517,7 @@ function checkDuplicateChildren(
       if (childDef && !childDef.multiple) {
         if (seen.has(child.name)) {
           diagnostics.push({
-            message: `Duplicate child object '${child.name}' in '${objectName}'`,
+            message: `'${objectName}' の子オブジェクト '${child.name}' が重複しています`,
             range: child.nameRange,
             severity: "error",
           });

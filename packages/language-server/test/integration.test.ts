@@ -277,7 +277,7 @@ CompletelyFakeObject {
     const diagnostics = validateTextDocument(input);
     const warnings = diagnostics.filter((d) => d.severity === "warning");
     expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings.some((w) => w.message.includes("Unknown object name"))).toBe(true);
+    expect(warnings.some((w) => w.message.includes("不明なオブジェクト名"))).toBe(true);
     expect(warnings.some((w) => w.message.includes("CompletelyFakeObject"))).toBe(true);
   });
 
@@ -289,7 +289,7 @@ Body {
     const diagnostics = validateTextDocument(input);
     const warnings = diagnostics.filter((d) => d.severity === "warning");
     expect(warnings.length).toBeGreaterThan(0);
-    expect(warnings.some((w) => w.message.includes("Unknown property name"))).toBe(true);
+    expect(warnings.some((w) => w.message.includes("不明なプロパティ名"))).toBe(true);
     expect(warnings.some((w) => w.message.includes("CompletelyFakeProperty"))).toBe(true);
   });
 
@@ -341,7 +341,7 @@ RailInfo {
 SoundInfo {}`;
     const diagnostics = validateTextDocument(input);
     expect(
-      diagnostics.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
+      diagnostics.some((d) => d.message.includes("型の不一致") && d.message.includes("Gauge")),
     ).toBe(true);
   });
 
@@ -352,7 +352,7 @@ RailInfo {
     const diagnostics = validateTextDocument(input);
     expect(
       diagnostics.some(
-        (d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning",
+        (d) => d.message.includes("必須のプロパティ 'Gauge'") && d.severity === "warning",
       ),
     ).toBe(true);
   });
@@ -372,7 +372,7 @@ TrainInfo { Gauge = 1.0; }`;
     expect(
       diagnostics.some(
         (d) =>
-          d.message.includes("not allowed as root object for PluginType") &&
+          d.message.includes("のルートオブジェクトとして使用できません") &&
           d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
@@ -383,7 +383,7 @@ TrainInfo { Gauge = 1.0; }`;
 RailInfo { Gauge = 1.0; }
 TrainInfo { Gauge = 1.0; }`;
     const diagnostics = validateTextDocument(input);
-    const rootErrors = diagnostics.filter((d) => d.message.includes("root object"));
+    const rootErrors = diagnostics.filter((d) => d.message.includes("ルートオブジェクト"));
     expect(rootErrors).toHaveLength(0);
   });
 });

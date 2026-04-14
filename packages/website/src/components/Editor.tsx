@@ -1,3 +1,4 @@
+import "../lib/monaco-nls-ja.js";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";

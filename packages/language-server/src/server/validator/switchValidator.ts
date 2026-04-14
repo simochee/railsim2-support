@@ -13,13 +13,13 @@ import { walkNodes } from "../../shared/astWalker.js";
 
 function formatSwitchValueWarning(val: number, name: string, entries: readonly SwitchEntry[]): string {
   if (entries.length === 0) {
-    return `Switch '${name}' has no entries`;
+    return `スイッチ '${name}' にエントリーがありません`;
   }
   if (entries.length <= 5) {
     const labels = entries.map((e) => `${e.index}=${e.label}`).join(", ");
-    return `Switch value ${val} is not defined in switch '${name}' (valid: ${labels})`;
+    return `スイッチ '${name}' に値 ${val} は定義されていません (有効: ${labels})`;
   }
-  return `Switch value ${val} is not defined in switch '${name}' (expected 0..${entries.length - 1})`;
+  return `スイッチ '${name}' に値 ${val} は定義されていません (有効範囲: 0..${entries.length - 1})`;
 }
 
 export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diagnostic[] {
@@ -29,7 +29,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
   for (const [name, defs] of switchIndex.duplicates) {
     for (const def of defs) {
       diagnostics.push({
-        message: `Duplicate switch definition '${name}'`,
+        message: `スイッチ定義 '${name}' が重複しています`,
         range: def.switchNameRange,
         severity: "warning",
       });
@@ -61,7 +61,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
         : expr.range;
 
     diagnostics.push({
-      message: `Reference to undefined switch '${name}'`,
+      message: `未定義のスイッチ '${name}' が参照されています`,
       range,
       severity: "warning",
     });
@@ -99,7 +99,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
 
     if (!Number.isInteger(val)) {
       diagnostics.push({
-        message: `Switch value ${val} is not a valid integer index for switch '${switchName}'`,
+        message: `スイッチ '${switchName}' の値 ${val} は有効な整数インデックスではありません`,
         range: expr.range,
         severity: "warning",
       });
@@ -108,7 +108,7 @@ export function validateSwitches(file: FileNode, switchIndex: SwitchIndex): Diag
 
     if (entries.length === 0) {
       diagnostics.push({
-        message: `Switch '${switchName}' has no entries`,
+        message: `スイッチ '${switchName}' にエントリーがありません`,
         range: expr.range,
         severity: "warning",
       });

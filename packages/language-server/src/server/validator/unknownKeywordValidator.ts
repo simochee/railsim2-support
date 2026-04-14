@@ -10,7 +10,7 @@ export function validateUnknownKeywords(file: FileNode): Diagnostic[] {
     object(node) {
       if (!OBJECT_NAME_SET.has(node.name) && !CONTROL_KEYWORD_SET.has(node.name)) {
         diagnostics.push({
-          message: `Unknown object name '${node.name}'`,
+          message: `不明なオブジェクト名 '${node.name}'`,
           range: node.nameRange,
           severity: "warning",
         });
@@ -19,7 +19,7 @@ export function validateUnknownKeywords(file: FileNode): Diagnostic[] {
     property(node) {
       if (!PROPERTY_NAME_SET.has(node.name)) {
         diagnostics.push({
-          message: `Unknown property name '${node.name}'`,
+          message: `不明なプロパティ名 '${node.name}'`,
           range: node.nameRange,
           severity: "warning",
         });

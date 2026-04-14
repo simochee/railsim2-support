@@ -51,7 +51,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(msgs(diags)).toContain("Invalid property 'FooBar' in 'RailInfo'");
+    expect(msgs(diags)).toContain("'RailInfo' に無効なプロパティ 'FooBar' があります");
     expect(diags.find((d) => d.message.includes("FooBar"))!.severity).toBe("error");
   });
 
@@ -65,7 +65,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(msgs(diags)).toContainEqual(expect.stringContaining("Type mismatch"));
+    expect(msgs(diags)).toContainEqual(expect.stringContaining("型の不一致"));
   });
 
   it("型不一致: float を string に → error", () => {
@@ -79,7 +79,7 @@ PluginHeader {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Type mismatch") && d.message.includes("PluginName")),
+      diags.some((d) => d.message.includes("型の不一致") && d.message.includes("PluginName")),
     ).toBe(true);
   });
 
@@ -106,7 +106,7 @@ RailInfo {
     // RailInfo.Gauge は required
     expect(
       diags.some(
-        (d) => d.message.includes("Required property 'Gauge'") && d.severity === "warning",
+        (d) => d.message.includes("必須のプロパティ 'Gauge'") && d.severity === "warning",
       ),
     ).toBe(true);
   });
@@ -122,7 +122,7 @@ Headlight {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("expects 3 value(s)") && d.severity === "error"),
+      diags.some((d) => d.message.includes("3 個の値が必要") && d.severity === "error"),
     ).toBe(true);
   });
 
@@ -140,7 +140,7 @@ RailInfo {
 `;
     const diags = validate(src);
     expect(msgs(diags)).toContainEqual(
-      expect.stringContaining("Invalid child object 'Headlight' in 'RailInfo'"),
+      expect.stringContaining("'RailInfo' に無効な子オブジェクト 'Headlight' があります"),
     );
   });
 
@@ -179,7 +179,7 @@ TrainInfo {
     expect(
       diags.some(
         (d) =>
-          d.message.includes("not allowed as root object for PluginType") &&
+          d.message.includes("のルートオブジェクトとして使用できません") &&
           d.message.includes("TrainInfo"),
       ),
     ).toBe(true);
@@ -198,7 +198,7 @@ PluginHeader {
     const diags = validate(src);
     expect(
       diags.some(
-        (d) => d.message.includes("Required root object 'RailInfo'") && d.severity === "warning",
+        (d) => d.message.includes("必須のルートオブジェクト 'RailInfo'") && d.severity === "warning",
       ),
     ).toBe(true);
   });
@@ -232,7 +232,7 @@ PluginHeader {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("Duplicate root object 'PluginHeader'"))).toBe(
+    expect(diags.some((d) => d.message.includes("ルートオブジェクト 'PluginHeader' が重複"))).toBe(
       true,
     );
   });
@@ -315,7 +315,7 @@ RailInfo {
     // PluginHeader がないのでルート検証なし → TrainInfo と RailInfo の混在OK
     const diags = validate(src);
     const rootErrors = diags.filter(
-      (d) => d.message.includes("root object") || d.message.includes("Required root"),
+      (d) => d.message.includes("ルートオブジェクト") || d.message.includes("必須のルートオブジェクト"),
     );
     expect(rootErrors).toHaveLength(0);
   });
@@ -332,7 +332,7 @@ Axle "test" {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Type mismatch") && d.message.includes("WheelSound")),
+      diags.some((d) => d.message.includes("型の不一致") && d.message.includes("WheelSound")),
     ).toBe(true);
   });
 
@@ -347,7 +347,7 @@ Axle "test" {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("AnalogClock") && d.message.includes("enum"))).toBe(
+    expect(diags.some((d) => d.message.includes("AnalogClock") && d.message.includes("enum 値"))).toBe(
       true,
     );
   });
@@ -381,7 +381,7 @@ If (1) {
 `;
     const diags = validate(src);
     // If の中の Profile はルート検証対象外
-    const rootErrors = diags.filter((d) => d.message.includes("root object"));
+    const rootErrors = diags.filter((d) => d.message.includes("ルートオブジェクト"));
     expect(rootErrors).toHaveLength(0);
   });
 
@@ -396,7 +396,7 @@ RailInfo {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
+      diags.some((d) => d.message.includes("型の不一致") && d.message.includes("Gauge")),
     ).toBe(true);
   });
 
@@ -426,7 +426,7 @@ RailInfo {
 `;
     const diags = validate(src);
     expect(msgs(diags)).toContainEqual(
-      expect.stringContaining("Invalid property 'FooBar' in 'RailInfo'"),
+      expect.stringContaining("'RailInfo' に無効なプロパティ 'FooBar' があります"),
     );
   });
 
@@ -440,7 +440,7 @@ RailInfo {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Type mismatch") && d.message.includes("Gauge")),
+      diags.some((d) => d.message.includes("型の不一致") && d.message.includes("Gauge")),
     ).toBe(true);
   });
 
@@ -456,7 +456,7 @@ Face {
 `;
     const diags = validate(src);
     // Vertex は If 内にあるがカウントされるので Required child 警告は出ない
-    const missingVertex = diags.filter((d) => d.message.includes("Required child object 'Vertex'"));
+    const missingVertex = diags.filter((d) => d.message.includes("必須の子オブジェクト 'Vertex'"));
     expect(missingVertex).toHaveLength(0);
   });
 
@@ -471,7 +471,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("Duplicate property 'Gauge'"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("プロパティ 'Gauge' が重複"))).toBe(true);
   });
 
   it("multiple=false の子オブジェクト FrontCabin が重複 → error", () => {
@@ -482,7 +482,7 @@ PrimaryAssembly {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("子オブジェクト 'FrontCabin' が重複"))).toBe(true);
   });
 
   // ================================================================
@@ -500,7 +500,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    const dupGauge = diags.filter((d) => d.message.includes("Duplicate property 'Gauge'"));
+    const dupGauge = diags.filter((d) => d.message.includes("プロパティ 'Gauge' が重複"));
     expect(dupGauge).toHaveLength(0);
   });
 
@@ -517,7 +517,7 @@ PrimaryAssembly {
 `;
     const diags = validate(src);
     const dupFrontCabin = diags.filter((d) =>
-      d.message.includes("Duplicate child object 'FrontCabin'"),
+      d.message.includes("子オブジェクト 'FrontCabin' が重複"),
     );
     expect(dupFrontCabin).toHaveLength(0);
   });
@@ -534,7 +534,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    const dupGauge = diags.filter((d) => d.message.includes("Duplicate property 'Gauge'"));
+    const dupGauge = diags.filter((d) => d.message.includes("プロパティ 'Gauge' が重複"));
     expect(dupGauge).toHaveLength(0);
   });
 
@@ -548,7 +548,7 @@ RailInfo {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("Duplicate property 'Gauge'"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("プロパティ 'Gauge' が重複"))).toBe(true);
   });
 
   it("同一 Case 内の子オブジェクト重複は検出する", () => {
@@ -562,7 +562,7 @@ PrimaryAssembly {
 }
 `;
     const diags = validate(src);
-    expect(diags.some((d) => d.message.includes("Duplicate child object 'FrontCabin'"))).toBe(true);
+    expect(diags.some((d) => d.message.includes("子オブジェクト 'FrontCabin' が重複"))).toBe(true);
   });
 
   it("RailInfo 内の子オブジェクトは無効", () => {
@@ -575,7 +575,7 @@ RailInfo {
     const diags = validate(src);
     // RailInfo has no children in the generated schema
     const invalidChild = diags.filter((d) =>
-      d.message.includes("Invalid child object 'DefineSwitch'"),
+      d.message.includes("無効な子オブジェクト 'DefineSwitch'"),
     );
     expect(invalidChild).toHaveLength(1);
   });
@@ -665,7 +665,7 @@ RailInfo {
 `;
     const diags = validate(src);
     const rootErrors = diags.filter((d) =>
-      d.message.includes("not allowed as root object for PluginType"),
+      d.message.includes("のルートオブジェクトとして使用できません"),
     );
     expect(rootErrors.length).toBeGreaterThan(0);
   });
@@ -681,7 +681,7 @@ TrainInfo {
 }
 `;
     const diags = validate(src);
-    const gaugeWarnings = diags.filter((d) => d.message.includes("Required property 'Gauge'"));
+    const gaugeWarnings = diags.filter((d) => d.message.includes("必須のプロパティ 'Gauge'"));
     expect(gaugeWarnings).toHaveLength(0);
   });
 
@@ -696,7 +696,7 @@ Body "Bogie1" {
 }
 `;
     const diags = validate(src);
-    const invalidChild = diags.filter((d) => d.message.includes("Invalid child object 'JointZY'"));
+    const invalidChild = diags.filter((d) => d.message.includes("無効な子オブジェクト 'JointZY'"));
     expect(invalidChild).toHaveLength(0);
   });
 
@@ -711,7 +711,7 @@ Object3D "test" {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("expects 2 value(s)") && d.severity === "error"),
+      diags.some((d) => d.message.includes("2 個の値が必要") && d.severity === "error"),
     ).toBe(true);
   });
 
@@ -722,7 +722,7 @@ Object3D "test" {
 }
 `;
     const diags = validate(src);
-    const arityErrors = diags.filter((d) => d.message.includes("ChangeAlpha") && d.message.includes("value(s)"));
+    const arityErrors = diags.filter((d) => d.message.includes("ChangeAlpha") && d.message.includes("個の値が必要"));
     expect(arityErrors).toHaveLength(0);
   });
 
@@ -745,7 +745,7 @@ Particle {
 }
 `;
     const diags = validate(src);
-    const arityErrors = diags.filter((d) => d.message.includes("value(s)"));
+    const arityErrors = diags.filter((d) => d.message.includes("個の値が必要"));
     expect(arityErrors).toHaveLength(0);
   });
 
@@ -757,7 +757,7 @@ Headlight {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("expects 3 value(s)") && d.severity === "error"),
+      diags.some((d) => d.message.includes("3 個の値が必要") && d.severity === "error"),
     ).toBe(true);
   });
 
@@ -778,7 +778,7 @@ Particle {
 `;
     const diags = validate(src);
     expect(
-      diags.some((d) => d.message.includes("Lifetime") && d.message.includes("expects 2 value(s)")),
+      diags.some((d) => d.message.includes("Lifetime") && d.message.includes("2 個の値が必要")),
     ).toBe(true);
   });
 
@@ -798,7 +798,7 @@ Object3D "Door" {
 `;
     const diags = validate(src);
     const dupErrors = diags.filter((d) =>
-      d.message.includes("Duplicate child object 'StaticMove'"),
+      d.message.includes("子オブジェクト 'StaticMove' が重複"),
     );
     expect(dupErrors).toHaveLength(0);
   });
@@ -818,7 +818,7 @@ LensFlare {
       diags.some(
         (d) =>
           d.message.includes("Twinkle") &&
-          d.message.includes("above maximum") &&
+          d.message.includes("最大値") && d.message.includes("超えています") &&
           d.severity === "warning",
       ),
     ).toBe(true);
@@ -836,7 +836,7 @@ LensFlare {
       diags.some(
         (d) =>
           d.message.includes("Twinkle") &&
-          d.message.includes("below minimum") &&
+          d.message.includes("最小値") && d.message.includes("下回っています") &&
           d.severity === "warning",
       ),
     ).toBe(true);

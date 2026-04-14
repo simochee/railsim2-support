@@ -68,9 +68,9 @@ interface AllowlistEntry {
 
 const ERROR_ALLOWLIST: AllowlistEntry[] = [
   // 公式プラグインで DefineAnimation 内に ShiftTexture が重複定義されている
-  { pathPattern: "Station/DoubleCrossing/Station2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
-  { pathPattern: "Station/SingleCrossing/Station2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
-  { pathPattern: "Struct/DigitalClock/Struct2.txt", message: "Duplicate property 'ShiftTexture' in 'DefineAnimation'" },
+  { pathPattern: "Station/DoubleCrossing/Station2.txt", message: "'DefineAnimation' のプロパティ 'ShiftTexture' が重複しています" },
+  { pathPattern: "Station/SingleCrossing/Station2.txt", message: "'DefineAnimation' のプロパティ 'ShiftTexture' が重複しています" },
+  { pathPattern: "Struct/DigitalClock/Struct2.txt", message: "'DefineAnimation' のプロパティ 'ShiftTexture' が重複しています" },
 ];
 
 function isAllowlisted(
